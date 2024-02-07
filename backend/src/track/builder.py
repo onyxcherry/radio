@@ -17,19 +17,21 @@ DEFAULT_API_IMPLS: dict[Type[TrackProvider], Any] = {
 
 class TrackBuilder:
     @staticmethod
-    def _normalize_url(url: str) -> TrackUrl:
+    def normalize(url: str) -> TrackUrl:
         if not isinstance(url, str):
             raise TypeError(f"Passed {type(url)} type, expected 'str'")
 
-        unquoted = unquote(url)
-        parsed = urlparse(unquoted)
-        # dodać próbę sparsowania i wyjątek, jeśli się nie da
-        if not parsed.scheme:
-            # a ten kod powinien być na podstawie urlparse
-            url = "https://" + unquoted
-            parsed = urlparse(url)
-        track_url = parsed.netloc.split("@")[-1].split(":")[0]
-        return TrackUrl(track_url)
+        url = unquote(url)
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
+
+        return TrackUrl(url)
+
+    @staticmethod
+    def _extract_netloc(url: TrackUrl) -> str:
+        parsed = urlparse(url)
+        netloc = parsed.netloc.split("@")[-1].split(":")[0]
+        return netloc
 
     @staticmethod
     def _match_provider(domain: str) -> Type[TrackProvider]:
@@ -40,8 +42,9 @@ class TrackBuilder:
 
     @classmethod
     def build(cls, url: str):
-        track_url = cls._normalize_url(url)
-        provider = cls._match_provider(track_url)
+        track_url = cls.normalize(url)
+        netloc = cls._extract_netloc(track_url)
+        provider = cls._match_provider(netloc)
         # ZAMIENIĆ NA DEPENDENCY INJECTION
         default_provider_api_impl = DEFAULT_API_IMPLS[provider]
         # jakie mamy gwarancje co do parametru track_url?
