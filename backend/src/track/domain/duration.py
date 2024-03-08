@@ -1,6 +1,5 @@
 def parse_isoduration(isostring: str) -> dict[str, int]:
     separators = {
-        "D": "days",
         "H": "hours",
         "M": "minutes",
         "S": "seconds",
