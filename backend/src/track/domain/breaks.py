@@ -26,6 +26,15 @@ class PlayingTime:
     date_: date
     break_: BreaksEnum
 
+    def to_datetime(self) -> datetime:
+        break_number = self.break_ - BreaksEnum.FIRST
+        starting_time = list(Breaks._start_times.items())[break_number][0]
+        return datetime.combine(self.date_, starting_time)
+
+    # strefy czasowe trzeba obsługiwać
+    def is_weekday(self) -> bool:
+        return self.date_.isoweekday() > 5
+
 
 class Breaks:
     _start_times = {
@@ -38,15 +47,3 @@ class Breaks:
         time(14, 5): 10,
         time(15, 00): 10,
     }
-
-    @classmethod
-    def to_datetime(cls, when: PlayingTime) -> datetime:
-        date_ = when.date_
-        break_number = when.break_ - BreaksEnum.FIRST
-        starting_time = list(cls._start_times.items())[break_number][0]
-        return datetime.combine(date_, starting_time)
-
-    # strefy czasowe trzeba obsługiwać
-    @classmethod
-    def is_weekday(cls, when: PlayingTime) -> bool:
-        return when.date_.isoweekday() > 5

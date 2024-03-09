@@ -66,6 +66,7 @@ class Config(object):
     )
 
     YOUTUBE_API_KEY: Final = (
+        # "AIzaSyBhNDkMdufb-bfe7u7I0SLPCofEwbgRDPU" or
         load_secret("YOUTUBE_API_KEY")
         or settings.get("YOUTUBE_API_KEY")
         or "testingpurposessecret"

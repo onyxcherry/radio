@@ -88,8 +88,8 @@ class _InternalAPIProvider:
 
 
 class YoutubeAPI(
-    YoutubeAPIInterface,
     _InternalAPIProvider,
     _PublicAPIProvider,
+    YoutubeAPIInterface,
 ):
     pass

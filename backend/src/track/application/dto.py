@@ -24,6 +24,7 @@ class TrackRequestedAt:
 class TrackQueued:
     url: TrackUrl
     when: PlayingTime
+    waiting: bool
 
 
 @dataclass(frozen=True)

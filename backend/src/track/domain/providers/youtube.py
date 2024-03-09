@@ -1,5 +1,7 @@
 from datetime import timedelta
 import string
+
+from kink import inject
 from track.domain.errors import TrackIdentifierError
 from track.domain.status import ErrorMessages
 from track.infrastructure.config import get_logger
@@ -16,6 +18,7 @@ logger = get_logger(__name__)
 ORIGINS = ["youtube.com", "m.youtube.com", "www.youtube.com", "youtu.be"]
 
 
+@inject
 class YoutubeTrackProvider(TrackProvider):
     _provider = "Youtube"
 
@@ -23,6 +26,9 @@ class YoutubeTrackProvider(TrackProvider):
         self._id = self.get_track_id(url)
         self._url = self.build_standard_url(self._id)
         self._api = api
+        print(f"{self._api=}")
+        self._title = None
+        self._duration = None
 
     @property
     def identity(self) -> TrackId:
@@ -48,20 +54,20 @@ class YoutubeTrackProvider(TrackProvider):
             self._duration = self.get_duration()
         return self._duration
 
-    async def fetch_all_properties(self) -> None:
-        if self._title is None:
-            self._title = self.get_title()
-        if self._duration is None:
-            self._duration = self.get_duration()
+    # async def fetch_all_properties(self) -> None:
+    #     if self._title is None:
+    #         self._title = self.get_title()
+    #     if self._duration is None:
+    #         self._duration = self.get_duration()
 
     def __str__(self) -> str:
-        return f'YoutubeTrack("{self._url}")'
-
-    def __repr__(self) -> str:
         return (
             f"<YoutubeTrack id={self._id} url={self._url} "
             + f"{self._duration=} {self._title=}>"
         )
+
+    def __repr__(self) -> str:
+        return f'YoutubeTrack("{self._url}")'
 
     # def __eq__(self, other) -> bool:
     #     if isinstance(other, YoutubeTrack):
@@ -81,7 +87,6 @@ class YoutubeTrackProvider(TrackProvider):
             return track_id
 
         parsed_url = urlparse.urlparse(url)
-
         if (
             parsed_url.netloc in ["youtube.com", "m.youtube.com", "www.youtube.com"]
             and parsed_url.path == "/watch"
@@ -111,6 +116,7 @@ class YoutubeTrackProvider(TrackProvider):
 
     def get_duration(self) -> Seconds:
         api_response = self._api.get_api_part(self._id, "contentDetails")
+        # print(f"{api_response=}")
         iso_duration = api_response["duration"]
         assert isinstance(iso_duration, str)
 
@@ -121,8 +127,8 @@ class YoutubeTrackProvider(TrackProvider):
         return self._duration
 
     def _check_channel_belongs_official_artist(self, channel_id: str) -> bool:
+        print("A tutaj też?")
         channel_info = self._api.get_channel_info(channel_id)
-
         try:
             header_rendered = channel_info[1]["response"]["header"][
                 "c4TabbedHeaderRenderer"
@@ -131,6 +137,9 @@ class YoutubeTrackProvider(TrackProvider):
             logger.warning(f"Response does not contain expected keys - {ex}")
             raise ex
 
+        # print(f"{channel_info[1]["response"]["header"][
+        #         "c4TabbedHeaderRenderer"
+        #     ]=}")
         if "badges" not in header_rendered:
             return False
 
@@ -145,6 +154,7 @@ class YoutubeTrackProvider(TrackProvider):
 
     def get_title(self) -> str:
         api_response = self._api.get_api_part(self._id, "snippet")
+        # print(f"{api_response=}")
         track_title = api_response["title"]
         self._title = track_title
 
