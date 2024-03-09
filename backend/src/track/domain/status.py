@@ -12,6 +12,13 @@ class ErrorMessages(Enum):
 
 
 @unique
+class InDatabaseStatus(Enum):
+    ACCEPTED = "accepted"
+    PENDING_APPROVAL = "pending"
+    REJECTED = "rejected"
+
+
+@unique
 class Status(Enum):
     ACCEPTED = "accepted"
     PENDING_APPROVAL = "pending"

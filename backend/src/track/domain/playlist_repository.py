@@ -17,7 +17,7 @@ class PlaylistRepository(ABC):
         pass
 
     @abstractmethod
-    def save(self, track: TrackRequestedAt) -> None:
+    def save(self, track: TrackQueued) -> None:
         pass
 
     @abstractmethod

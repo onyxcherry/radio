@@ -17,7 +17,7 @@ class Library:
     def _check_valid_duration(self, track_duration: Seconds, limit: Seconds) -> bool:
         return track_duration <= limit
 
-    def filter_by_status(self, status: Status) -> list[TrackEntity]:
+    def filter_by_statuses(self, statuses: list[Status]) -> list[TrackEntity]:
         ...
 
     def get(self, track_url: TrackUrl) -> Optional[TrackEntity]:
@@ -25,7 +25,8 @@ class Library:
 
     def add(self, track: NewTrack):
         length_limit = MAX_TRACK_DURATION_SECONDS
-        if not self._check_valid_duration(track.duration, length_limit):
+        duration = track.duration
+        if not self._check_valid_duration(duration, length_limit):
             msg = f"Too long track. Limit is {length_limit}"
             raise TrackDurationExceeded(msg)
 
@@ -41,10 +42,14 @@ class Library:
 
     def accept(self, track_url: TrackUrl) -> None:
         track = self._library_repository.get(track_url)
-        track.status = Status.ACCEPTED
-        self._library_repository.update(track)
+        if track is not None:
+            track.status = Status.ACCEPTED
+            self._library_repository.update(track)
+            # emit event
 
     def reject(self, track_url: TrackUrl) -> None:
         track = self._library_repository.get(track_url)
-        track.status = Status.REJECTED
-        self._library_repository.update(track)
+        if track is not None:
+            track.status = Status.REJECTED
+            self._library_repository.update(track)
+            # emit event

@@ -39,6 +39,6 @@ class TrackProvider(ABC):
     def duration(self) -> Seconds:
         pass
 
-    @abstractmethod
-    async def fetch_all_properties(self) -> None:
-        pass
+    # @abstractmethod
+    # async def fetch_all_properties(self) -> None:
+    #     pass
