@@ -16,14 +16,14 @@ from track.domain.status import InDatabaseStatus
 from .base import Base
 
 
-class Library(Base):
+class TrackModel(Base):
     __tablename__ = "library"
     __table_args__ = (UniqueConstraint("identifier", "provider"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    url: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
-    provider: Mapped[str] = mapped_column(String(32), nullable=False)
     identifier: Mapped[str] = mapped_column(String(128), nullable=False)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    url: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     duration: Mapped[int] = mapped_column(Integer, nullable=True)
     status: Mapped[InDatabaseStatus]
     created: Mapped[datetime] = mapped_column(
@@ -37,7 +37,7 @@ class Library(Base):
         return f"User(id={self.id!r}, title={self.title!r}, url={self.url!r})"
 
 
-class Queue(Base):
+class QueuedTrackModel(Base):
     __tablename__ = "queue"
     __table_args__ = (UniqueConstraint("identifier", "provider"),)
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -49,11 +49,11 @@ class Queue(Base):
     created: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now
     )
-    track: Mapped["Library"] = relationship(
-        Library,
-        primaryjoin="Library.id==Queue.id",
+    track: Mapped["TrackModel"] = relationship(
+        TrackModel,
+        primaryjoin="TrackModel.id==QueuedTrackModel.id",
         uselist=False,
-        foreign_keys=[Library.id],
+        foreign_keys=[TrackModel.id],
     )
 
     def __repr__(self) -> str:
