@@ -1,8 +1,6 @@
-from dataclasses import dataclass
 from enum import Enum
 
 
-@dataclass(frozen=True)
 class ErrorMessages(Enum):
     UNKNOWN_PROVIDER = "Incompatible track url - we do not support this music provider"
     NO_TRACK_ID = "No track id"
