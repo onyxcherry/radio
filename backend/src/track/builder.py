@@ -1,21 +1,27 @@
 from typing import Any, Type
 from urllib.parse import urlparse, unquote
 
-from track.infrastructure.youtube_api import YoutubeAPI
+from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.errors import TrackIdentifierError
-from track.domain.status import ErrorMessages
+from track.domain.errors import ErrorMessages
 from track.domain.providers.youtube import (
     ORIGINS as YoutubeOrigins,
-    YoutubeTrackProvider,
+    YoutubeTrackProvided,
 )
-from track.domain.track import TrackProvider, TrackUrl
+from backend.src.track.domain.provided import TrackProvided, ProviderName, TrackUrl
 
-DEFAULT_API_IMPLS: dict[Type[TrackProvider], Any] = {
-    YoutubeTrackProvider: YoutubeAPI,
+
+INTERFACES_FOR_IMPLS: dict[Type[TrackProvided], Any] = {
+    YoutubeTrackProvided: YoutubeAPIInterface,
+}
+
+PROVIDERS = {
+    ProviderName("Youtube"): YoutubeTrackProvided,
 }
 
 
 class TrackBuilder:
+
     @staticmethod
     def normalize(url: str) -> TrackUrl:
         if not isinstance(url, str):
@@ -34,9 +40,13 @@ class TrackBuilder:
         return netloc
 
     @staticmethod
-    def _match_provider(domain: str) -> Type[TrackProvider]:
+    def _match_provider(domain: str) -> tuple[
+        ProviderName,
+        Type[TrackProvided],
+    ]:
         if domain in YoutubeOrigins:
-            return YoutubeTrackProvider
+            provider_name = ProviderName("Youtube")
+            return (provider_name, PROVIDERS[provider_name])
         else:
             raise TrackIdentifierError(ErrorMessages.UNKNOWN_PROVIDER)
 
@@ -44,10 +54,9 @@ class TrackBuilder:
     def build(cls, url: str):
         track_url = cls.normalize(url)
         netloc = cls._extract_netloc(track_url)
-        provider = cls._match_provider(netloc)
+        provider_name, provider_class = cls._match_provider(netloc)
         # ZAMIENIĆ NA DEPENDENCY INJECTION
-        default_provider_api_impl = DEFAULT_API_IMPLS[provider]
-        # jakie mamy gwarancje co do parametru track_url?
-        # 1. jest poprawnym urlem
-        # 2. nie jest id, a urlem
-        return provider(track_url, default_provider_api_impl)
+        default_provider_api_impl = INTERFACES_FOR_IMPLS[provider_class]
+
+        api_impl = default_provider_api_impl
+        return provider_class(track_url, api_impl)
