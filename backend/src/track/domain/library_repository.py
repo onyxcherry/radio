@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from track.domain.entities import Status, TrackInLibrary
 
-from backend.src.track.domain.provided import TrackProvidedIdentity
+from track.domain.provided import TrackProvidedIdentity
 
 
 class LibraryRepository(ABC):

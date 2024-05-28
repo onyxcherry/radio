@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from track.domain.breaks import PlayingTime
 
-from backend.src.track.domain.provided import (
+from track.domain.provided import (
     Seconds,
     TrackProvidedIdentity,
     TrackUrl,

@@ -2,7 +2,7 @@ import copy
 from typing import Optional
 from track.application.dto import TrackEntity
 from track.domain.library_repository import LibraryRepository
-from track.domain.track import TrackUrl
+from track.domain.provided import TrackUrl
 
 
 class InMemoryLibraryRepository(LibraryRepository):

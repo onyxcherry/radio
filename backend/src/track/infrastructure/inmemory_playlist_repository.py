@@ -1,7 +1,7 @@
 from datetime import date
 from track.application.dto import TrackQueued, TrackRequestedAt
 from track.domain.playlist_repository import PlaylistRepository
-from track.domain.track import TrackUrl
+from track.domain.provided import TrackUrl
 
 
 class InMemoryPlaylistRepository(PlaylistRepository):

@@ -4,7 +4,7 @@ from track.application.dto import NewTrack, TrackEntity
 from track.domain.errors import TrackDurationExceeded
 from track.domain.library_repository import LibraryRepository
 from track.domain.status import Status
-from track.domain.track import Seconds, TrackUrl
+from track.domain.provided import Seconds, TrackProvidedIdentity
 
 MAX_TRACK_DURATION_SECONDS = Seconds(1200)
 

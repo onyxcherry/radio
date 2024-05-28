@@ -4,7 +4,7 @@ from typing import Optional
 from track.domain.breaks import Breaks
 
 from track.domain.entities import TrackQueued
-from backend.src.track.domain.provided import (
+from track.domain.provided import (
     Identifier,
     ProviderName,
     Seconds,

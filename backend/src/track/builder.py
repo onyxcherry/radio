@@ -8,7 +8,7 @@ from track.domain.providers.youtube import (
     ORIGINS as YoutubeOrigins,
     YoutubeTrackProvided,
 )
-from backend.src.track.domain.provided import TrackProvided, ProviderName, TrackUrl
+from track.domain.provided import TrackProvided, ProviderName, TrackUrl
 
 
 INTERFACES_FOR_IMPLS: dict[Type[TrackProvided], Any] = {

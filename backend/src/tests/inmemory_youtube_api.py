@@ -1,5 +1,5 @@
-from backend.src.track.application.interfaces.youtube_api import YoutubeAPIInterface
-from backend.src.track.domain.provided import Identifier
+from track.application.interfaces.youtube_api import YoutubeAPIInterface
+from track.domain.provided import Identifier
 
 # header_rendered = channel_info[1]["response"]["header"]["c4TabbedHeaderRenderer"]
 _channel_info_data = {
