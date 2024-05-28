@@ -7,7 +7,7 @@ from track.domain.errors import ErrorMessages
 from track.infrastructure.config import get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.duration import parse_isoduration
-from backend.src.track.domain.provided import (
+from track.domain.provided import (
     ProviderName,
     Seconds,
     Identifier,
