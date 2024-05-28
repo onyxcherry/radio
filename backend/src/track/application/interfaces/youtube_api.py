@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
-from track.domain.track import TrackId
+from track.domain.provided import Identifier
 
 
 class YoutubeAPIInterface(ABC):
     @staticmethod
     @abstractmethod
-    def get_api_part(track_id: TrackId, part: str) -> dict:
+    def get_api_part(track_id: Identifier, part: str) -> dict:
         pass
 
     @staticmethod
