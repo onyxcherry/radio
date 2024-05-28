@@ -1,24 +1,26 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from backend.src.track.domain.status import Status
-from track.application.dto import TrackEntity
+from track.domain.entities import Status, TrackInLibrary
 
-from track.domain.track import TrackUrl
+from backend.src.track.domain.provided import TrackProvidedIdentity
 
 
 class LibraryRepository(ABC):
     @abstractmethod
-    def get(self, track_url: TrackUrl) -> Optional[TrackEntity]:
+    def get(self, identity: TrackProvidedIdentity) -> Optional[TrackInLibrary]:
         pass
 
     @abstractmethod
-    def filter_by_statuses(self, statuses: list[Status]) -> list[TrackEntity]:
+    def filter_by_statuses(
+        self,
+        statuses: list[Status],
+    ) -> list[TrackInLibrary]:
         pass
 
     @abstractmethod
-    def add(self, track: TrackEntity) -> TrackEntity:
+    def add(self, track: TrackInLibrary) -> TrackInLibrary:
         pass
 
     @abstractmethod
-    def update(self, track: TrackEntity) -> TrackEntity:
+    def update(self, track: TrackInLibrary) -> TrackInLibrary:
         pass

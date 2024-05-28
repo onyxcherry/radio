@@ -1,3 +1,15 @@
+from dataclasses import dataclass
+from enum import Enum
+
+
+@dataclass(frozen=True)
+class ErrorMessages(Enum):
+    UNKNOWN_PROVIDER = "Incompatible track url - we do not support this music provider"
+    NO_TRACK_ID = "No track id"
+    NO_TRACK_URL = "No track url"
+    INVALID_YOUTUBE_TRACK_URL = "Incorrect Youtube track url - cannot extract track id"
+
+
 class TrackIdentifierError(ValueError):
     pass
 
@@ -8,35 +20,3 @@ class TrackDurationExceeded(Exception):
 
 class PlayingTimeError(ValueError):
     pass
-
-
-class TrackAPIConfigurationError(Exception):
-    pass
-
-
-class TrackAPIMalformedResponse(Exception):
-    pass
-
-
-class TrackAPINoResults(Exception):
-    pass
-
-
-class TrackAPITimeout(Exception):
-    pass
-
-
-class TrackAPIConnectionError(Exception):
-    pass
-
-
-# class TrackLibraryUnknownStatus(Exception):
-#     pass
-
-
-# class TrackStatusUpdateError(Exception):
-#     pass
-
-
-# class TrackDownloadError(Exception):
-#     pass

@@ -3,11 +3,18 @@ import string
 
 from kink import inject
 from track.domain.errors import TrackIdentifierError
-from track.domain.status import ErrorMessages
+from track.domain.errors import ErrorMessages
 from track.infrastructure.config import get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.duration import parse_isoduration
-from track.domain.track import Seconds, TrackId, TrackProvider, TrackUrl
+from backend.src.track.domain.provided import (
+    ProviderName,
+    Seconds,
+    Identifier,
+    TrackProvided,
+    TrackProvidedIdentity,
+    TrackUrl,
+)
 
 from urllib.parse import parse_qs
 import urllib.parse as urlparse
@@ -19,23 +26,30 @@ ORIGINS = ["youtube.com", "m.youtube.com", "www.youtube.com", "youtu.be"]
 
 
 @inject
-class YoutubeTrackProvider(TrackProvider):
-    _provider = "Youtube"
+class YoutubeTrackProvided(TrackProvided):
+    _provider = ProviderName("Youtube")
 
     def __init__(self, url: TrackUrl, api: YoutubeAPIInterface) -> None:
         self._id = self.get_track_id(url)
         self._url = self.build_standard_url(self._id)
         self._api = api
-        print(f"{self._api=}")
+        # print(f"{self._api=}")
         self._title = None
         self._duration = None
 
     @property
-    def identity(self) -> TrackId:
+    def identity(self) -> TrackProvidedIdentity:
+        return TrackProvidedIdentity(
+            identifier=self.identifier,
+            provider=self.provider,
+        )
+
+    @property
+    def identifier(self) -> Identifier:
         return self._id
 
     @property
-    def provider(self) -> str:
+    def provider(self) -> ProviderName:
         return self._provider
 
     @property
@@ -54,20 +68,14 @@ class YoutubeTrackProvider(TrackProvider):
             self._duration = self.get_duration()
         return self._duration
 
-    # async def fetch_all_properties(self) -> None:
-    #     if self._title is None:
-    #         self._title = self.get_title()
-    #     if self._duration is None:
-    #         self._duration = self.get_duration()
-
     def __str__(self) -> str:
         return (
-            f"<YoutubeTrack id={self._id} url={self._url} "
-            + f"{self._duration=} {self._title=}>"
+            f"YoutubeTrack(id={self._id!s}, url={self._url!s}, "
+            + f"duration={self._duration!s}, title={self._title!s})"
         )
 
     def __repr__(self) -> str:
-        return f'YoutubeTrack("{self._url}")'
+        return f"YoutubeTrack(url={self._url!r}, api={self._api!r})"
 
     # def __eq__(self, other) -> bool:
     #     if isinstance(other, YoutubeTrack):
@@ -77,13 +85,12 @@ class YoutubeTrackProvider(TrackProvider):
     @classmethod
     def check_url_valid(cls, url: str):
         if cls._check_video_id(url):
-            # przekazywać pełny url (bądź w przyszłości (id, provider))
             return False
 
     @classmethod
-    def get_track_id(cls, url: str) -> TrackId:
+    def get_track_id(cls, url: str) -> Identifier:
         if cls._check_video_id(url):
-            track_id = TrackId(url)
+            track_id = Identifier(url)
             return track_id
 
         parsed_url = urlparse.urlparse(url)
@@ -93,16 +100,16 @@ class YoutubeTrackProvider(TrackProvider):
         ):
             v_param = parse_qs(parsed_url.query).get("v")
             if v_param and len(v_param) > 0 and cls._check_video_id(v_param[0]):
-                track_id = TrackId(v_param[0])
+                track_id = Identifier(v_param[0])
                 return track_id
         elif parsed_url.netloc == "youtu.be":
-            track_id = TrackId(parsed_url.path[1:])
+            track_id = Identifier(parsed_url.path[1:])
             if cls._check_video_id(track_id):
-                return TrackId(track_id)
+                return Identifier(track_id)
         raise TrackIdentifierError(ErrorMessages.INVALID_YOUTUBE_TRACK_URL)
 
     @staticmethod
-    def build_standard_url(id_: TrackId) -> TrackUrl:
+    def build_standard_url(id_: Identifier) -> TrackUrl:
         base_url = "https://www.youtube.com/watch?"
         desired_parameters = {"v": id_}
         urlencoded_parameters = urlparse.urlencode(desired_parameters)
