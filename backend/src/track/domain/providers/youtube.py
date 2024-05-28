@@ -16,13 +16,17 @@ from backend.src.track.domain.provided import (
     TrackUrl,
 )
 
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, unquote
 import urllib.parse as urlparse
 
 
 logger = get_logger(__name__)
 
-ORIGINS = ["youtube.com", "m.youtube.com", "www.youtube.com", "youtu.be"]
+_ORIGINS_WATCH_PATH = ["youtube.com", "m.youtube.com", "www.youtube.com"]
+_ORIGINS_SHORT_PATH = ["youtu.be"]
+_WATCH_PATH = "/watch"
+
+ORIGINS = _ORIGINS_WATCH_PATH + _ORIGINS_SHORT_PATH
 
 
 @inject
@@ -30,7 +34,7 @@ class YoutubeTrackProvided(TrackProvided):
     _provider = ProviderName("Youtube")
 
     def __init__(self, url: TrackUrl, api: YoutubeAPIInterface) -> None:
-        self._id = self.get_track_id(url)
+        self._id = self.extract_id(url)
         self._url = self.build_standard_url(self._id)
         self._api = api
         # print(f"{self._api=}")
@@ -59,13 +63,13 @@ class YoutubeTrackProvided(TrackProvided):
     @property
     def title(self) -> str:
         if self._title is None:
-            self._title = self.get_title()
+            self._title = self._get_title()
         return self._title
 
     @property
     def duration(self) -> Seconds:
         if self._duration is None:
-            self._duration = self.get_duration()
+            self._duration = self._get_duration()
         return self._duration
 
     def __str__(self) -> str:
@@ -82,46 +86,7 @@ class YoutubeTrackProvided(TrackProvided):
     #         return self._url == other.url
     #     return False
 
-    @classmethod
-    def check_url_valid(cls, url: str):
-        if cls._check_video_id(url):
-            return False
-
-    @classmethod
-    def get_track_id(cls, url: str) -> Identifier:
-        if cls._check_video_id(url):
-            track_id = Identifier(url)
-            return track_id
-
-        parsed_url = urlparse.urlparse(url)
-        if (
-            parsed_url.netloc in ["youtube.com", "m.youtube.com", "www.youtube.com"]
-            and parsed_url.path == "/watch"
-        ):
-            v_param = parse_qs(parsed_url.query).get("v")
-            if v_param and len(v_param) > 0 and cls._check_video_id(v_param[0]):
-                track_id = Identifier(v_param[0])
-                return track_id
-        elif parsed_url.netloc == "youtu.be":
-            track_id = Identifier(parsed_url.path[1:])
-            if cls._check_video_id(track_id):
-                return Identifier(track_id)
-        raise TrackIdentifierError(ErrorMessages.INVALID_YOUTUBE_TRACK_URL)
-
-    @staticmethod
-    def build_standard_url(id_: Identifier) -> TrackUrl:
-        base_url = "https://www.youtube.com/watch?"
-        desired_parameters = {"v": id_}
-        urlencoded_parameters = urlparse.urlencode(desired_parameters)
-        standard_track_url = base_url + urlencoded_parameters
-        return TrackUrl(standard_track_url)
-
-    @staticmethod
-    def _check_video_id(url: str) -> bool:
-        id_charset = [*string.ascii_letters, *string.digits, "-", "_"]
-        return len(url) == 11 and all(character in id_charset for character in url)
-
-    def get_duration(self) -> Seconds:
+    def _get_duration(self) -> Seconds:
         api_response = self._api.get_api_part(self._id, "contentDetails")
         # print(f"{api_response=}")
         iso_duration = api_response["duration"]
@@ -130,8 +95,7 @@ class YoutubeTrackProvided(TrackProvided):
         parsed_time = parse_isoduration(iso_duration)
         td = timedelta(**parsed_time)
         duration = Seconds(int(td.total_seconds()))
-        self._duration = duration
-        return self._duration
+        return duration
 
     def _check_channel_belongs_official_artist(self, channel_id: str) -> bool:
         print("A tutaj też?")
@@ -159,24 +123,67 @@ class YoutubeTrackProvided(TrackProvided):
         else:
             return badge_type == "OFFICIAL_ARTIST_BADGE"
 
-    def get_title(self) -> str:
+    def _get_title(self) -> str:
         api_response = self._api.get_api_part(self._id, "snippet")
         # print(f"{api_response=}")
         track_title = api_response["title"]
-        self._title = track_title
 
         delims = ["-", "–", "—", "|"]
         topic_suffix = "- Topic"
         if not any([ch in track_title for ch in delims]):
             channel_title: str = api_response["channelTitle"]
             channel_id: str = api_response["channelId"]
-            if self._check_channel_belongs_official_artist(channel_id):
-                author = channel_title
-                full_title = f"{author} - {track_title}"
-                self._title = full_title
-            elif topic_suffix in channel_title:
+            # if self._check_channel_belongs_official_artist(channel_id):
+            #     author = channel_title
+            #     full_title = f"{author} - {track_title}"
+            #     self._title = full_title
+            if topic_suffix in channel_title:
                 author = channel_title.removesuffix(topic_suffix).strip()
                 full_title = f"{author} - {track_title}"
-                self._title = full_title
+                return full_title
 
-        return self._title
+            return channel_title
+
+        return track_title
+
+    @staticmethod
+    def _check_video_id(id_: str) -> bool:
+        id_charset = [*string.ascii_letters, *string.digits, "-", "_"]
+        return len(id_) == 11 and all(character in id_charset for character in id_)
+
+    @classmethod
+    def extract_id(cls, url: str) -> Identifier:
+        if not isinstance(url, str):
+            raise TypeError(f"Passed {type(url)} type, expected 'str'")
+
+        if cls._check_video_id(url):
+            track_id = Identifier(url)
+            return track_id
+
+        unquoted = unquote(url)
+
+        protocolful = unquoted
+
+        if not protocolful.startswith(("http://", "https://")):
+            protocolful = "https://" + protocolful
+
+        parsed_url = urlparse.urlparse(protocolful)
+
+        if parsed_url.netloc in _ORIGINS_WATCH_PATH and parsed_url.path == _WATCH_PATH:
+            v_param = parse_qs(parsed_url.query).get("v")
+            if v_param and len(v_param) > 0 and cls._check_video_id(v_param[0]):
+                track_id = Identifier(v_param[0])
+                return track_id
+        elif parsed_url.netloc in _ORIGINS_SHORT_PATH:
+            track_id = Identifier(parsed_url.path[1:])
+            if cls._check_video_id(track_id):
+                return Identifier(track_id)
+        raise TrackIdentifierError(ErrorMessages.INVALID_YOUTUBE_TRACK_URL)
+
+    @staticmethod
+    def build_standard_url(id_: Identifier) -> TrackUrl:
+        base_url = "https://www.youtube.com/watch?"
+        desired_parameters = {"v": id_}
+        urlencoded_parameters = urlparse.urlencode(desired_parameters)
+        standard_track_url = base_url + urlencoded_parameters
+        return TrackUrl(standard_track_url)

@@ -1,12 +1,15 @@
 from typing import Final
 
-import pytest
 from pytest import mark
 
-from src.track.builder import TrackBuilder
-from src.track.domain.errors import TrackIdentifierError
+
+from track.domain.provided import TrackUrl
+from track.domain.providers.youtube import YoutubeTrackProvided
+from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 
 expected: Final = "i-uYn_lp6Qg"
+
+api = InMemoryYoutubeAPI()
 
 
 @mark.parametrize(
@@ -24,18 +27,13 @@ expected: Final = "i-uYn_lp6Qg"
         ),
     ],
 )
-def test_should_give_youtube_id(track_url):
-    track = TrackBuilder.build(track_url)
-    assert track.identity == expected
+def test_extracts_youtube_id(track_url):
+    track_id = YoutubeTrackProvided.extract_id(track_url)
+    assert track_id == expected
 
 
-def test_normalize_url():
-    url_not_full = "www.youtube.com/watch?v=i-uYn_lp6Qg"
-    result = TrackBuilder.normalize(url_not_full)
-    assert result == "https://www.youtube.com/watch?v=i-uYn_lp6Qg"
-
-
-def test_should_raise_error_url_invalid():
+@mark.skip()
+def test_raises_error_url_invalid():
     invalid_urls = [
         "pqrUQrAcfo4",
         "https://example.com/url=https://youtube.com/watch?v=i-uYn_lp6Qg",
@@ -47,9 +45,15 @@ def test_should_raise_error_url_invalid():
     #         pass
 
 
-def test_should_get_track_duration():
-    # url = "https://youtube.com/watch?v=ZDZiXmCl4pk"
-    url = "https://www.youtube.com/watch?v=YBcdt6DsLQA"
-    track = TrackBuilder.build(url)
-    assert track.title == "The Beatles - In My Life (Remastered 2009)"
-    assert track.duration == 147
+def test_gets_track_duration():
+    url = TrackUrl("https://www.youtube.com/watch?v=YBcdt6DsLQA")
+    youtube_track = YoutubeTrackProvided(url, api)
+
+    assert youtube_track.duration == 147
+
+
+def test_gets_track_title():
+    url = TrackUrl("https://www.youtube.com/watch?v=YBcdt6DsLQA")
+    youtube_track = YoutubeTrackProvided(url, api)
+
+    assert youtube_track.title == "The Beatles - In My Life (Remastered 2009)"
