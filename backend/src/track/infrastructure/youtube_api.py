@@ -3,7 +3,7 @@ import requests
 
 from track.infrastructure.config import Config, get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
-from track.domain.track import TrackId
+from track.domain.provided import Identifier
 from track.domain.errors import (
     TrackAPIConfigurationError,
     TrackAPIConnectionError,
@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 class _PublicAPIProvider:
     @staticmethod
-    def get_api_part(track_id: TrackId, part: str) -> dict:
+    def get_api_part(track_id: Identifier, part: str) -> dict:
         api_url = (
             f"{Config.YOUTUBE_API_URL}?part={part}&id={track_id}"
             f"&key={Config.YOUTUBE_API_KEY}"
