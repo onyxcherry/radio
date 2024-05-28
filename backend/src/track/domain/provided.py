@@ -2,26 +2,33 @@ from typing import NamedTuple, NewType
 from abc import ABC, abstractmethod
 
 
-TrackId = NewType("TrackId", str)
+Identifier = NewType("Identifier", str)
+ProviderName = NewType("ProviderName", str)
+
 TrackUrl = NewType("TrackUrl", str)
 
 Seconds = NewType("Seconds", int)
 
 
-class IdWithProvider(NamedTuple):
-    id: str
-    provider: str
+class TrackProvidedIdentity(NamedTuple):
+    identifier: Identifier
+    provider: ProviderName
 
 
-class TrackProvider(ABC):
+class TrackProvided(ABC):
     @property
     @abstractmethod
-    def identity(self) -> TrackId:
+    def identity(self) -> TrackProvidedIdentity:
         pass
 
     @property
     @abstractmethod
-    def provider(self) -> str:
+    def identifier(self) -> Identifier:
+        pass
+
+    @property
+    @abstractmethod
+    def provider(self) -> ProviderName:
         pass
 
     @property
@@ -38,7 +45,3 @@ class TrackProvider(ABC):
     @abstractmethod
     def duration(self) -> Seconds:
         pass
-
-    # @abstractmethod
-    # async def fetch_all_properties(self) -> None:
-    #     pass
