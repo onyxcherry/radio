@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any, Optional, Type
 from urllib.parse import urlparse, unquote
 
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
@@ -8,22 +8,34 @@ from track.domain.providers.youtube import (
     ORIGINS as YoutubeOrigins,
     YoutubeTrackProvided,
 )
-from track.domain.provided import TrackProvided, ProviderName, TrackUrl
+from track.domain.provided import (
+    TrackProvided,
+    ProviderName,
+    TrackProvidedIdentity,
+    TrackUrl,
+)
 
 
-INTERFACES_FOR_IMPLS: dict[Type[TrackProvided], Any] = {
+_TEMP_INTERFACES_FOR_IMPLS: dict[Type[TrackProvided], Any] = {
     YoutubeTrackProvided: YoutubeAPIInterface,
 }
 
-PROVIDERS = {
+_PROVIDERS_NAMES_MAPPING = {
     ProviderName("Youtube"): YoutubeTrackProvided,
 }
+
+
+def _get_provided_track_class(name: ProviderName) -> type[TrackProvided]:
+    result = _PROVIDERS_NAMES_MAPPING.get(name)
+    if result is None:
+        raise RuntimeError("Brak zmapowanego providera")
+    return result
 
 
 class TrackBuilder:
 
     @staticmethod
-    def normalize(url: str) -> TrackUrl:
+    def normalize(url: str) -> str:
         if not isinstance(url, str):
             raise TypeError(f"Passed {type(url)} type, expected 'str'")
 
@@ -31,32 +43,39 @@ class TrackBuilder:
         if not url.startswith(("http://", "https://")):
             url = "https://" + url
 
-        return TrackUrl(url)
+        return url
 
     @staticmethod
-    def _extract_netloc(url: TrackUrl) -> str:
+    def _extract_netloc(url: str) -> str:
         parsed = urlparse(url)
         netloc = parsed.netloc.split("@")[-1].split(":")[0]
         return netloc
 
     @staticmethod
-    def _match_provider(domain: str) -> tuple[
-        ProviderName,
-        Type[TrackProvided],
-    ]:
+    def _match_provider(domain: str) -> Optional[ProviderName]:
         if domain in YoutubeOrigins:
-            provider_name = ProviderName("Youtube")
-            return (provider_name, PROVIDERS[provider_name])
+            return ProviderName("Youtube")
         else:
-            raise TrackIdentifierError(ErrorMessages.UNKNOWN_PROVIDER)
+            return None
 
     @classmethod
-    def build(cls, url: str):
-        track_url = cls.normalize(url)
-        netloc = cls._extract_netloc(track_url)
-        provider_name, provider_class = cls._match_provider(netloc)
-        # ZAMIENIĆ NA DEPENDENCY INJECTION
-        default_provider_api_impl = INTERFACES_FOR_IMPLS[provider_class]
+    def from_url(cls, url: str):
+        normalized_url = cls.normalize(url)
+        netloc = cls._extract_netloc(normalized_url)
+        provider_name = cls._match_provider(netloc)
 
-        api_impl = default_provider_api_impl
-        return provider_class(track_url, api_impl)
+        if provider_name is None:
+            raise TrackIdentifierError(ErrorMessages.UNKNOWN_PROVIDER)
+
+        track_url = TrackUrl(normalized_url)
+        track_provided_cls = _get_provided_track_class(provider_name)
+
+        api_impl = _TEMP_INTERFACES_FOR_IMPLS[track_provided_cls]
+        return track_provided_cls.from_url(track_url, api_impl)
+
+    @staticmethod
+    def build(identity: TrackProvidedIdentity):
+        track_provided_cls = _get_provided_track_class(identity.provider)
+
+        api_impl = _TEMP_INTERFACES_FOR_IMPLS[track_provided_cls]
+        return track_provided_cls(identity.identifier, api_impl)
