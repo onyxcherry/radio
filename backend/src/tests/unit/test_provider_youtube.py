@@ -47,13 +47,13 @@ def test_raises_error_url_invalid():
 
 def test_gets_track_duration():
     url = TrackUrl("https://www.youtube.com/watch?v=YBcdt6DsLQA")
-    youtube_track = YoutubeTrackProvided(url, api)
+    youtube_track = YoutubeTrackProvided.from_url(url, api)
 
     assert youtube_track.duration == 147
 
 
 def test_gets_track_title():
     url = TrackUrl("https://www.youtube.com/watch?v=YBcdt6DsLQA")
-    youtube_track = YoutubeTrackProvided(url, api)
+    youtube_track = YoutubeTrackProvided.from_url(url, api)
 
     assert youtube_track.title == "The Beatles - In My Life (Remastered 2009)"

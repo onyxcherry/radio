@@ -1,5 +1,6 @@
 from datetime import timedelta
 import string
+from typing import Self
 
 from kink import inject
 from track.domain.errors import TrackIdentifierError
@@ -33,11 +34,14 @@ ORIGINS = _ORIGINS_WATCH_PATH + _ORIGINS_SHORT_PATH
 class YoutubeTrackProvided(TrackProvided):
     _provider = ProviderName("Youtube")
 
-    def __init__(self, url: TrackUrl, api: YoutubeAPIInterface) -> None:
-        self._id = self.extract_id(url)
-        self._url = self.build_standard_url(self._id)
+    def __init__(
+        self,
+        identifier: Identifier,
+        api: YoutubeAPIInterface,
+    ) -> None:
+        self._id = identifier
+        self._url = self.build_standard_url(identifier)
         self._api = api
-        # print(f"{self._api=}")
         self._title = None
         self._duration = None
 
@@ -71,6 +75,11 @@ class YoutubeTrackProvided(TrackProvided):
         if self._duration is None:
             self._duration = self._get_duration()
         return self._duration
+
+    @classmethod
+    def from_url(cls, url: TrackUrl, api: YoutubeAPIInterface) -> Self:
+        id_ = cls.extract_id(url)
+        return cls(id_, api)
 
     def __str__(self) -> str:
         return (

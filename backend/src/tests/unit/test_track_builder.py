@@ -1,3 +1,8 @@
+from track.domain.provided import (
+    Identifier,
+    ProviderName,
+    TrackProvidedIdentity
+)
 from track.domain.providers.youtube import YoutubeTrackProvided
 from track.builder import TrackBuilder
 
@@ -26,7 +31,17 @@ def test_normalize_url_when_url_quoted():
     assert track_url == "https://www.youtube.com/watch?v=i-uYn_lp6Qg"
 
 
+def test_builds_track():
+    identifier = Identifier("i-uYn_lp6Qg")
+    provider = ProviderName("Youtube")
+    track_identity = TrackProvidedIdentity(identifier, provider)
+    track = TrackBuilder.build(track_identity)
+    assert track.identifier == identifier
+    assert track.provider == provider
+
+
 def test_chooses_correct_provider_for_track():
     valid_url = "https://www.youtube.com/watch?v=i-uYn_lp6Qg"
-    track_provided = TrackBuilder.build(valid_url)
+    track_provided = TrackBuilder.from_url(valid_url)
     assert isinstance(track_provided, YoutubeTrackProvided)
+    assert track_provided.provider == ProviderName("Youtube")

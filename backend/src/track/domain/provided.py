@@ -1,4 +1,4 @@
-from typing import NamedTuple, NewType
+from typing import Any, NamedTuple, NewType, Self
 from abc import ABC, abstractmethod
 
 
@@ -16,6 +16,10 @@ class TrackProvidedIdentity(NamedTuple):
 
 
 class TrackProvided(ABC):
+    @abstractmethod
+    def __init__(self, identifier: Identifier, api: Any) -> None:
+        pass
+
     @property
     @abstractmethod
     def identity(self) -> TrackProvidedIdentity:
@@ -44,4 +48,9 @@ class TrackProvided(ABC):
     @property
     @abstractmethod
     def duration(self) -> Seconds:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def from_url(cls, url: TrackUrl, api: Any) -> Self:
         pass
