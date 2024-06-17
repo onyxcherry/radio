@@ -4,36 +4,26 @@ from typing import Optional
 from track.domain.breaks import Breaks
 
 from track.domain.entities import TrackQueued
-from track.domain.provided import (
-    Identifier,
-    ProviderName,
-    Seconds,
-    TrackUrl,
-)
+from track.domain.provided import Seconds, TrackProvidedIdentity
 
 
 class PlaylistRepository(ABC):
     @abstractmethod
     def get_track_on(
         self,
-        provider: ProviderName,
-        identifier: Identifier,
+        track: TrackProvidedIdentity,
         date_: date,
         break_: Optional[Breaks] = None,
     ) -> Optional[TrackQueued]:
         pass
 
     @abstractmethod
-    def get_all_on(
+    def get_all(
         self,
         date_: date,
         break_: Optional[Breaks] = None,
-    ) -> list[TrackQueued]:
-        pass
-
-    @abstractmethod
-    def filter_on_by(
-        self, track_url: TrackUrl, date_: date, conditions
+        played: Optional[bool] = None,
+        waiting: Optional[bool] = None,
     ) -> list[TrackQueued]:
         pass
 
@@ -42,6 +32,8 @@ class PlaylistRepository(ABC):
         self,
         date_: date,
         break_: Optional[Breaks] = None,
+        played: Optional[bool] = None,
+        waiting: Optional[bool] = None,
     ) -> int:
         pass
 
@@ -50,6 +42,8 @@ class PlaylistRepository(ABC):
         self,
         date_: date,
         break_: Optional[Breaks] = None,
+        played: Optional[bool] = None,
+        waiting: Optional[bool] = None,
     ) -> Seconds:
         pass
 
