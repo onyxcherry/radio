@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import IntEnum, auto, unique
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 
 
 _BREAKS_START_TIMES = {
@@ -46,7 +46,7 @@ class PlayingTime:
     def to_datetime(self) -> datetime:
         break_number = self.break_.get_number_from_zero_of()
         starting_time = get_breaks_starting_times()[break_number]
-        return datetime.combine(self.date_, starting_time)
+        return datetime.combine(self.date_, starting_time, tzinfo=timezone.utc)
 
-    def is_weekday(self) -> bool:
+    def is_on_weekend(self) -> bool:
         return self.date_.isoweekday() > 5
