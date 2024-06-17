@@ -4,7 +4,7 @@ import requests
 from track.infrastructure.config import Config, get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.provided import Identifier
-from track.domain.errors import (
+from track.application.errors import (
     TrackAPIConfigurationError,
     TrackAPIConnectionError,
     TrackAPIMalformedResponse,
