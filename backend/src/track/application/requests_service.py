@@ -21,7 +21,7 @@ MINIMUM_PLAYING_TIME = Seconds(15)
 MAX_TRACKS_QUEUED_ONE_BREAK = 8
 
 
-Errors = NewType("Errors", set)
+Errors = NewType("Errors", list)
 
 
 @dataclass(frozen=True)
@@ -33,7 +33,7 @@ class AddToLibraryStatus:
 @dataclass(frozen=True)
 class RequestResult:
     success: bool
-    errors: Optional[set]
+    errors: Optional[Errors]
 
 
 @inject
@@ -67,16 +67,16 @@ class RequestsService:
         return Seconds(break_duration - duration - margin)
 
     def can_add_to_playlist(self, req: TrackRequested) -> Optional[Errors]:
-        errors = set()
+        errors = list()
 
         if self._requested_playing_time_passed(req.when):
-            errors.add(
+            errors.append(
                 PlayingTimeError(
                     f"Requested break time {req.when} in the past, cannot add!"
                 )
             )
         if req.when.is_on_weekend():
-            errors.add(
+            errors.append(
                 PlayingTimeError(
                     f"Requested break time {req.when} in a weekend, cannot add!"
                 )
@@ -86,7 +86,7 @@ class RequestsService:
             req.identity,
             req.when.date_,
         ):
-            errors.add(PlayingTimeError("Już jest tego dnia"))
+            errors.append(PlayingTimeError("Już jest tego dnia"))
 
         # on_break_duration = self._playlist.get_tracks_duration_on_break(
         #     req.when, waiting=False
@@ -96,13 +96,13 @@ class RequestsService:
         #     req.when.break_,
         # )
         # if left_time <= MINIMUM_PLAYING_TIME:
-        # errors.add(PlayingTimeError("Not enough time to play"))
+        # errors.append(PlayingTimeError("Not enough time to play"))
 
         tracks_on_break_count = self._playlist.get_tracks_count_on_break(
             req.when, waiting=False
         )
         if tracks_on_break_count >= MAX_TRACKS_QUEUED_ONE_BREAK:
-            errors.add(PlayingTimeError("MAX_QUEUED_EXCEED"))
+            errors.append(PlayingTimeError("MAX_QUEUED_EXCEED"))
         if len(errors) > 0:
             return Errors(errors)
         return None
@@ -116,17 +116,17 @@ class RequestsService:
         if track_status == Status.REJECTED:
             return (
                 AddToLibraryStatus(added=False, waits_on_decision=False),
-                Errors(set()),
+                Errors(list()),
             )
         elif track_status == Status.ACCEPTED:
             return (
                 AddToLibraryStatus(added=False, waits_on_decision=False),
-                Errors(set()),
+                Errors(list()),
             )
         elif track_status == Status.PENDING_APPROVAL:
             return (
                 AddToLibraryStatus(added=False, waits_on_decision=True),
-                Errors(set()),
+                Errors(list()),
             )
 
         elif track_status is None:
@@ -134,10 +134,10 @@ class RequestsService:
             identity = TrackProvidedIdentity(
                 identifier=track.identifier, provider=track.provider
             )
-            errors = set()
+            errors = list()
             if not self._check_valid_duration(track.duration):
                 msg = f"Track duration must be between {MIN_TRACK_DURATION_SECONDS} and {MAX_TRACK_DURATION_SECONDS} seconds"
-                errors.add(TrackDurationExceeded(msg))
+                errors.append(TrackDurationExceeded(msg))
 
             if len(errors) > 0:
                 return (
@@ -154,7 +154,7 @@ class RequestsService:
             self._library.add(new_track)
             return (
                 AddToLibraryStatus(added=True, waits_on_decision=True),
-                Errors(set()),
+                Errors(list()),
             )
 
         else:
