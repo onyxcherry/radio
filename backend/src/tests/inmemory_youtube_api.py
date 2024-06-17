@@ -100,6 +100,16 @@ _content_details_data = {
         "contentRating": {},
         "projection": "rectangular",
     },
+    "c_iRx2Un07k": {
+        "duration": "PT1H1M29S",
+        "dimension": "2d",
+        "definition": "hd",
+        "caption": "false",
+        "licensedContent": False,
+        "regionRestriction": {"allowed": ["..."]},
+        "contentRating": {},
+        "projection": "rectangular",
+    },
 }
 
 
