@@ -1,12 +1,8 @@
 from typing import Optional
 from kink import inject
-from track.application.dto import NewTrack, TrackEntity
-from track.domain.errors import TrackDurationExceeded
+from track.domain.entities import NewTrack, Status, TrackInLibrary
 from track.domain.library_repository import LibraryRepository
-from track.domain.status import Status
-from track.domain.provided import Seconds, TrackProvidedIdentity
-
-MAX_TRACK_DURATION_SECONDS = Seconds(1200)
+from track.domain.provided import TrackProvidedIdentity
 
 
 @inject
@@ -14,42 +10,42 @@ class Library:
     def __init__(self, library_repository: LibraryRepository):
         self._library_repository = library_repository
 
-    def _check_valid_duration(self, track_duration: Seconds, limit: Seconds) -> bool:
-        return track_duration <= limit
+    def filter_by_statuses(
+        self,
+        statuses: list[Status],
+    ) -> list[TrackInLibrary]:
+        return self._library_repository.filter_by_statuses(statuses)
 
-    def filter_by_statuses(self, statuses: list[Status]) -> list[TrackEntity]:
-        ...
-
-    def get(self, track_url: TrackUrl) -> Optional[TrackEntity]:
-        self._library_repository.get(track_url)
+    def get(self, identity: TrackProvidedIdentity) -> Optional[TrackInLibrary]:
+        return self._library_repository.get(identity=identity)
 
     def add(self, track: NewTrack):
-        length_limit = MAX_TRACK_DURATION_SECONDS
-        duration = track.duration
-        if not self._check_valid_duration(duration, length_limit):
-            msg = f"Too long track. Limit is {length_limit}"
-            raise TrackDurationExceeded(msg)
-
-        track_to_add = TrackEntity(
+        default_status = Status.PENDING_APPROVAL
+        track_to_add = TrackInLibrary(
+            identity=track.identity,
             title=track.title,
             url=track.url,
             duration=track.duration,
-            status=Status.PENDING_APPROVAL,
-            ready=False,
-            # wywalić to, mieszanie odpowiedzialności playera to jest
+            status=default_status,
         )
         self._library_repository.add(track_to_add)
 
-    def accept(self, track_url: TrackUrl) -> None:
-        track = self._library_repository.get(track_url)
-        if track is not None:
-            track.status = Status.ACCEPTED
-            self._library_repository.update(track)
-            # emit event
+    def _change_status(
+        self, identity: TrackProvidedIdentity, status: Status
+    ) -> TrackInLibrary:
+        track = self._library_repository.get(identity)
+        if track is None:
+            raise RuntimeError("No track with given identity")
 
-    def reject(self, track_url: TrackUrl) -> None:
-        track = self._library_repository.get(track_url)
-        if track is not None:
-            track.status = Status.REJECTED
-            self._library_repository.update(track)
-            # emit event
+        track.status = status
+        self._library_repository.update(track)
+        # emit event
+        return track
+
+    def accept(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
+        new_status = Status.ACCEPTED
+        return self._change_status(identity, new_status)
+
+    def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
+        new_status = Status.REJECTED
+        return self._change_status(identity, new_status)
