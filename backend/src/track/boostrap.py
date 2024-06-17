@@ -18,7 +18,9 @@ def boostrap_di() -> None:
     di[LibraryRepository] = InMemoryLibraryRepository
     di[PlaylistRepository] = InMemoryPlaylistRepository
     di[RequestsService] = RequestsService(
-        InMemoryLibraryRepository(), InMemoryPlaylistRepository(), SystemClock()
+        InMemoryLibraryRepository(),
+        InMemoryPlaylistRepository(),
+        SystemClock(),
     )
     di[YoutubeAPIInterface] = YoutubeAPI
     di[Clock] = SystemClock()

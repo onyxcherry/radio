@@ -1,6 +1,8 @@
 from typing import Any, Optional, Type
 from urllib.parse import urlparse, unquote
 
+from kink import di
+
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.errors import TrackIdentifierError
 from track.domain.errors import ErrorMessages
@@ -30,6 +32,10 @@ def _get_provided_track_class(name: ProviderName) -> type[TrackProvided]:
     if result is None:
         raise RuntimeError("Brak zmapowanego providera")
     return result
+
+
+def _get_api_impl(provider: Type[TrackProvided]):
+    return di[provider]
 
 
 class TrackBuilder:
@@ -70,12 +76,12 @@ class TrackBuilder:
         track_url = TrackUrl(normalized_url)
         track_provided_cls = _get_provided_track_class(provider_name)
 
-        api_impl = _TEMP_INTERFACES_FOR_IMPLS[track_provided_cls]
+        api_impl = _get_api_impl(track_provided_cls)
         return track_provided_cls.from_url(track_url, api_impl)
 
     @staticmethod
     def build(identity: TrackProvidedIdentity):
         track_provided_cls = _get_provided_track_class(identity.provider)
 
-        api_impl = _TEMP_INTERFACES_FOR_IMPLS[track_provided_cls]
+        api_impl = _get_api_impl(track_provided_cls)
         return track_provided_cls(identity.identifier, api_impl)
