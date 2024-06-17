@@ -96,7 +96,7 @@ def test_too_long_track_not_added_to_library():
     assert result.added is False
     assert result.waits_on_decision is False
     assert len(errors) == 1
-    assert isinstance(list(errors)[0], TrackDurationExceeded)
+    assert isinstance(errors[0], TrackDurationExceeded)
 
 
 def test_no_provider_matched_for_track_requested():
@@ -148,7 +148,7 @@ def test_error_as_requested_pt_passed(yt_tracks):
     result = rs.request_on(track.identity, PASSED_PT)
     assert result.success is False
     assert result.errors is not None
-    assert isinstance(list(result.errors)[0], PlayingTimeError)
+    assert isinstance(result.errors[0], PlayingTimeError)
 
 
 def test_error_as_requested_on_weekend(yt_tracks):
@@ -157,7 +157,7 @@ def test_error_as_requested_on_weekend(yt_tracks):
     result = rs.request_on(track.identity, FUTURE_PT_WEEKEND)
     assert result.success is False
     assert result.errors is not None
-    assert isinstance(list(result.errors)[0], PlayingTimeError)
+    assert isinstance(result.errors[0], PlayingTimeError)
 
 
 def test_error_as_track_played_on_this_day(yt_tracks):
@@ -178,7 +178,7 @@ def test_error_as_track_played_on_this_day(yt_tracks):
     result = rs.request_on(track.identity, pt2)
     assert result.success is False
     assert result.errors is not None
-    assert isinstance(list(result.errors)[0], PlayingTimeError)
+    assert isinstance(result.errors[0], PlayingTimeError)
 
 
 def test_error_as_track_already_queued_on_this_day(yt_tracks):
@@ -197,7 +197,7 @@ def test_error_as_track_already_queued_on_this_day(yt_tracks):
     result = rs.request_on(track.identity, pt2)
     assert result.success is False
     assert result.errors is not None
-    assert isinstance(list(result.errors)[0], PlayingTimeError)
+    assert isinstance(result.errors[0], PlayingTimeError)
 
 
 @pytest.mark.skip()
@@ -206,7 +206,7 @@ def test_error_as_no_left_time_on_break(tracks, whole_break_scheduled):
     result = rs.request_on(not_scheduled_track.identity, FUTURE_PT)
     assert result.success is False
     assert result.errors is not None
-    assert isinstance(list(result.errors)[0], PlayingTimeError)
+    assert isinstance(result.errors[0], PlayingTimeError)
 
 
 def test_error_as_max_queue_count_exceeded(tracks):
@@ -219,5 +219,5 @@ def test_multiple_playlist_errors(tracks, whole_break_scheduled):
     result = rs.request_on(scheduled_track.identity, FUTURE_PT)
     assert result.success is False
     assert result.errors is not None
-    assert isinstance(list(result.errors)[0], PlayingTimeError)
-    assert isinstance(list(result.errors)[1], PlayingTimeError)
+    assert isinstance(result.errors[0], PlayingTimeError)
+    assert isinstance(result.errors[1], PlayingTimeError)
