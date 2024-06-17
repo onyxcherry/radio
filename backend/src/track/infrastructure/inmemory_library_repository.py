@@ -1,25 +1,46 @@
 import copy
 from typing import Optional
-from track.application.dto import TrackEntity
+from track.domain.entities import Status, TrackInLibrary
 from track.domain.library_repository import LibraryRepository
-from track.domain.provided import TrackUrl
+from track.domain.provided import TrackProvidedIdentity
 
 
 class InMemoryLibraryRepository(LibraryRepository):
     def __init__(self) -> None:
-        self._tracks: dict[TrackUrl, TrackEntity] = {}
+        self._tracks: dict[TrackProvidedIdentity, TrackInLibrary] = {}
 
-    def get(self, track_url: TrackUrl) -> Optional[TrackEntity]:
-        if track_url in self._tracks:
-            return copy.deepcopy(self._tracks[track_url])
+    def _reset_state(self) -> None:
+        self._tracks = {}
+
+    def get(self, identity: TrackProvidedIdentity) -> Optional[TrackInLibrary]:
+        if identity in self._tracks:
+            return copy.deepcopy(self._tracks[identity])
         return None
 
-    def add(self, track: TrackEntity):
-        if track.url in self._tracks:
-            raise ValueError("Duplicate!")
-        self._tracks[track.url] = copy.deepcopy(track)
+    def get_all(self):
+        return copy.deepcopy(self._tracks)
 
-    def update(self, track: TrackEntity):
-        if track.url not in self._tracks:
+    def add(self, track: TrackInLibrary) -> TrackInLibrary:
+        if track.identity in self._tracks:
+            raise ValueError("Duplicate!")
+        copied_track = copy.deepcopy(track)
+        self._tracks[track.identity] = copied_track
+        return copied_track
+
+    def update(self, track: TrackInLibrary) -> TrackInLibrary:
+        if track.identity not in self._tracks:
             raise ValueError("No track already exists!")
-        self._tracks[track.url] = copy.deepcopy(track)
+        copied_track = copy.deepcopy(track)
+        self._tracks[track.identity] = copied_track
+        return copied_track
+
+    def filter_by_statuses(
+        self,
+        statuses: list[Status],
+    ) -> list[TrackInLibrary]:
+        return list(
+            filter(
+                lambda track: (track.status in statuses),
+                self._tracks.values(),
+            )
+        )
