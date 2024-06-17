@@ -21,25 +21,25 @@ class Status(Enum):
 @dataclass
 class TrackInLibrary:
     identity: TrackProvidedIdentity
-    title: Optional[str]
-    url: Optional[TrackUrl]
-    duration: Optional[Seconds]
+    title: str
+    url: TrackUrl
+    duration: Seconds
     status: Status
 
 
 @dataclass(frozen=True)
 class NewTrack:
     identity: TrackProvidedIdentity
-    title: Optional[str]
-    url: Optional[TrackUrl]
-    duration: Optional[Seconds]
+    title: str
+    url: TrackUrl
+    duration: Seconds
 
 
-@dataclass(frozen=True)
+@dataclass
 class TrackQueued:
     identity: TrackProvidedIdentity
     when: PlayingTime
-    played: Optional[bool]
+    played: bool
     waiting: bool
 
 
