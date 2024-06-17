@@ -1,14 +1,39 @@
+from dataclasses import dataclass
+from typing import NewType, Optional
 from kink import inject
+from track.domain.entities import NewTrack, Status, TrackRequested
 from building_blocks.clock import Clock
-from track.domain.breaks import PlayingTime
-from track.application.dto import NewTrack, TrackRequestedAt
+from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.application.library import Library
 from track.builder import TrackBuilder
 from track.domain.errors import PlayingTimeError, TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.library_repository import LibraryRepository
 from track.domain.playlist_repository import PlaylistRepository
-from track.domain.status import Status
+from track.domain.provided import Seconds, TrackProvidedIdentity
+
+
+MIN_TRACK_DURATION_SECONDS = Seconds(20)
+MAX_TRACK_DURATION_SECONDS = Seconds(1200)
+
+
+MINIMUM_PLAYING_TIME = Seconds(15)
+MAX_TRACKS_QUEUED_ONE_BREAK = 8
+
+
+Errors = NewType("Errors", set)
+
+
+@dataclass(frozen=True)
+class AddToLibraryStatus:
+    added: bool
+    waits_on_decision: bool
+
+
+@dataclass(frozen=True)
+class RequestResult:
+    success: bool
+    errors: Optional[set]
 
 
 @inject
@@ -23,6 +48,12 @@ class RequestsService:
         self._playlist = Playlist(playlist_repo)
         self._clock = clock
 
+    @staticmethod
+    def _check_valid_duration(duration: Seconds) -> bool:
+        lower_limit = MIN_TRACK_DURATION_SECONDS
+        upper_limit = MAX_TRACK_DURATION_SECONDS
+        return lower_limit <= duration <= upper_limit
+
     def _requested_playing_time_passed(self, requested_time: PlayingTime) -> bool:
         now = self._clock.now()
         requested_dt = requested_time.to_datetime()
@@ -30,39 +61,118 @@ class RequestsService:
             return False
         return True
 
-    def request(self, requested: TrackRequestedAt):
-        if self._requested_playing_time_passed(requested.when):
-            raise PlayingTimeError(
-                f"Requested break time {requested.when} in the past, cannot add!"
+    def _calc_left_time_on_break(self, duration: Seconds, break_: Breaks) -> Seconds:
+        margin = Seconds(15)
+        break_duration = get_breaks_durations()[break_]
+        return Seconds(break_duration - duration - margin)
+
+    def can_add_to_playlist(self, req: TrackRequested) -> Optional[Errors]:
+        errors = set()
+
+        if self._requested_playing_time_passed(req.when):
+            errors.add(
+                PlayingTimeError(
+                    f"Requested break time {req.when} in the past, cannot add!"
+                )
             )
-        if requested.when.is_weekday():
-            raise PlayingTimeError(
-                f"Requested break time {requested.when} in a weekend, cannot add!"
+        if req.when.is_on_weekend():
+            errors.add(
+                PlayingTimeError(
+                    f"Requested break time {req.when} in a weekend, cannot add!"
+                )
             )
 
-        track_status = self._library.get(requested.url)
+        if self._playlist.check_played_or_queued_on_day(
+            req.identity,
+            req.when.date_,
+        ):
+            errors.add(PlayingTimeError("Już jest tego dnia"))
+
+        # on_break_duration = self._playlist.get_tracks_duration_on_break(
+        #     req.when, waiting=False
+        # )
+        # left_time = self._calc_left_time_on_break(
+        #     on_break_duration,
+        #     req.when.break_,
+        # )
+        # if left_time <= MINIMUM_PLAYING_TIME:
+        # errors.add(PlayingTimeError("Not enough time to play"))
+
+        tracks_on_break_count = self._playlist.get_tracks_count_on_break(
+            req.when, waiting=False
+        )
+        if tracks_on_break_count >= MAX_TRACKS_QUEUED_ONE_BREAK:
+            errors.add(PlayingTimeError("MAX_QUEUED_EXCEED"))
+        if len(errors) > 0:
+            return Errors(errors)
+        return None
+
+    def add_to_library(
+        self, identity: TrackProvidedIdentity
+    ) -> tuple[AddToLibraryStatus, Errors]:
+        track_in_library = self._library.get(identity)
+        track_status = track_in_library.status if track_in_library is not None else None
 
         if track_status == Status.REJECTED:
-            raise Exception("Utwór jest odrzucony, z czym do ludzi")
+            return (
+                AddToLibraryStatus(added=False, waits_on_decision=False),
+                Errors(set()),
+            )
         elif track_status == Status.ACCEPTED:
-            self._playlist.add_at(requested, waiting=False)
+            return (
+                AddToLibraryStatus(added=False, waits_on_decision=False),
+                Errors(set()),
+            )
         elif track_status == Status.PENDING_APPROVAL:
-            self._playlist.add_at(requested, waiting=True)
+            return (
+                AddToLibraryStatus(added=False, waits_on_decision=True),
+                Errors(set()),
+            )
 
         elif track_status is None:
-            track = TrackBuilder.build(requested.url)
-            new_track = NewTrack(
-                url=track.url, title=track.title, duration=track.duration
+            track = TrackBuilder.build(identity)
+            identity = TrackProvidedIdentity(
+                identifier=track.identifier, provider=track.provider
             )
-            try:
-                self._library.add(new_track)
-            except TrackDurationExceeded as ex:
-                raise ValueError from ex
-            try:
-                self._playlist.add_at(requested, waiting=True)
-            except PlayingTimeError as ex:
-                raise ValueError from ex
+            errors = set()
+            if not self._check_valid_duration(track.duration):
+                msg = f"Track duration must be between {MIN_TRACK_DURATION_SECONDS} and {MAX_TRACK_DURATION_SECONDS} seconds"
+                errors.add(TrackDurationExceeded(msg))
+
+            if len(errors) > 0:
+                return (
+                    AddToLibraryStatus(added=False, waits_on_decision=False),
+                    Errors(errors),
+                )
+
+            new_track = NewTrack(
+                identity=identity,
+                url=track.url,
+                title=track.title,
+                duration=track.duration,
+            )
+            self._library.add(new_track)
+            return (
+                AddToLibraryStatus(added=True, waits_on_decision=True),
+                Errors(set()),
+            )
 
         else:
             raise NotImplementedError("Słabo generalnie")
-        # co z waiting? Dodaj do waiting, gdy w bibliotece utwór czeka na akceptację (bo czekał bądź dopiero dodano do biblioteki)
+
+    def request_on(
+        self, identity: TrackProvidedIdentity, when: PlayingTime
+    ) -> RequestResult:
+        library_result, errors = self.add_to_library(identity)
+        if errors is not None and len(errors) > 0:
+            raise NotImplementedError("TODO: obsługa błędów")
+
+        waits = library_result.waits_on_decision
+
+        requested = TrackRequested(identity, when)
+        errors = self.can_add_to_playlist(requested)
+        if errors is None:
+            self._playlist.add_at(requested, waits)
+            return RequestResult(success=True, errors=None)
+        else:
+            return RequestResult(success=False, errors=errors)
