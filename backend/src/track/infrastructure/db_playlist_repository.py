@@ -82,8 +82,10 @@ class DBPlaylistRepository(PlaylistRepository):
         played: Optional[bool] = None,
         waiting: Optional[bool] = None,
     ) -> int:
-        stmt = select(func.count(QueueTrackModel.id)).filter(
-            QueueTrackModel.date_ == date_
+        stmt = (
+            select(func.count(QueueTrackModel.id))
+            .join(LibraryTrackModel)
+            .filter(QueueTrackModel.date_ == date_)
         )
         stmt = self._apply_filters(stmt, break_, played, waiting)
 
