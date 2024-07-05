@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date
 import pytest
 from tests.unit.data import TRACKS, YT_TRACKS
 from track.domain.errors import PlayingTimeError, TrackDurationExceeded
@@ -133,11 +133,12 @@ def test_requests_to_add_already_pending_approval_track_in_library():
 
 def test_adds_track_to_playlist(yt_tracks):
     track = YT_TRACKS[0]
-    pt = PlayingTime(
-        break_=Breaks.SECOND,
-        date_=datetime.now().date() + timedelta(days=1),
-    )
-    rs.request_on(track.identity, pt)
+    pt = FUTURE_PT
+
+    result = rs.request_on(track.identity, pt)
+
+    assert result.success is True
+    assert result.errors is None
     got_track = playlist.get(track.identity, pt.date_, pt.break_)
     assert got_track is not None
     assert got_track.when == pt
