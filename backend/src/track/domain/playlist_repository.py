@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional
 from track.domain.breaks import Breaks
 
-from track.domain.entities import TrackQueued
+from track.domain.entities import TrackQueued, TrackToQueue
 from track.domain.provided import Seconds, TrackProvidedIdentity
 
 
@@ -48,7 +48,8 @@ class PlaylistRepository(ABC):
         pass
 
     @abstractmethod
-    def save(self, track: TrackQueued) -> TrackQueued:
+    def save(self, track: TrackToQueue) -> TrackQueued:
+        pass
         pass
 
     @abstractmethod

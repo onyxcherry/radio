@@ -43,6 +43,13 @@ class TrackQueued:
     waiting: bool
 
 
+@dataclass
+class TrackToQueue:
+    identity: TrackProvidedIdentity
+    when: PlayingTime
+    played: bool
+
+
 @dataclass(frozen=True)
 class TrackRequested:
     identity: TrackProvidedIdentity

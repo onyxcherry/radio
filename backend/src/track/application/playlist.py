@@ -2,7 +2,7 @@ from datetime import date
 from typing import Optional
 
 from kink import inject
-from track.domain.entities import TrackQueued, TrackRequested
+from track.domain.entities import TrackQueued, TrackRequested, TrackToQueue
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Seconds, TrackProvidedIdentity
@@ -36,12 +36,11 @@ class Playlist:
             waiting,
         )
 
-    def add_at(self, req: TrackRequested, waiting: bool) -> TrackQueued:
-        to_save = TrackQueued(
+    def add(self, req: TrackRequested) -> TrackQueued:
+        to_save = TrackToQueue(
             req.identity,
             req.when,
             played=False,
-            waiting=waiting,
         )
         saved = self._playlist_repository.save(to_save)
         return saved
