@@ -1,26 +1,16 @@
+from kink import di
 from pytest import fixture
-from tests.unit.data import TRACKS
+from tests.unit.data import NEW_TRACKS, TRACKS
 from track.application.library import Library
 from track.domain.entities import Status
-from track.infrastructure.inmemory_library_repository import (
-    InMemoryLibraryRepository,
-)
 
 
-library_repo = InMemoryLibraryRepository()
-library = Library(library_repo)
-
-
-@fixture()
-def tracks_one_accepted():
-    for track in TRACKS:
-        library.add(track)
-
-    library.accept(TRACKS[0].identity)
+library = di[Library]
 
 
 @fixture(autouse=True)
 def reset():
+    library_repo = library._library_repository
     library_repo.delete_all()
 
     yield
@@ -28,18 +18,32 @@ def reset():
     library_repo.delete_all()
 
 
+@fixture()
+def tracks_one_accepted(reset):
+    library_repo = library._library_repository
+    statuses = dict.fromkeys(Status, 0)
+
+    for track in TRACKS:
+        library_repo.add(track)
+        statuses[track.status] += 1
+
+    assert statuses == {
+        Status.ACCEPTED: 1,
+        Status.PENDING_APPROVAL: 1,
+        Status.REJECTED: 0,
+    }
+
+
 def test_new_track_has_pending_approval_state():
-    track = TRACKS[0]
+    track = NEW_TRACKS[0]
     library.add(track)
     got_track = library.get(track.identity)
     assert got_track is not None
     assert got_track.status == Status.PENDING_APPROVAL
 
 
-def test_accept_track():
+def test_accept_track(tracks_one_accepted):
     track = TRACKS[0]
-    library.add(track)
-
     library.accept(track.identity)
 
     got_track = library.get(track.identity)
@@ -47,9 +51,8 @@ def test_accept_track():
     assert got_track.status == Status.ACCEPTED
 
 
-def test_reject_track():
+def test_reject_track(tracks_one_accepted):
     track = TRACKS[0]
-    library.add(track)
 
     library.reject(track.identity)
 
@@ -62,5 +65,5 @@ def test_filters_tracks_by_status(tracks_one_accepted):
     tracks_filtered = library.filter_by_statuses(
         [Status.PENDING_APPROVAL, Status.ACCEPTED]
     )
-    assert len(tracks_filtered) == 3
-    assert len(library.filter_by_statuses([Status.PENDING_APPROVAL])) == 2
+    assert len(tracks_filtered) == 2
+    assert len(library.filter_by_statuses([Status.PENDING_APPROVAL])) == 1
