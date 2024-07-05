@@ -1,18 +1,15 @@
 from datetime import date
 from typing import Optional
 
-from track.domain.breaks import Breaks
-from track.domain.entities import TrackQueued
-from track.domain.provided import Seconds, TrackProvidedIdentity
-from track.domain.playlist_repository import PlaylistRepository
+from src.track.domain.breaks import Breaks
+from src.track.domain.entities import TrackQueued
+from src.track.domain.provided import Seconds, TrackProvidedIdentity
+from src.track.domain.playlist_repository import PlaylistRepository
 
 
 class InMemoryPlaylistRepository(PlaylistRepository):
     def __init__(self) -> None:
         self._tracks: dict[date, dict[Breaks, list[TrackQueued]]] = {}
-
-    def _reset_state(self) -> None:
-        self._tracks = {}
 
     def _tracks_at(
         self,
@@ -124,3 +121,6 @@ class InMemoryPlaylistRepository(PlaylistRepository):
             raise ValueError(msg) from ex
         else:
             return track
+
+    def delete_all(self) -> None:
+        self._tracks = {}

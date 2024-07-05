@@ -50,8 +50,11 @@ class PlaylistRepository(ABC):
     @abstractmethod
     def save(self, track: TrackToQueue) -> TrackQueued:
         pass
+
+    @abstractmethod
+    def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
         pass
 
     @abstractmethod
-    def delete(self, track: TrackQueued) -> TrackQueued:
+    def delete_all(self) -> None:
         pass
