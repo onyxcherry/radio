@@ -21,11 +21,11 @@ def tracks_one_accepted():
 
 @fixture(autouse=True)
 def reset():
-    library_repo._reset_state()
+    library_repo.delete_all()
 
     yield
 
-    library_repo._reset_state()
+    library_repo.delete_all()
 
 
 def test_new_track_has_pending_approval_state():
