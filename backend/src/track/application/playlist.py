@@ -42,16 +42,16 @@ class Playlist:
             req.when,
             played=False,
         )
-        saved = self._playlist_repository.save(to_save)
+        saved = self._playlist_repository.insert(to_save)
         return saved
 
-    def delete(self, track: TrackQueued) -> TrackQueued:
+    def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
         return self._playlist_repository.delete(track)
 
     def mark_as_played(self, track: TrackQueued) -> TrackQueued:
         to_save = track
         to_save.played = True
-        saved = self._playlist_repository.save(to_save)
+        saved = self._playlist_repository.update(to_save)
         return saved
 
     def get_tracks_duration_on_break(

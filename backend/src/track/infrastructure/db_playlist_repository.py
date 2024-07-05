@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any, Optional
 
-from sqlalchemy import Select, delete, func, select
+from sqlalchemy import Select, delete, func, select, update
 from track.application.models.library import LibraryTrackModel
 from track.application.models.queue import QueueTrackModel
 from track.infrastructure.persistence.database import SessionLocal
@@ -111,7 +111,7 @@ class DBPlaylistRepository(PlaylistRepository):
                 return Seconds(0)
             return Seconds(result)
 
-    def save(self, track: TrackToQueue) -> TrackQueued:
+    def insert(self, track: TrackToQueue) -> TrackQueued:
         track_id = self._get_track_id(track.identity)
         new_queued_track = QueueTrackModel(
             date_=track.when.date_,
@@ -126,13 +126,28 @@ class DBPlaylistRepository(PlaylistRepository):
 
         return track
 
+    def update(self, track: TrackQueued) -> TrackQueued:
+        track_id = self._get_track_id(track.identity)
+        stmt = (
+            update(QueueTrackModel)
+            .where(QueueTrackModel.date_ == track.when.date_)
+            .where(QueueTrackModel.break_ == track.when.break_)
+            .where(QueueTrackModel.track_id == track_id)
+            .values(played=track.played)
+            .execution_options(synchronize_session="fetch")
+        )
+        with SessionLocal() as session:
+            session.execute(stmt)
+            session.commit()
+
+        return track
+
     def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
         track_id = self._get_track_id(track.identity)
         stmt = (
             delete(QueueTrackModel)
             .where(QueueTrackModel.break_ == track.when.break_)
             .where(QueueTrackModel.date_ == track.when.date_)
-            .where(QueueTrackModel.played == track.played)
             .where(QueueTrackModel.track_id == track_id)
         )
         with SessionLocal() as session:

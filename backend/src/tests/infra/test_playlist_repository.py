@@ -14,11 +14,10 @@ playlist_repo = DBPlaylistRepository()
 library_repo = DBLibraryRepository()
 
 
-TRACK_QUEUED = TrackQueued(
+TRACK_QUEUED = TrackToQueue(
     identity=IDENTITIES[0],
     when=PlayingTime(date_=date(2099, 1, 1), break_=Breaks.FIRST),
     played=False,
-    waiting=False,
 )
 
 
@@ -30,7 +29,7 @@ def reset():
     library_repo.add(TRACKS[0])
     library_repo.add(TRACKS[1])
 
-    playlist_repo.save(TRACK_QUEUED)
+    playlist_repo.insert(TRACK_QUEUED)
 
     yield
 
@@ -82,7 +81,7 @@ def test_adds_track_to_playlist():
         identity=IDENTITIES[1], when=playing_time, played=False
     )
 
-    playlist_repo.save(new_queued_track)
+    playlist_repo.insert(new_queued_track)
     result = playlist_repo.get_track_on(
         identity=new_queued_track.identity,
         date_=playing_time.date_,
