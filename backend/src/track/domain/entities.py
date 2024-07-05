@@ -12,7 +12,7 @@ from enum import Enum, unique
 
 
 @unique
-class Status(Enum):
+class Status(str, Enum):
     ACCEPTED = "accepted"
     PENDING_APPROVAL = "pending"
     REJECTED = "rejected"
@@ -21,18 +21,18 @@ class Status(Enum):
 @dataclass
 class TrackInLibrary:
     identity: TrackProvidedIdentity
-    title: str
-    url: TrackUrl
-    duration: Seconds
+    title: Optional[str]
+    url: Optional[TrackUrl]
+    duration: Optional[Seconds]
     status: Status
 
 
 @dataclass(frozen=True)
 class NewTrack:
     identity: TrackProvidedIdentity
-    title: str
-    url: TrackUrl
-    duration: Seconds
+    title: Optional[str]
+    url: Optional[TrackUrl]
+    duration: Optional[Seconds]
 
 
 @dataclass
