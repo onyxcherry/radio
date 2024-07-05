@@ -167,12 +167,10 @@ class RequestsService:
         if errors is not None and len(errors) > 0:
             raise NotImplementedError("TODO: obsługa błędów")
 
-        waits = library_result.waits_on_decision
-
         requested = TrackRequested(identity, when)
         errors = self.can_add_to_playlist(requested)
         if errors is None:
-            self._playlist.add_at(requested, waits)
+            self._playlist.add(requested)
             return RequestResult(success=True, errors=None)
         else:
             return RequestResult(success=False, errors=errors)
