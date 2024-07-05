@@ -62,18 +62,18 @@ def yt_tracks():
 def whole_break_scheduled():
     for track in TRACKS:
         req = TrackRequested(track.identity, FUTURE_PT)
-        playlist.add_at(req, waiting=True)
+        playlist.add(req)
 
 
 @pytest.fixture(autouse=True)
 def reset():
-    playlist_repo._reset_state()
-    library_repo._reset_state()
+    playlist_repo.delete_all()
+    library_repo.delete_all()
 
     yield
 
-    playlist_repo._reset_state()
-    library_repo._reset_state()
+    playlist_repo.delete_all()
+    library_repo.delete_all()
 
 
 def test_adds_track_to_library_successfully():

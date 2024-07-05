@@ -20,11 +20,11 @@ requested = TrackRequested(track.identity, playing_time)
 
 @fixture(autouse=True)
 def reset():
-    playlist_repo._reset_state()
+    playlist_repo.delete_all()
 
     yield
 
-    playlist_repo._reset_state()
+    playlist_repo.delete_all()
 
 
 # def test_gets_tracks_only_not_played():
@@ -36,7 +36,7 @@ def test_adds_track_to_playlist():
     playing_time = PlayingTime(tomorrow_date, Breaks.SECOND)
     request = TrackRequested(track.identity, playing_time)
 
-    playlist.add_at(request, waiting=False)
+    playlist.add(request)
 
     playlist_tracks_list = playlist.get_all(playing_time.date_)
 
@@ -46,7 +46,7 @@ def test_adds_track_to_playlist():
 
 
 def test_marks_as_played():
-    playlist.add_at(requested, waiting=False)
+    playlist.add(requested)
 
     track = playlist.get(
         requested.identity, requested.when.date_, requested.when.break_
