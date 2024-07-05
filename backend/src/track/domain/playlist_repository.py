@@ -48,7 +48,11 @@ class PlaylistRepository(ABC):
         pass
 
     @abstractmethod
-    def save(self, track: TrackToQueue) -> TrackQueued:
+    def insert(self, track: TrackToQueue) -> TrackQueued:
+        pass
+
+    @abstractmethod
+    def update(self, track: TrackQueued) -> TrackQueued:
         pass
 
     @abstractmethod
