@@ -9,9 +9,6 @@ class InMemoryLibraryRepository(LibraryRepository):
     def __init__(self) -> None:
         self._tracks: dict[TrackProvidedIdentity, TrackInLibrary] = {}
 
-    def _reset_state(self) -> None:
-        self._tracks = {}
-
     def get(self, identity: TrackProvidedIdentity) -> Optional[TrackInLibrary]:
         if identity in self._tracks:
             return copy.deepcopy(self._tracks[identity])
@@ -44,3 +41,6 @@ class InMemoryLibraryRepository(LibraryRepository):
                 self._tracks.values(),
             )
         )
+
+    def delete_all(self) -> None:
+        self._tracks = {}

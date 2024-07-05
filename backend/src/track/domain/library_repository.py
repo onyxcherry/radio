@@ -24,3 +24,7 @@ class LibraryRepository(ABC):
     @abstractmethod
     def update(self, track: TrackInLibrary) -> TrackInLibrary:
         pass
+
+    @abstractmethod
+    def delete_all(self) -> None:
+        pass
