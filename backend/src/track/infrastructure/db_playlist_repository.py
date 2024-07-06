@@ -122,11 +122,23 @@ class DBPlaylistRepository(PlaylistRepository):
             track_id=track_id,
         )
 
+        status_stmt = (
+            select(LibraryTrackModel.status)
+            .filter(LibraryTrackModel.identifier == track.identity.identifier)
+            .filter(LibraryTrackModel.provider == track.identity.provider)
+        )
         with SessionLocal() as session:
             session.add(new_queued_track)
             session.commit()
+            status = session.execute(status_stmt).one()
 
-        return track
+        queued = TrackQueued(
+            identity=track.identity,
+            when=track.when,
+            played=track.played,
+            waiting=status[0] == Status.PENDING_APPROVAL,
+        )
+        return queued
 
     def update(self, track: TrackQueued) -> TrackQueued:
         track_id = self._get_track_id(track.identity)
