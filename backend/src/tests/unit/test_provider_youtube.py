@@ -1,8 +1,10 @@
 from typing import Final
 
-from pytest import mark
+import pytest
 
 
+from track.domain.errors import TrackIdentifierError
+from track.builder import TrackBuilder
 from track.domain.provided import TrackUrl
 from track.domain.providers.youtube import YoutubeTrackProvided
 from tests.inmemory_youtube_api import InMemoryYoutubeAPI
@@ -12,7 +14,7 @@ expected: Final = "i-uYn_lp6Qg"
 api = InMemoryYoutubeAPI()
 
 
-@mark.parametrize(
+@pytest.mark.parametrize(
     "track_url",
     [
         f"https://www.youtube.com/watch?v={expected}",
@@ -32,17 +34,15 @@ def test_extracts_youtube_id(track_url):
     assert track_id == expected
 
 
-@mark.skip()
 def test_raises_error_url_invalid():
     invalid_urls = [
         "pqrUQrAcfo4",
         "https://example.com/url=https://youtube.com/watch?v=i-uYn_lp6Qg",
     ]
 
-    # for track_url in invalid_urls:
-    #     with pytest.raises(TrackIdentifierError):
-    #         # _ = TrackBuilder.build(track_url)
-    #         pass
+    for track_url in invalid_urls:
+        with pytest.raises(TrackIdentifierError):
+            _ = TrackBuilder.from_url(track_url)
 
 
 def test_gets_track_duration():
