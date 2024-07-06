@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import enum
 from typing import NewType, Optional
 from kink import inject
 from track.domain.entities import NewTrack, Status, TrackRequested
@@ -6,7 +7,7 @@ from building_blocks.clock import Clock
 from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.application.library import Library
 from track.builder import TrackBuilder
-from track.domain.errors import PlayingTimeError, TrackDurationExceeded
+from track.domain.errors import TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.library_repository import LibraryRepository
 from track.domain.playlist_repository import PlaylistRepository
@@ -21,7 +22,15 @@ MINIMUM_PLAYING_TIME = Seconds(15)
 MAX_TRACKS_QUEUED_ONE_BREAK = 8
 
 
-Errors = NewType("Errors", list)
+class PlayingTimeError(enum.StrEnum):
+    IN_THE_PAST = enum.auto()
+    AT_THE_WEEKEND = enum.auto()
+    ALREADY_ON_THIS_DAY = enum.auto()
+    NOT_ENOUGH_TIME = enum.auto()
+    MAX_COUNT_EXEEDED = enum.auto()
+
+
+Errors = NewType("Errors", list[PlayingTimeError])
 
 
 @dataclass(frozen=True)
@@ -70,39 +79,33 @@ class RequestsService:
         errors = list()
 
         if self._requested_playing_time_passed(req.when):
-            errors.append(
-                PlayingTimeError(
-                    f"Requested break time {req.when} in the past, cannot add!"
-                )
-            )
+            errors.append(PlayingTimeError.IN_THE_PAST)
+
         if req.when.is_on_weekend():
-            errors.append(
-                PlayingTimeError(
-                    f"Requested break time {req.when} in a weekend, cannot add!"
-                )
-            )
+            errors.append(PlayingTimeError.AT_THE_WEEKEND)
 
         if self._playlist.check_played_or_queued_on_day(
             req.identity,
             req.when.date_,
         ):
-            errors.append(PlayingTimeError("Już jest tego dnia"))
+            errors.append(PlayingTimeError.ALREADY_ON_THIS_DAY)
 
-        # on_break_duration = self._playlist.get_tracks_duration_on_break(
-        #     req.when, waiting=False
-        # )
-        # left_time = self._calc_left_time_on_break(
-        #     on_break_duration,
-        #     req.when.break_,
-        # )
-        # if left_time <= MINIMUM_PLAYING_TIME:
-        # errors.append(PlayingTimeError("Not enough time to play"))
+        on_break_duration = self._playlist.get_tracks_duration_on_break(
+            req.when, waiting=False
+        )
+        left_time = self._calc_left_time_on_break(
+            on_break_duration,
+            req.when.break_,
+        )
+        if left_time <= MINIMUM_PLAYING_TIME:
+            errors.append(PlayingTimeError.NOT_ENOUGH_TIME)
 
         tracks_on_break_count = self._playlist.get_tracks_count_on_break(
             req.when, waiting=False
         )
         if tracks_on_break_count >= MAX_TRACKS_QUEUED_ONE_BREAK:
-            errors.append(PlayingTimeError("MAX_QUEUED_EXCEED"))
+            errors.append(PlayingTimeError.MAX_COUNT_EXEEDED)
+
         if len(errors) > 0:
             return Errors(errors)
         return None
