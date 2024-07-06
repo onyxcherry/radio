@@ -4,13 +4,7 @@ from kink import di
 from pytest import fixture, raises, mark
 from track.builder import NotKnownProviderError
 from building_blocks.clock import Clock
-from tests.unit.data import (
-    FUTURE_PT,
-    FUTURE_PT_WEEKEND,
-    PASSED_PT,
-    TRACKS,
-    NEW_YT_TRACKS,
-)
+from tests.unit.data import FUTURE_PT, FUTURE_PT_WEEKEND, PASSED_PT, NEW_YT_TRACKS
 from track.domain.errors import TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.entities import NewTrack, Status, TrackRequested
@@ -108,7 +102,7 @@ def test_adds_track_to_library_successfully():
     result, errors = rs.add_to_library(identity)
     assert result.added is True
     assert result.waits_on_decision is True
-    assert errors is not None and len(errors) == 0
+    assert errors is None
 
     got_track = library.get(identity)
     assert got_track is not None
@@ -157,7 +151,7 @@ def test_requests_to_add_already_pending_approval_track_in_library():
     assert got_track.status == Status.PENDING_APPROVAL
 
 
-def test_adds_track_to_playlist(yt_tracks):
+def test_adds_new_track_to_playlist():
     track = NEW_YT_TRACKS[0]
     pt = FUTURE_PT
 
@@ -168,6 +162,49 @@ def test_adds_track_to_playlist(yt_tracks):
     got_track = playlist.get(track.identity, pt.date_, pt.break_)
     assert got_track is not None
     assert got_track.when == pt
+
+
+def test_adds_pending_approval_track_to_playlist(yt_tracks):
+    track = NEW_YT_TRACKS[0]
+    pt = FUTURE_PT
+
+    result = rs.request_on(track.identity, pt)
+
+    assert result.success is True
+    assert result.errors is None
+    got_track = playlist.get(track.identity, pt.date_, pt.break_)
+    assert got_track is not None
+    assert got_track.when == pt
+
+
+def test_adds_accepted_track_to_playlist(yt_tracks):
+    track = NEW_YT_TRACKS[0]
+    library.accept(track.identity)
+    pt = FUTURE_PT
+
+    result = rs.request_on(track.identity, pt)
+
+    assert result.success is True
+    assert result.errors is None
+    got_track = playlist.get(track.identity, pt.date_, pt.break_)
+    assert got_track is not None
+    assert got_track.when == pt
+
+
+def test_not_add_rejected_track_to_playlist(yt_tracks):
+    track = NEW_YT_TRACKS[0]
+    library.reject(track.identity)
+    pt = FUTURE_PT
+
+    result = rs.request_on(track.identity, pt)
+
+    assert result.success is False
+    assert result.errors is not None
+    assert len(result.errors) == 1
+    assert result.errors[0] == LibraryTrackError.TRACK_REJECTED
+
+    got_track = playlist.get(track.identity, pt.date_, pt.break_)
+    assert got_track is None
 
 
 def test_error_as_requested_pt_passed(yt_tracks):
@@ -257,3 +294,18 @@ def test_multiple_playlist_errors(yt_tracks, whole_break_scheduled):
     assert len(result.errors) == 2
     assert set(result.errors) == expected_errors_set
 
+
+# def test_waiting_track_doesnt_count_into_number_of_tracks_limit():
+#     playing_time = FUTURE_PT
+
+#     for track in PENDING_APPROVAL_TRACKS:
+#         library_repo.add(track)
+#         assert rs.request_on(track.identity, playing_time).success is True
+
+#     # def test_waiting_track_doesnt_count_into_duration_sum_limit(yt_tracks):
+
+
+# #     playlist.add()
+#     count = playlist.get_tracks_duration_on_break()
+#     playlist.
+#     assert count == 1
