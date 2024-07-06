@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Optional
 
+from track.domain.entities import TrackToQueue
 from src.track.domain.breaks import Breaks
 from src.track.domain.entities import TrackQueued
 from src.track.domain.provided import Seconds, TrackProvidedIdentity
@@ -100,17 +101,37 @@ class InMemoryPlaylistRepository(PlaylistRepository):
         # return Seconds(sum())
         raise NotImplementedError("Synek, joinów ci tutaj nie zrobię")
 
-    def save(self, track: TrackQueued) -> TrackQueued:
+    def update(self, track: TrackQueued) -> TrackQueued:
         date_ = track.when.date_
         break_ = track.when.break_
-        if len((self._tracks_at(date_, break_))) == 0:
-            self._tracks[date_][break_].append(track)
-            return track
+        queued = TrackQueued(
+            identity=track.identity,
+            when=track.when,
+            played=track.played,
+            waiting=False,  # no possibility to reflect this property
+        )
+        for idx, track_queued in enumerate(self._tracks_at(date_, break_)):
+            if track_queued.identity == track.identity:
+                self._tracks[date_][break_][idx] = queued
+        return queued
+
+    def insert(self, track: TrackToQueue) -> TrackQueued:
+        date_ = track.when.date_
+        break_ = track.when.break_
+        queued = TrackQueued(
+            identity=track.identity,
+            when=track.when,
+            played=track.played,
+            waiting=False,  # no possibility to reflect this property
+        )
+        if len(self._tracks_at(date_, break_)) == 0:
+            self._tracks[date_][break_].append(queued)
+            return queued
 
         for idx, track_queued in enumerate(self._tracks_at(date_, break_)):
             if track_queued.identity == track.identity:
-                self._tracks[date_][break_][idx] = track
-        return track
+                self._tracks[date_][break_][idx] = queued
+        return queued
 
     def delete(self, track: TrackQueued) -> TrackQueued:
         date_ = track.when.date_
