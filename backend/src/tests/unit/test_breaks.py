@@ -1,5 +1,9 @@
 from datetime import date
-from src.track.domain.breaks import Breaks, PlayingTime, get_breaks_starting_times
+from src.track.domain.breaks import (
+    Breaks,
+    PlayingTime,
+    get_breaks_starting_times,
+)
 
 
 def test_playing_time_converts_to_datetime():
