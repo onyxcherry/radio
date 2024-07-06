@@ -50,6 +50,7 @@ class Playlist:
 
     def mark_as_played(self, track: TrackQueued) -> TrackQueued:
         to_save = track
+        assert track.waiting is False
         to_save.played = True
         saved = self._playlist_repository.update(to_save)
         return saved
@@ -75,4 +76,5 @@ class Playlist:
     def check_played_or_queued_on_day(
         self, identity: TrackProvidedIdentity, date_: date
     ) -> bool:
-        return self._playlist_repository.get_track_on(identity, date_) is not None
+        got_track = self._playlist_repository.get_track_on(identity, date_)
+        return got_track is not None and got_track.waiting is False
