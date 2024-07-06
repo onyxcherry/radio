@@ -17,6 +17,7 @@ from track.domain.entities import NewTrack, Status, TrackRequested
 from track.application.library import Library
 from track.application.requests_service import (
     MAX_TRACKS_QUEUED_ONE_BREAK,
+    LibraryTrackError,
     PlayingTimeError,
     RequestsService,
 )
@@ -107,7 +108,7 @@ def test_adds_track_to_library_successfully():
     result, errors = rs.add_to_library(identity)
     assert result.added is True
     assert result.waits_on_decision is True
-    assert len(errors) == 0
+    assert errors is not None and len(errors) == 0
 
     got_track = library.get(identity)
     assert got_track is not None
@@ -121,7 +122,7 @@ def test_too_long_track_not_added_to_library():
     result, errors = rs.add_to_library(identity)
     assert result.added is False
     assert result.waits_on_decision is False
-    assert len(errors) == 1
+    assert errors is not None and len(errors) == 1
     assert isinstance(errors[0], TrackDurationExceeded)
 
 
@@ -148,7 +149,7 @@ def test_requests_to_add_already_pending_approval_track_in_library():
 
     assert result.added is False
     assert result.waits_on_decision is True
-    assert len(errors) == 0
+    assert errors is None
 
     got_track = library.get(identity)
     assert got_track is not None
