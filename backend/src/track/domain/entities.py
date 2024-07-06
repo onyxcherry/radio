@@ -8,11 +8,11 @@ from track.domain.provided import (
     TrackUrl,
 )
 
-from enum import Enum, unique
+from enum import StrEnum, unique
 
 
 @unique
-class Status(str, Enum):
+class Status(StrEnum):
     ACCEPTED = "accepted"
     PENDING_APPROVAL = "pending"
     REJECTED = "rejected"

@@ -3,12 +3,15 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     DateTime,
+    Enum,
     ForeignKey,
     Integer,
 )
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from datetime import date, datetime
+
+from track.domain.breaks import Breaks
 
 
 from .base import Base
@@ -22,9 +25,9 @@ class QueueTrackModel(Base):
         autoincrement=True,
     )
     date_: Mapped[date] = mapped_column("date", Date, nullable=False)
-    break_: Mapped[int] = mapped_column(
+    break_: Mapped[Breaks] = mapped_column(
         "break",
-        Integer,
+        Enum(Breaks),
         CheckConstraint("break>0", name="break_gt_0"),
         nullable=False,
     )
