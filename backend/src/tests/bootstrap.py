@@ -16,25 +16,35 @@ from track.infrastructure.inmemory_playlist_repository import (
 from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 
+UNIT = False
+
 
 def bootstrap_di() -> None:
-    # inmemory_library_repo = InMemoryLibraryRepository()
-    # inmemory_playlist_repo = InMemoryPlaylistRepository()
+    inmemory_library_repo = InMemoryLibraryRepository()
+    inmemory_playlist_repo = InMemoryPlaylistRepository()
     real_library_repo = DBLibraryRepository()
     real_playlist_repo = DBPlaylistRepository()
     system_clock = SystemClock()
-    di[LibraryRepository] = real_library_repo
-    di[RequestsService] = RequestsService(
-        # inmemory_library_repo,
-        # inmemory_playlist_repo,
-        real_library_repo,
-        real_playlist_repo,
-        system_clock,
-    )
-    # di[Library] = Library(inmemory_library_repo)
-    # di[Playlist] = Playlist(inmemory_playlist_repo)
-    di[Library] = Library(real_library_repo)
-    di[Playlist] = Playlist(real_playlist_repo)
+    if UNIT:
+        di[Library] = Library(inmemory_library_repo)
+        di[Playlist] = Playlist(inmemory_playlist_repo)
+        di[RequestsService] = RequestsService(
+            inmemory_library_repo,
+            inmemory_playlist_repo,
+            # real_library_repo,
+            # real_playlist_repo,
+            system_clock,
+        )
+    else:
+        di[Library] = Library(real_library_repo)
+        di[Playlist] = Playlist(real_playlist_repo)
+        di[RequestsService] = RequestsService(
+            # inmemory_library_repo,
+            # inmemory_playlist_repo,
+            real_library_repo,
+            real_playlist_repo,
+            system_clock,
+        )
     di[YoutubeAPIInterface] = InMemoryYoutubeAPI()
     di[YoutubeTrackProvided] = InMemoryYoutubeAPI
     di[Clock] = system_clock
