@@ -1,4 +1,11 @@
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Integer
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+)
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from datetime import date, datetime

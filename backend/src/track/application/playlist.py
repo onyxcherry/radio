@@ -59,7 +59,6 @@ class Playlist:
         when: PlayingTime,
         waiting: Optional[bool] = None,
     ) -> Seconds:
-
         return self._playlist_repository.sum_durations_on(
             when.date_, when.break_, played=False, waiting=waiting
         )

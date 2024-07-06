@@ -15,7 +15,6 @@ from track.infrastructure.persistence.database import SessionLocal
 
 
 class DBLibraryRepository(LibraryRepository):
-
     def get(self, identity: TrackProvidedIdentity) -> Optional[TrackInLibrary]:
         stmt = select(LibraryTrackModel).filter_by(
             provider=identity.provider,
@@ -89,7 +88,9 @@ class DBLibraryRepository(LibraryRepository):
             return result.rowcount
 
     @staticmethod
-    def _map_on_domain_model(library_track: LibraryTrackModel) -> TrackInLibrary:
+    def _map_on_domain_model(
+        library_track: LibraryTrackModel,
+    ) -> TrackInLibrary:
         identity = TrackProvidedIdentity(
             Identifier(library_track.identifier),
             library_track.provider,

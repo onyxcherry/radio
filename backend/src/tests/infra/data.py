@@ -9,12 +9,8 @@ from track.domain.provided import (
 
 
 IDENTITIES = [
-    TrackProvidedIdentity(
-        identifier=Identifier("ZDZiXmCl4pk"), provider=ProviderName("youtube")
-    ),
-    TrackProvidedIdentity(
-        identifier=Identifier("NBlSYkIJbIg"), provider=ProviderName("youtube")
-    ),
+    TrackProvidedIdentity(identifier=Identifier("ZDZiXmCl4pk"), provider="Youtube"),
+    TrackProvidedIdentity(identifier=Identifier("NBlSYkIJbIg"), provider="Youtube"),
 ]
 
 TRACKS = [
