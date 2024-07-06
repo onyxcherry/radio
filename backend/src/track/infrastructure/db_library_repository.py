@@ -92,7 +92,7 @@ class DBLibraryRepository(LibraryRepository):
     def _map_on_domain_model(library_track: LibraryTrackModel) -> TrackInLibrary:
         identity = TrackProvidedIdentity(
             Identifier(library_track.identifier),
-            ProviderName(library_track.provider),
+            library_track.provider,
         )
         url = TrackUrl(library_track.url) if library_track.url is not None else None
         duration = (

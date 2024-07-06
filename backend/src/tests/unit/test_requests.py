@@ -90,7 +90,7 @@ def test_adds_track_to_library_successfully():
 
 def test_too_long_track_not_added_to_library():
     identity = TrackProvidedIdentity(
-        identifier=Identifier("c_iRx2Un07k"), provider=ProviderName("Youtube")
+        identifier=Identifier("c_iRx2Un07k"), provider="Youtube"
     )
     result, errors = rs.add_to_library(identity)
     assert result.added is False
@@ -100,8 +100,9 @@ def test_too_long_track_not_added_to_library():
 
 
 def test_no_provider_matched_for_track_requested():
+    notknownprovider: Any = "notknownprovider"
     identity = TrackProvidedIdentity(
-        identifier=Identifier("sth"), provider=ProviderName("notknownprovider")
+        identifier=Identifier("sth"), provider=notknownprovider
     )
     with pytest.raises(RuntimeError) as ex:
         rs.add_to_library(identity)

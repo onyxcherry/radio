@@ -22,8 +22,8 @@ _TEMP_INTERFACES_FOR_IMPLS: dict[Type[TrackProvided], Any] = {
     YoutubeTrackProvided: YoutubeAPIInterface,
 }
 
-_PROVIDERS_NAMES_MAPPING = {
-    ProviderName("Youtube"): YoutubeTrackProvided,
+_PROVIDERS_NAMES_MAPPING: dict[ProviderName, type[TrackProvided]] = {
+    "Youtube": YoutubeTrackProvided,
 }
 
 
@@ -60,7 +60,7 @@ class TrackBuilder:
     @staticmethod
     def _match_provider(domain: str) -> Optional[ProviderName]:
         if domain in YoutubeOrigins:
-            return ProviderName("Youtube")
+            return "Youtube"
         else:
             return None
 

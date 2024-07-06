@@ -203,7 +203,7 @@ class DBPlaylistRepository(PlaylistRepository):
     def _map_on_domain_model(queue_track_dict: dict) -> TrackQueued:
         identity = TrackProvidedIdentity(
             Identifier(queue_track_dict["identifier"]),
-            ProviderName(queue_track_dict["provider"]),
+            queue_track_dict["provider"],
         )
         playing_time = PlayingTime(
             date_=queue_track_dict["date"], break_=queue_track_dict["break"]
