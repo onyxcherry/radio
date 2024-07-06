@@ -1,10 +1,21 @@
 from datetime import date
+from typing import Any
+from kink import di
+from pytest import fixture, raises, mark
 from track.builder import NotKnownProviderError
+from building_blocks.clock import Clock
+from tests.unit.data import (
+    FUTURE_PT,
+    FUTURE_PT_WEEKEND,
+    NEW_TRACKS,
+    PASSED_PT,
+    TRACKS,
+    NEW_YT_TRACKS,
+)
 from track.domain.errors import PlayingTimeError, TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.entities import NewTrack, Status, TrackRequested
 from track.application.library import Library
-from building_blocks.clock import SystemClock
 from track.application.requests_service import RequestsService
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.provided import (
@@ -14,15 +25,12 @@ from track.domain.provided import (
     TrackProvidedIdentity,
     TrackUrl,
 )
-from track.infrastructure.inmemory_library_repository import InMemoryLibraryRepository
-from track.infrastructure.inmemory_playlist_repository import InMemoryPlaylistRepository
 
-
-library_repo = InMemoryLibraryRepository()
-playlist_repo = InMemoryPlaylistRepository()
-system_clock = SystemClock()
-library = Library(library_repo)
-playlist = Playlist(playlist_repo)
+system_clock = di[Clock]
+playlist = di[Playlist]
+library = di[Library]
+playlist_repo = playlist._playlist_repository
+library_repo = library._library_repository
 
 rs = RequestsService(
     library_repo,
@@ -31,40 +39,26 @@ rs = RequestsService(
 )
 
 
-PASSED_PT = PlayingTime(
-    break_=Breaks.FIRST,
-    date_=date(2000, 1, 1),
-)
-FUTURE_PT = PlayingTime(
-    break_=Breaks.FIRST,
-    date_=date(2099, 1, 1),
-)
-FUTURE_PT_WEEKEND = PlayingTime(
-    break_=Breaks.FIRST,
-    date_=date(2099, 1, 3),
-)
-
-
-@pytest.fixture
+@fixture
 def tracks():
-    for track in TRACKS:
+    for track in NEW_TRACKS:
         library.add(track)
 
 
-@pytest.fixture
+@fixture
 def yt_tracks():
-    for track in YT_TRACKS:
+    for track in NEW_YT_TRACKS:
         library.add(track)
 
 
-@pytest.fixture
+@fixture
 def whole_break_scheduled():
     for track in TRACKS:
         req = TrackRequested(track.identity, FUTURE_PT)
         playlist.add(req)
 
 
-@pytest.fixture(autouse=True)
+@fixture(autouse=True)
 def reset():
     playlist_repo.delete_all()
     library_repo.delete_all()
@@ -76,7 +70,7 @@ def reset():
 
 
 def test_adds_track_to_library_successfully():
-    identity = YT_TRACKS[0].identity
+    identity = NEW_YT_TRACKS[0].identity
     result, errors = rs.add_to_library(identity)
     assert result.added is True
     assert result.waits_on_decision is True
@@ -130,7 +124,7 @@ def test_requests_to_add_already_pending_approval_track_in_library():
 
 
 def test_adds_track_to_playlist(yt_tracks):
-    track = YT_TRACKS[0]
+    track = NEW_YT_TRACKS[0]
     pt = FUTURE_PT
 
     result = rs.request_on(track.identity, pt)
@@ -143,7 +137,7 @@ def test_adds_track_to_playlist(yt_tracks):
 
 
 def test_error_as_requested_pt_passed(yt_tracks):
-    track = YT_TRACKS[0]
+    track = NEW_YT_TRACKS[0]
     result = rs.request_on(track.identity, PASSED_PT)
     assert result.success is False
     assert result.errors is not None
@@ -151,7 +145,7 @@ def test_error_as_requested_pt_passed(yt_tracks):
 
 
 def test_error_as_requested_on_weekend(yt_tracks):
-    track = YT_TRACKS[0]
+    track = NEW_YT_TRACKS[0]
 
     result = rs.request_on(track.identity, FUTURE_PT_WEEKEND)
     assert result.success is False
@@ -160,7 +154,7 @@ def test_error_as_requested_on_weekend(yt_tracks):
 
 
 def test_error_as_track_played_on_this_day(yt_tracks):
-    track = YT_TRACKS[0]
+    track = NEW_YT_TRACKS[0]
     same_day = date(2099, 1, 1)
     pt1 = PlayingTime(
         break_=Breaks.FIRST,
@@ -181,7 +175,7 @@ def test_error_as_track_played_on_this_day(yt_tracks):
 
 
 def test_error_as_track_already_queued_on_this_day(yt_tracks):
-    track = YT_TRACKS[0]
+    track = NEW_YT_TRACKS[0]
     same_day = date(2099, 1, 1)
     pt1 = PlayingTime(
         break_=Breaks.FIRST,
@@ -199,9 +193,9 @@ def test_error_as_track_already_queued_on_this_day(yt_tracks):
     assert isinstance(result.errors[0], PlayingTimeError)
 
 
-@pytest.mark.skip()
+@mark.skip()
 def test_error_as_no_left_time_on_break(tracks, whole_break_scheduled):
-    not_scheduled_track = YT_TRACKS[0]
+    not_scheduled_track = NEW_YT_TRACKS[0]
     result = rs.request_on(not_scheduled_track.identity, FUTURE_PT)
     assert result.success is False
     assert result.errors is not None
@@ -212,7 +206,7 @@ def test_error_as_max_queue_count_exceeded(tracks):
     pass
 
 
-@pytest.mark.skip()
+@mark.skip()
 def test_multiple_playlist_errors(tracks, whole_break_scheduled):
     scheduled_track = TRACKS[0]
     result = rs.request_on(scheduled_track.identity, FUTURE_PT)
