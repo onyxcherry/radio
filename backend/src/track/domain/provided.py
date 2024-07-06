@@ -1,9 +1,9 @@
-from typing import Any, NamedTuple, NewType, Self
+from typing import Any, Literal, NamedTuple, NewType, Self
 from abc import ABC, abstractmethod
 
 
 Identifier = NewType("Identifier", str)
-ProviderName = NewType("ProviderName", str)
+ProviderName = Literal["file", "Youtube"]
 
 TrackUrl = NewType("TrackUrl", str)
 

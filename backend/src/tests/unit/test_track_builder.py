@@ -33,7 +33,7 @@ def test_normalize_url_when_url_quoted():
 
 def test_builds_track():
     identifier = Identifier("i-uYn_lp6Qg")
-    provider = ProviderName("Youtube")
+    provider = "Youtube"
     track_identity = TrackProvidedIdentity(identifier, provider)
     track = TrackBuilder.build(track_identity)
     assert track.identifier == identifier
@@ -44,4 +44,4 @@ def test_chooses_correct_provider_for_track():
     valid_url = "https://www.youtube.com/watch?v=i-uYn_lp6Qg"
     track_provided = TrackBuilder.from_url(valid_url)
     assert isinstance(track_provided, YoutubeTrackProvided)
-    assert track_provided.provider == ProviderName("Youtube")
+    assert track_provided.provider == "Youtube"

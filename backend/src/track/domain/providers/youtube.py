@@ -32,7 +32,7 @@ ORIGINS = _ORIGINS_WATCH_PATH + _ORIGINS_SHORT_PATH
 
 @inject
 class YoutubeTrackProvided(TrackProvided):
-    _provider = ProviderName("Youtube")
+    _provider: ProviderName = "Youtube"
 
     def __init__(
         self,
