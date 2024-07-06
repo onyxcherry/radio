@@ -1,8 +1,4 @@
-from track.domain.provided import (
-    Identifier,
-    ProviderName,
-    TrackProvidedIdentity
-)
+from track.domain.provided import Identifier, TrackProvidedIdentity
 from track.domain.providers.youtube import YoutubeTrackProvided
 from track.builder import TrackBuilder
 

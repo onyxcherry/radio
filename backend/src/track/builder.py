@@ -39,7 +39,6 @@ def _get_api_impl(provider: Type[TrackProvided]):
 
 
 class TrackBuilder:
-
     @staticmethod
     def normalize(url: str) -> str:
         if not isinstance(url, str):

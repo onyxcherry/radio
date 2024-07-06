@@ -50,7 +50,8 @@ class InMemoryPlaylistRepository(PlaylistRepository):
     ) -> Optional[TrackQueued]:
         matched = list(
             filter(
-                lambda track: track.identity == identity, self._tracks_at(date_, break_)
+                lambda track: track.identity == identity,
+                self._tracks_at(date_, break_),
             )
         )
         return matched[0] if len(matched) == 1 else None

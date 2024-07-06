@@ -109,9 +109,7 @@ def test_no_provider_matched_for_track_requested():
 
 
 def test_requests_to_add_already_pending_approval_track_in_library():
-    identity = TrackProvidedIdentity(
-        identifier=Identifier("a123"), provider=ProviderName("file")
-    )
+    identity = TrackProvidedIdentity(identifier=Identifier("a123"), provider="file")
     track = NewTrack(
         identity,
         title="A - B",

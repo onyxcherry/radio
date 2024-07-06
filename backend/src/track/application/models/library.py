@@ -29,7 +29,9 @@ class LibraryTrackModel(Base):
     url: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
     title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     duration: Mapped[Optional[int]] = mapped_column(
-        Integer, CheckConstraint("duration>0", name="duration_gt_0"), nullable=True
+        Integer,
+        CheckConstraint("duration>0", name="duration_gt_0"),
+        nullable=True,
     )
     status: Mapped[Status] = mapped_column(
         Enum(Status, create_contraint=True, native_enum=False),
