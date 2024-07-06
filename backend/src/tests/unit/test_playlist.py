@@ -109,3 +109,17 @@ def test_gets_tracks_duration(accepted_tracks, pending_approval_tracks):
     assert playlist.get_tracks_duration_on_break(playing_time, waiting=True) == sum_1_2
     assert playlist.get_tracks_duration_on_break(playing_time, waiting=False) == dur_3
     assert playlist.get_tracks_duration_on_break(playing_time) == sum_1_2 + dur_3
+
+
+def test_checks_track_played_or_queued_this_day(accepted_tracks):
+    identity = ACCEPTED_TRACKS[0].identity
+    playing_time = FUTURE_PT
+    requested = TrackRequested(identity, playing_time)
+
+    queued = playlist.add(requested)
+
+    assert playlist.check_played_or_queued_on_day(identity, playing_time.date_) is True
+
+    playlist.mark_as_played(queued)
+
+    assert playlist.check_played_or_queued_on_day(identity, playing_time.date_) is True
