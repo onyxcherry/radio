@@ -27,10 +27,14 @@ _PROVIDERS_NAMES_MAPPING: dict[ProviderName, type[TrackProvided]] = {
 }
 
 
+class NotKnownProviderError(RuntimeError):
+    pass
+
+
 def _get_provided_track_class(name: ProviderName) -> type[TrackProvided]:
     result = _PROVIDERS_NAMES_MAPPING.get(name)
     if result is None:
-        raise RuntimeError("Brak zmapowanego providera")
+        raise NotKnownProviderError(f"Brak zmapowanego providera {name}")
     return result
 
 
