@@ -1,6 +1,5 @@
 from datetime import date
-import pytest
-from tests.unit.data import TRACKS, YT_TRACKS
+from track.builder import NotKnownProviderError
 from track.domain.errors import PlayingTimeError, TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.entities import NewTrack, Status, TrackRequested
@@ -104,7 +103,7 @@ def test_no_provider_matched_for_track_requested():
     identity = TrackProvidedIdentity(
         identifier=Identifier("sth"), provider=notknownprovider
     )
-    with pytest.raises(RuntimeError) as ex:
+    with raises(NotKnownProviderError):
         rs.add_to_library(identity)
 
 
