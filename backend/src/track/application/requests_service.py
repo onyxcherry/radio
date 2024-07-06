@@ -22,6 +22,11 @@ MINIMUM_PLAYING_TIME = Seconds(15)
 MAX_TRACKS_QUEUED_ONE_BREAK = 8
 
 
+class LibraryTrackError(enum.StrEnum):
+    INVALID_DURATION = enum.auto()
+    TRACK_REJECTED = enum.auto()
+
+
 class PlayingTimeError(enum.StrEnum):
     IN_THE_PAST = enum.auto()
     AT_THE_WEEKEND = enum.auto()
@@ -30,7 +35,8 @@ class PlayingTimeError(enum.StrEnum):
     MAX_COUNT_EXEEDED = enum.auto()
 
 
-Errors = NewType("Errors", list[PlayingTimeError])
+LibraryTrackErrors = NewType("LibraryTrackErrors", list[LibraryTrackError])
+PlayingTimeErrors = NewType("PlayingTimeErrors", list[PlayingTimeError])
 
 
 @dataclass(frozen=True)
@@ -42,7 +48,7 @@ class AddToLibraryStatus:
 @dataclass(frozen=True)
 class RequestResult:
     success: bool
-    errors: Optional[Errors]
+    errors: Optional[LibraryTrackErrors | PlayingTimeErrors]
 
 
 @inject
@@ -75,7 +81,7 @@ class RequestsService:
         break_duration = get_breaks_durations()[break_]
         return Seconds(break_duration - duration - margin)
 
-    def can_add_to_playlist(self, req: TrackRequested) -> Optional[Errors]:
+    def can_add_to_playlist(self, req: TrackRequested) -> Optional[PlayingTimeErrors]:
         errors = list()
 
         if self._requested_playing_time_passed(req.when):
@@ -107,7 +113,7 @@ class RequestsService:
             errors.append(PlayingTimeError.MAX_COUNT_EXEEDED)
 
         if len(errors) > 0:
-            return Errors(errors)
+            return PlayingTimeErrors(errors)
         return None
 
     def add_to_library(
@@ -124,12 +130,12 @@ class RequestsService:
         elif track_status == Status.ACCEPTED:
             return (
                 AddToLibraryStatus(added=False, waits_on_decision=False),
-                Errors(list()),
+                None,
             )
         elif track_status == Status.PENDING_APPROVAL:
             return (
                 AddToLibraryStatus(added=False, waits_on_decision=True),
-                Errors(list()),
+                None,
             )
 
         elif track_status is None:
@@ -137,6 +143,7 @@ class RequestsService:
             identity = TrackProvidedIdentity(
                 identifier=track.identifier, provider=track.provider
             )
+
             errors = list()
             if not self._check_valid_duration(track.duration):
                 msg = f"Track duration must be between {MIN_TRACK_DURATION_SECONDS} and {MAX_TRACK_DURATION_SECONDS} seconds"
@@ -157,7 +164,7 @@ class RequestsService:
             self._library.add(new_track)
             return (
                 AddToLibraryStatus(added=True, waits_on_decision=True),
-                Errors(list()),
+                None,
             )
 
         else:
