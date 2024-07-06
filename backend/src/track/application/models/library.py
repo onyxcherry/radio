@@ -10,6 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
 from datetime import datetime
+from track.domain.provided import ProviderName
 from track.application.models.queue import QueueTrackModel
 from track.domain.entities import Status
 
@@ -25,7 +26,7 @@ class LibraryTrackModel(Base):
         autoincrement=True,
     )
     identifier: Mapped[str] = mapped_column(String(128), nullable=False)
-    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    provider: Mapped[ProviderName] = mapped_column(String(32), nullable=False)
     url: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
     title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     duration: Mapped[Optional[int]] = mapped_column(
