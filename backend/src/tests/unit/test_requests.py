@@ -149,7 +149,7 @@ def test_requests_to_add_already_pending_approval_track_in_library():
     assert got_track.identity == identity
     assert got_track.status == Status.PENDING_APPROVAL
 
-
+@mark.realdb()
 def test_adds_new_track_to_playlist():
     track = NEW_YT_TRACKS[0]
     pt = FUTURE_PT
@@ -162,7 +162,7 @@ def test_adds_new_track_to_playlist():
     assert got_track is not None
     assert got_track.when == pt
 
-
+@mark.realdb()
 def test_adds_pending_approval_track_to_playlist(yt_tracks):
     track = NEW_YT_TRACKS[0]
     pt = FUTURE_PT
@@ -175,7 +175,7 @@ def test_adds_pending_approval_track_to_playlist(yt_tracks):
     assert got_track is not None
     assert got_track.when == pt
 
-
+@mark.realdb()
 def test_adds_accepted_track_to_playlist(yt_tracks):
     track = NEW_YT_TRACKS[0]
     library.accept(track.identity)
@@ -205,7 +205,7 @@ def test_not_add_rejected_track_to_playlist(yt_tracks):
     got_track = playlist.get(track.identity, pt.date_, pt.break_)
     assert got_track is None
 
-
+@mark.realdb()
 def test_error_as_requested_pt_passed(yt_tracks):
     track = NEW_YT_TRACKS[0]
     result = rs.request_on(track.identity, PASSED_PT)
@@ -214,7 +214,7 @@ def test_error_as_requested_pt_passed(yt_tracks):
     assert len(result.errors) == 1
     assert result.errors[0] == PlayingTimeError.IN_THE_PAST
 
-
+@mark.realdb()
 def test_error_as_requested_on_weekend(yt_tracks):
     track = NEW_YT_TRACKS[0]
 
@@ -224,7 +224,7 @@ def test_error_as_requested_on_weekend(yt_tracks):
     assert len(result.errors) == 1
     assert result.errors[0] == PlayingTimeError.AT_THE_WEEKEND
 
-
+@mark.realdb()
 def test_error_as_track_played_on_this_day(yt_tracks):
     track = NEW_YT_TRACKS[0]
     library.accept(track.identity)
@@ -244,7 +244,7 @@ def test_error_as_track_played_on_this_day(yt_tracks):
     assert len(result.errors) == 1
     assert result.errors[0] == PlayingTimeError.ALREADY_ON_THIS_DAY
 
-
+@mark.realdb()
 def test_error_as_track_already_queued_on_this_day(yt_tracks):
     track = NEW_YT_TRACKS[0]
     library.accept(track.identity)
@@ -260,7 +260,7 @@ def test_error_as_track_already_queued_on_this_day(yt_tracks):
     assert len(result.errors) == 1
     assert result.errors[0] == PlayingTimeError.ALREADY_ON_THIS_DAY
 
-
+@mark.realdb()
 def test_error_as_no_left_time_on_break(yt_tracks, whole_break_scheduled):
     track = NEW_YT_TRACKS[0]
     result = rs.request_on(track.identity, FUTURE_PT)
@@ -270,7 +270,7 @@ def test_error_as_no_left_time_on_break(yt_tracks, whole_break_scheduled):
     assert len(result.errors) == 1
     assert result.errors[0] == PlayingTimeError.NOT_ENOUGH_TIME
 
-
+@mark.realdb()
 def test_error_as_max_queue_count_exceeded(yt_tracks, max_tracks_count_on_queue):
     track = NEW_YT_TRACKS[0]
     result = rs.request_on(track.identity, FUTURE_PT)
@@ -280,7 +280,7 @@ def test_error_as_max_queue_count_exceeded(yt_tracks, max_tracks_count_on_queue)
     assert len(result.errors) == 1
     assert result.errors[0] == PlayingTimeError.MAX_COUNT_EXEEDED
 
-
+@mark.realdb()
 def test_multiple_playlist_errors(yt_tracks, whole_break_scheduled):
     scheduled_track = playlist.get_all(FUTURE_PT.date_)[0]
     result = rs.request_on(scheduled_track.identity, scheduled_track.when)

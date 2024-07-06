@@ -1,5 +1,5 @@
 from kink import di
-from pytest import fixture
+from pytest import fixture, mark
 from track.application.library import Library
 from track.domain.entities import TrackRequested
 from track.application.playlist import Playlist
@@ -37,7 +37,7 @@ def pending_approval_tracks():
     for track in PENDING_APPROVAL_TRACKS:
         library_repo.add(track)
 
-
+@mark.realdb()
 def test_adds_track_to_playlist(accepted_tracks):
     playing_time = FUTURE_PT
     requested = TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time)
@@ -81,7 +81,7 @@ def test_marks_as_played(accepted_tracks):
     assert track_marked is not None
     assert track_marked.played is True
 
-
+@mark.realdb()
 def test_gets_tracks_count(accepted_tracks, pending_approval_tracks):
     playing_time = FUTURE_PT
     playlist.add(TrackRequested(PENDING_APPROVAL_TRACKS[0].identity, playing_time))
@@ -92,7 +92,7 @@ def test_gets_tracks_count(accepted_tracks, pending_approval_tracks):
     assert playlist.get_tracks_count_on_break(playing_time, waiting=False) == 1
     assert playlist.get_tracks_count_on_break(playing_time) == 3
 
-
+@mark.realdb()
 def test_gets_tracks_duration(accepted_tracks, pending_approval_tracks):
     playing_time = FUTURE_PT
     track1 = PENDING_APPROVAL_TRACKS[0]
