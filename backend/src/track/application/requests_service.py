@@ -7,7 +7,6 @@ from building_blocks.clock import Clock
 from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.application.library import Library
 from track.builder import TrackBuilder
-from track.domain.errors import TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.library_repository import LibraryRepository
 from track.domain.playlist_repository import PlaylistRepository

@@ -10,11 +10,3 @@ class ErrorMessages(Enum):
 
 class TrackIdentifierError(ValueError):
     pass
-
-
-class TrackDurationExceeded(Exception):
-    pass
-
-
-class PlayingTimeError(ValueError):
-    pass

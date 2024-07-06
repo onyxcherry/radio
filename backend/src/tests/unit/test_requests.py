@@ -5,7 +5,6 @@ from pytest import fixture, raises, mark
 from track.builder import NotKnownProviderError
 from building_blocks.clock import Clock
 from tests.unit.data import FUTURE_PT, FUTURE_PT_WEEKEND, PASSED_PT, NEW_YT_TRACKS
-from track.domain.errors import TrackDurationExceeded
 from track.application.playlist import Playlist
 from track.domain.entities import NewTrack, Status, TrackRequested
 from track.application.library import Library
@@ -117,7 +116,7 @@ def test_too_long_track_not_added_to_library():
     assert result.added is False
     assert result.waits_on_decision is False
     assert errors is not None and len(errors) == 1
-    assert isinstance(errors[0], TrackDurationExceeded)
+    assert errors[0] == LibraryTrackError.INVALID_DURATION
 
 
 def test_no_provider_matched_for_track_requested():
