@@ -1,6 +1,6 @@
 from kink import di
 from pytest import fixture
-from tests.unit.data import NEW_TRACKS, TRACKS
+from tests.unit.data import ACCEPTED_TRACKS, NEW_TRACKS, PENDING_APPROVAL_TRACKS
 from track.application.library import Library
 from track.domain.entities import Status
 
@@ -21,17 +21,8 @@ def reset():
 @fixture()
 def tracks_one_accepted(reset):
     library_repo = library._library_repository
-    statuses = dict.fromkeys(Status, 0)
-
-    for track in TRACKS:
-        library_repo.add(track)
-        statuses[track.status] += 1
-
-    assert statuses == {
-        Status.ACCEPTED: 1,
-        Status.PENDING_APPROVAL: 1,
-        Status.REJECTED: 0,
-    }
+    library_repo.add(PENDING_APPROVAL_TRACKS[0])
+    library_repo.add(ACCEPTED_TRACKS[0])
 
 
 def test_new_track_has_pending_approval_state():
@@ -43,7 +34,7 @@ def test_new_track_has_pending_approval_state():
 
 
 def test_accept_track(tracks_one_accepted):
-    track = TRACKS[0]
+    track = PENDING_APPROVAL_TRACKS[0]
     library.accept(track.identity)
 
     got_track = library.get(track.identity)
@@ -52,7 +43,7 @@ def test_accept_track(tracks_one_accepted):
 
 
 def test_reject_track(tracks_one_accepted):
-    track = TRACKS[0]
+    track = PENDING_APPROVAL_TRACKS[0]
 
     library.reject(track.identity)
 
