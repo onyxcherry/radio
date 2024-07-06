@@ -118,14 +118,14 @@ class RequestsService:
 
     def add_to_library(
         self, identity: TrackProvidedIdentity
-    ) -> tuple[AddToLibraryStatus, Errors]:
+    ) -> tuple[AddToLibraryStatus, Optional[LibraryTrackErrors]]:
         track_in_library = self._library.get(identity)
         track_status = track_in_library.status if track_in_library is not None else None
 
         if track_status == Status.REJECTED:
             return (
                 AddToLibraryStatus(added=False, waits_on_decision=False),
-                Errors(list()),
+                LibraryTrackErrors([LibraryTrackError.TRACK_REJECTED]),
             )
         elif track_status == Status.ACCEPTED:
             return (
@@ -146,13 +146,12 @@ class RequestsService:
 
             errors = list()
             if not self._check_valid_duration(track.duration):
-                msg = f"Track duration must be between {MIN_TRACK_DURATION_SECONDS} and {MAX_TRACK_DURATION_SECONDS} seconds"
-                errors.append(TrackDurationExceeded(msg))
+                errors.append(LibraryTrackError.INVALID_DURATION)
 
             if len(errors) > 0:
                 return (
                     AddToLibraryStatus(added=False, waits_on_decision=False),
-                    Errors(errors),
+                    LibraryTrackErrors(errors),
                 )
 
             new_track = NewTrack(
@@ -173,14 +172,14 @@ class RequestsService:
     def request_on(
         self, identity: TrackProvidedIdentity, when: PlayingTime
     ) -> RequestResult:
-        library_result, errors = self.add_to_library(identity)
-        if errors is not None and len(errors) > 0:
-            raise NotImplementedError("TODO: obsługa błędów")
+        library_result, library_errors = self.add_to_library(identity)
+        if library_errors is not None and len(library_errors) > 0:
+            return RequestResult(success=False, errors=library_errors)
 
         requested = TrackRequested(identity, when)
-        errors = self.can_add_to_playlist(requested)
-        if errors is None:
+        playlist_errors = self.can_add_to_playlist(requested)
+        if playlist_errors is None:
             self._playlist.add(requested)
             return RequestResult(success=True, errors=None)
         else:
-            return RequestResult(success=False, errors=errors)
+            return RequestResult(success=False, errors=playlist_errors)
