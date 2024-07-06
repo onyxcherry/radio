@@ -1,11 +1,5 @@
 from track.domain.entities import Status, TrackInLibrary
-from track.domain.provided import (
-    Identifier,
-    ProviderName,
-    Seconds,
-    TrackProvidedIdentity,
-    TrackUrl,
-)
+from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity, TrackUrl
 
 
 IDENTITIES = [
