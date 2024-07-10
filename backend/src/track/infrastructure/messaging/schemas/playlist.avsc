@@ -1,0 +1,66 @@
+{
+    "namespace": "app.wisniewski.radio",
+    "type": "record",
+    "name": "playlist",
+    "fields": [
+        {
+            "name": "event_name",
+            "type": "string"
+        },
+        {
+            "name": "identity",
+            "type": "TrackProvidedIdentity"
+        },
+        {
+            "name": "when",
+            "type": [
+                "null",
+                "PlayingTime"
+            ],
+            "default": null
+        },
+        {
+            "name": "waits_on_approval",
+            "type": [
+                "null",
+                "boolean"
+            ],
+            "default": null
+        },
+        {
+            "name": "break",
+            "type": [
+                "null",
+                "int"
+            ],
+            "default": null
+        },
+        {
+            "name": "start",
+            "type": [
+                "null",
+                {
+                    "type": "long",
+                    "logicalType": "timestamp-millis"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "end",
+            "type": [
+                "null",
+                {
+                    "type": "long",
+                    "logicalType": "timestamp-millis"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "created",
+            "type": "long",
+            "logicalType": "timestamp-millis"
+        }
+    ]
+}

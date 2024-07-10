@@ -1,4 +1,5 @@
-from typing import Any, Literal, NamedTuple, NewType, Self
+from dataclasses import dataclass
+from typing import Any, Literal, NewType, Self
 from abc import ABC, abstractmethod
 
 
@@ -10,7 +11,8 @@ TrackUrl = NewType("TrackUrl", str)
 Seconds = NewType("Seconds", int)
 
 
-class TrackProvidedIdentity(NamedTuple):
+@dataclass(frozen=True)
+class TrackProvidedIdentity:
     identifier: Identifier
     provider: ProviderName
 

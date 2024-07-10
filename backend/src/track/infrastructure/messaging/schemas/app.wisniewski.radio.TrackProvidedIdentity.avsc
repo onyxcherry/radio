@@ -1,0 +1,15 @@
+{
+  "namespace": "app.wisniewski.radio",
+  "type": "record",
+  "name": "TrackProvidedIdentity",
+  "fields": [
+    {
+      "name": "provider",
+      "type": "string"
+    },
+    {
+      "name": "identifier",
+      "type": "string"
+    }
+  ]
+}
