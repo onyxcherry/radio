@@ -1,0 +1,16 @@
+{
+  "namespace": "app.wisniewski.radio",
+  "type": "record",
+  "name": "PlayingTime",
+  "fields": [
+    {
+      "name": "date",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    },
+    {
+      "name": "break",
+      "type": "int"
+    }
+  ]
+}
