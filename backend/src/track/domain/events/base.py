@@ -1,11 +1,16 @@
 from abc import abstractmethod
+from dataclasses import field
 
 
 class Serializable:
 
     @abstractmethod
-    def to_bytes(self):
+    def to_json(self):
         pass
+
+
+class Event(Serializable):
+    pass
 
 
 # class Event:
