@@ -1,7 +1,7 @@
 {
     "namespace": "app.wisniewski.radio",
     "type": "record",
-    "name": "playlist",
+    "name": "queue",
     "fields": [
         {
             "name": "event_name",
