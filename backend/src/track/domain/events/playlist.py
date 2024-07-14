@@ -1,30 +1,32 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import ClassVar, Optional
+from typing import Optional
 
+from track.domain.events.base import Event
 from track.domain.provided import TrackProvidedIdentity
 from track.domain.breaks import Breaks, PlayingTime
-from track.domain.events_base import Serializable
 
 
 @dataclass(frozen=True)
-class TrackAddedToPlaylist(Serializable):
+class TrackAddedToPlaylist(Event):
+    name: str = field(default="TrackAddedToPlaylist", init=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
     waits_on_approval: bool
     created: Optional[datetime] = datetime.now(tz=timezone.utc)
-    event_name: Optional[str] = "TrackAddedToPlaylist"
 
 
 @dataclass(frozen=True)
-class TrackDeletedFromPlaylist(Serializable):
+class TrackDeletedFromPlaylist(Event):
+    name: str = field(default="TrackDeletedFromPlaylist", init=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
     created: Optional[datetime] = datetime.now(tz=timezone.utc)
 
 
 @dataclass(frozen=True)
-class TrackPlayed(Serializable):
+class TrackPlayed(Event):
+    name: str = field(default="TrackPlayed", init=False)
     identity: TrackProvidedIdentity
     break_: Breaks
     start: datetime
@@ -33,7 +35,8 @@ class TrackPlayed(Serializable):
 
 
 @dataclass(frozen=True)
-class TrackMarkedAsPlayed(Serializable):
+class TrackMarkedAsPlayed(Event):
+    name: str = field(default="TrackMarkedAsPlayed", init=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
     created: Optional[datetime] = datetime.now(tz=timezone.utc)
