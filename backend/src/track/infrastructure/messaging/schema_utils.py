@@ -1,6 +1,9 @@
 from dataclasses import dataclass
+import os
 from typing import Literal, Optional
 from confluent_kafka.schema_registry import SchemaRegistryClient
+from fastavro.schema import load_schema
+from fastavro.types import Schema
 
 
 @dataclass
@@ -25,3 +28,11 @@ def fetch_schema(config: SchemaRegistryConfig) -> tuple[SchemaRegistryClient, st
     else:
         raise RuntimeError(f"Invalid schema_id: {schema_id}")
     return client, schema_str
+
+
+def merge_sub_schemas(schema: Literal["queue", "library"]) -> Schema:
+    dir_name = os.path.dirname(__file__)
+    path = os.path.join(dir_name, "./schemas/", f"{schema}.avsc")
+    abs_path = os.path.abspath(path)
+    parsed_schema = load_schema(abs_path)
+    return parsed_schema
