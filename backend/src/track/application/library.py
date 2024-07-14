@@ -1,14 +1,33 @@
+from copy import deepcopy
+from dataclasses import dataclass
 from typing import Optional
 from kink import inject
+from track.application.interfaces.events import EventsProducer
+from track.domain.events.library import (
+    TrackAccepted,
+    TrackAddedToLibrary,
+    TrackRejected,
+)
 from track.domain.entities import NewTrack, Status, TrackInLibrary
 from track.domain.library_repository import LibraryRepository
 from track.domain.provided import TrackProvidedIdentity
 
 
+@dataclass
+class _ChangeStatusResult:
+    previous: TrackInLibrary
+    current: TrackInLibrary
+
+
 @inject
 class Library:
-    def __init__(self, library_repository: LibraryRepository):
+    _events_topic = "library"
+
+    def __init__(
+        self, library_repository: LibraryRepository, events_producer: EventsProducer
+    ):
         self._library_repository = library_repository
+        self._events_producer = events_producer
 
     def filter_by_statuses(
         self,
@@ -29,23 +48,30 @@ class Library:
             status=default_status,
         )
         self._library_repository.add(track_to_add)
+        event = TrackAddedToLibrary(track.identity)
+        self._events_producer.produce(topic=self._events_topic, message=event)
 
     def _change_status(
         self, identity: TrackProvidedIdentity, status: Status
-    ) -> TrackInLibrary:
+    ) -> _ChangeStatusResult:
         track = self._library_repository.get(identity)
         if track is None:
             raise RuntimeError("No track with given identity")
-
+        old_track = deepcopy(track)
         track.status = status
-        self._library_repository.update(track)
-        # emit event
-        return track
+        new_track = self._library_repository.update(track)
+        return _ChangeStatusResult(previous=old_track, current=new_track)
 
     def accept(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
         new_status = Status.ACCEPTED
-        return self._change_status(identity, new_status)
+        result = self._change_status(identity, new_status)
+        event = TrackAccepted(identity, previous_status=result.previous.status)
+        self._events_producer.produce(topic=self._events_topic, message=event)
+        return result.current
 
     def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
         new_status = Status.REJECTED
-        return self._change_status(identity, new_status)
+        result = self._change_status(identity, new_status)
+        event = TrackRejected(identity, previous_status=result.previous.status)
+        self._events_producer.produce(topic=self._events_topic, message=event)
+        return result.current
