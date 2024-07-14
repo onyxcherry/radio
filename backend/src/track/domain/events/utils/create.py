@@ -1,5 +1,10 @@
 from datetime import date, datetime
 from typing import Optional
+from track.domain.events.library import (
+    TrackAccepted,
+    TrackAddedToLibrary,
+    TrackRejected,
+)
 from track.domain.events.base import Event
 from track.domain.breaks import PlayingTime
 from track.domain.events.playlist import (
@@ -9,6 +14,18 @@ from track.domain.events.playlist import (
     TrackPlayed,
 )
 from track.domain.provided import Identifier, TrackProvidedIdentity
+
+
+a = {
+    "name": "TrackAddedToPlaylist",
+    "identity": {"provider": "Youtube", "identifier": "ZDZiXmCl4pk"},
+    "when": {"date": 738957, "break": 5},
+    "waits_on_approval": True,
+    "break": None,
+    "start": None,
+    "end": None,
+    "created": 1234566,
+}
 
 
 def _to_date(data: int) -> date:
@@ -81,5 +98,15 @@ def event_from_dict(data: dict) -> Event:
             if pt is None:
                 raise RuntimeError("Bad data for playing time!")
             return TrackMarkedAsPlayed(identity=identity, when=pt)
+        case "TrackAddedToLibrary":
+            return TrackAddedToLibrary(identity=identity)
+        case "TrackAccepted":
+            if (previous_status := data.get("previous_status")) is None:
+                raise RuntimeError('No "previous_status"!')
+            return TrackAccepted(identity=identity, previous_status=previous_status)
+        case "TrackRejected":
+            if (previous_status := data.get("previous_status")) is None:
+                raise RuntimeError('No "previous_status"!')
+            return TrackRejected(identity=identity, previous_status=previous_status)
         case _:
             raise RuntimeError(f'Unknown event "{event_name}"')
