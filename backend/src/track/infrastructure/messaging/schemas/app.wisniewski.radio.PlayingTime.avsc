@@ -5,8 +5,8 @@
   "fields": [
     {
       "name": "date",
-      "type": "long",
-      "logicalType": "timestamp-millis"
+      "type": "int",
+      "logicalType": "date"
     },
     {
       "name": "break",
