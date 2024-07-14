@@ -2,6 +2,12 @@ from datetime import date
 from typing import Optional
 
 from kink import inject
+from track.application.interfaces.events import EventsConsumer, EventsProducer
+from track.domain.events.playlist import (
+    TrackAddedToPlaylist,
+    TrackDeletedFromPlaylist,
+    TrackMarkedAsPlayed,
+)
 from track.domain.entities import TrackQueued, TrackRequested, TrackToQueue
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.playlist_repository import PlaylistRepository
@@ -10,9 +16,18 @@ from track.domain.provided import Seconds, TrackProvidedIdentity
 
 @inject
 class Playlist:
+    _events_topic = "queue"
+
     # słuchanie eventu REJECTED - trzeba usunąć wszystkie z kolejek z każdego dnia
-    def __init__(self, playlist_repository: PlaylistRepository):
+    def __init__(
+        self,
+        playlist_repository: PlaylistRepository,
+        events_consumer: EventsConsumer,
+        events_producer: EventsProducer,
+    ):
         self._playlist_repository = playlist_repository
+        self._events_consumer = events_consumer
+        self._events_producer = events_producer
 
     def get(
         self,
@@ -43,16 +58,24 @@ class Playlist:
             played=False,
         )
         saved = self._playlist_repository.insert(to_save)
+        event = TrackAddedToPlaylist(saved.identity, saved.when, saved.waiting)
+        self._events_producer.produce(topic=self._events_topic, message=event)
         return saved
 
     def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
-        return self._playlist_repository.delete(track)
+        deleted = self._playlist_repository.delete(track)
+        if deleted is not None:
+            event = TrackDeletedFromPlaylist(deleted.identity, deleted.when)
+            self._events_producer.produce(topic=self._events_topic, message=event)
+        return deleted
 
     def mark_as_played(self, track: TrackQueued) -> TrackQueued:
         to_save = track
         assert track.waiting is False
         to_save.played = True
         saved = self._playlist_repository.update(to_save)
+        event = TrackMarkedAsPlayed(saved.identity, saved.when)
+        self._events_producer.produce(topic=self._events_topic, message=event)
         return saved
 
     def get_tracks_duration_on_break(
