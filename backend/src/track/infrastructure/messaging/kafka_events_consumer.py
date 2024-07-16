@@ -47,7 +47,7 @@ class KafkaAvroEventsConsumer(EventsConsumer):
     ) -> None:
         self._consumer.subscribe(topics or pattern)
 
-    def consume(self, limit: int) -> Event:
+    def consume(self, limit: int) -> list[Event]:
         while True:
             msg = self._consumer.poll(0.0)
             if msg is None:
@@ -58,4 +58,4 @@ class KafkaAvroEventsConsumer(EventsConsumer):
             )
             if result is not None:
                 event_obj = event_from_dict(result)
-                return event_obj
+                return [event_obj]
