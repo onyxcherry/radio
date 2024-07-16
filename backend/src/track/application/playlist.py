@@ -2,6 +2,7 @@ from datetime import date
 from typing import Optional
 
 from kink import inject
+from building_blocks.clock import Clock
 from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.domain.events.playlist import (
     TrackAddedToPlaylist,
@@ -24,7 +25,9 @@ class Playlist:
         playlist_repository: PlaylistRepository,
         events_consumer: EventsConsumer,
         events_producer: EventsProducer,
+        clock: Clock,
     ):
+        self._clock = clock
         self._playlist_repository = playlist_repository
         self._events_consumer = events_consumer
         self._events_producer = events_producer
@@ -58,14 +61,18 @@ class Playlist:
             played=False,
         )
         saved = self._playlist_repository.insert(to_save)
-        event = TrackAddedToPlaylist(saved.identity, saved.when, saved.waiting)
+        event = TrackAddedToPlaylist(
+            saved.identity, saved.when, saved.waiting, created=self._clock.now()
+        )
         self._events_producer.produce(topic=self._events_topic, message=event)
         return saved
 
     def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
         deleted = self._playlist_repository.delete(track)
         if deleted is not None:
-            event = TrackDeletedFromPlaylist(deleted.identity, deleted.when)
+            event = TrackDeletedFromPlaylist(
+                deleted.identity, deleted.when, created=self._clock.now()
+            )
             self._events_producer.produce(topic=self._events_topic, message=event)
         return deleted
 
@@ -74,7 +81,9 @@ class Playlist:
         assert track.waiting is False
         to_save.played = True
         saved = self._playlist_repository.update(to_save)
-        event = TrackMarkedAsPlayed(saved.identity, saved.when)
+        event = TrackMarkedAsPlayed(
+            saved.identity, saved.when, created=self._clock.now()
+        )
         self._events_producer.produce(topic=self._events_topic, message=event)
         return saved
 

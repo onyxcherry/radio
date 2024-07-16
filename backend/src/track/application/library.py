@@ -2,6 +2,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Optional
 from kink import inject
+from building_blocks.clock import Clock
 from track.application.interfaces.events import EventsProducer
 from track.domain.events.library import (
     TrackAccepted,
@@ -24,8 +25,12 @@ class Library:
     _events_topic = "library"
 
     def __init__(
-        self, library_repository: LibraryRepository, events_producer: EventsProducer
+        self,
+        library_repository: LibraryRepository,
+        events_producer: EventsProducer,
+        clock: Clock,
     ):
+        self._clock = clock
         self._library_repository = library_repository
         self._events_producer = events_producer
 
@@ -48,7 +53,7 @@ class Library:
             status=default_status,
         )
         self._library_repository.add(track_to_add)
-        event = TrackAddedToLibrary(track.identity)
+        event = TrackAddedToLibrary(track.identity, created=self._clock.now())
         self._events_producer.produce(topic=self._events_topic, message=event)
 
     def _change_status(
@@ -65,13 +70,17 @@ class Library:
     def accept(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
         new_status = Status.ACCEPTED
         result = self._change_status(identity, new_status)
-        event = TrackAccepted(identity, previous_status=result.previous.status)
+        event = TrackAccepted(
+            identity, previous_status=result.previous.status, created=self._clock.now()
+        )
         self._events_producer.produce(topic=self._events_topic, message=event)
         return result.current
 
     def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
         new_status = Status.REJECTED
         result = self._change_status(identity, new_status)
-        event = TrackRejected(identity, previous_status=result.previous.status)
+        event = TrackRejected(
+            identity, previous_status=result.previous.status, created=self._clock.now()
+        )
         self._events_producer.produce(topic=self._events_topic, message=event)
         return result.current
