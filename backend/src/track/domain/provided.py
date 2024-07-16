@@ -16,6 +16,9 @@ class TrackProvidedIdentity:
     identifier: Identifier
     provider: ProviderName
 
+    def __repr__(self):
+        return f"TrackProvidedIdentity(identifier=Identifier({self.identifier!r}), provider={self.provider!r})"
+
 
 class TrackProvided(ABC):
     @abstractmethod
