@@ -8,7 +8,7 @@ from track.domain.breaks import Breaks, PlayingTime
 
 @dataclass(frozen=True)
 class TrackAddedToPlaylist(Event):
-    name: str = field(default="TrackAddedToPlaylist", init=False)
+    name: str = field(default="TrackAddedToPlaylist", init=False, repr=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
     waits_on_approval: bool
@@ -17,7 +17,7 @@ class TrackAddedToPlaylist(Event):
 
 @dataclass(frozen=True)
 class TrackDeletedFromPlaylist(Event):
-    name: str = field(default="TrackDeletedFromPlaylist", init=False)
+    name: str = field(default="TrackDeletedFromPlaylist", init=False, repr=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
     created: datetime
@@ -25,7 +25,7 @@ class TrackDeletedFromPlaylist(Event):
 
 @dataclass(frozen=True)
 class TrackPlayed(Event):
-    name: str = field(default="TrackPlayed", init=False)
+    name: str = field(default="TrackPlayed", init=False, repr=False)
     identity: TrackProvidedIdentity
     break_: Breaks
     start: datetime
@@ -35,7 +35,7 @@ class TrackPlayed(Event):
 
 @dataclass(frozen=True)
 class TrackMarkedAsPlayed(Event):
-    name: str = field(default="TrackMarkedAsPlayed", init=False)
+    name: str = field(default="TrackMarkedAsPlayed", init=False, repr=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
     created: datetime

@@ -8,14 +8,14 @@ from track.domain.entities import Status
 
 @dataclass
 class TrackAddedToLibrary(Event):
-    name: str = field(default="TrackAddedToLibrary", init=False)
+    name: str = field(default="TrackAddedToLibrary", init=False, repr=False)
     identity: TrackProvidedIdentity
     created: datetime
 
 
 @dataclass(frozen=True)
 class TrackAccepted(Event):
-    name: str = field(default="TrackAccepted", init=False)
+    name: str = field(default="TrackAccepted", init=False, repr=False)
     identity: TrackProvidedIdentity
     previous_status: Status
     created: datetime
@@ -23,7 +23,7 @@ class TrackAccepted(Event):
 
 @dataclass(frozen=True)
 class TrackRejected(Event):
-    name: str = field(default="TrackRejected", init=False)
+    name: str = field(default="TrackRejected", init=False, repr=False)
     identity: TrackProvidedIdentity
     previous_status: Status
     created: datetime
