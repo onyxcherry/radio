@@ -17,6 +17,9 @@ class Status(StrEnum):
     PENDING_APPROVAL = "pending"
     REJECTED = "rejected"
 
+    def __repr__(self) -> str:
+        return f"Status.{self.name}"
+
 
 @dataclass
 class TrackInLibrary:
