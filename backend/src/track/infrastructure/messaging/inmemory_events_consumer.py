@@ -34,5 +34,5 @@ class InMemoryEventsConsumer(EventsConsumer):
         for topic in self._topics:
             topic_messages = self._messages.get(topic)
             if topic_messages is not None:
-                messages.append(*topic_messages)
+                messages += topic_messages
         return messages[:limit]
