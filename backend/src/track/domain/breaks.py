@@ -39,6 +39,9 @@ class Breaks(IntEnum):
     def get_number_from_zero_of(self) -> int:
         return self - self.FIRST
 
+    def __repr__(self) -> str:
+        return f"Breaks.{self.name}"
+
 
 @dataclass(frozen=True)
 class PlayingTime:
