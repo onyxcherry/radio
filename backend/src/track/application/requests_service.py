@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import enum
 from typing import NewType, Optional
 from kink import inject
+from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.domain.entities import NewTrack, Status, TrackRequested
 from building_blocks.clock import Clock
 from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
@@ -56,11 +57,15 @@ class RequestsService:
         self,
         library_repo: LibraryRepository,
         playlist_repo: PlaylistRepository,
+        events_producer: EventsProducer,
+        events_consumer: EventsConsumer,
         clock: Clock,
     ):
-        self._library = Library(library_repo)
-        self._playlist = Playlist(playlist_repo)
         self._clock = clock
+        self._library = Library(library_repo, events_producer, clock)
+        self._playlist = Playlist(
+            playlist_repo, events_producer, events_consumer, clock
+        )
 
     @staticmethod
     def _check_valid_duration(duration: Seconds) -> bool:
