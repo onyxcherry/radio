@@ -23,14 +23,14 @@ class Playlist:
     def __init__(
         self,
         playlist_repository: PlaylistRepository,
-        events_consumer: EventsConsumer,
         events_producer: EventsProducer,
+        events_consumer: EventsConsumer,
         clock: Clock,
     ):
         self._clock = clock
         self._playlist_repository = playlist_repository
-        self._events_consumer = events_consumer
         self._events_producer = events_producer
+        self._events_consumer = events_consumer
 
     def get(
         self,
