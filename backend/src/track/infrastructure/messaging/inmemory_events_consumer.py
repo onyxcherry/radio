@@ -2,8 +2,8 @@ from re import Pattern
 from typing import Optional
 from track.application.interfaces.events import (
     ConsumerConnectionOptions,
+    ConsumerMessagesOptions,
     EventsConsumer,
-    MessagesOptions,
 )
 from track.domain.events.base import Event
 from track.infrastructure.messaging.schema_utils import SchemaRegistryConfig
@@ -13,16 +13,14 @@ class InMemoryEventsConsumer(EventsConsumer):
     def __init__(
         self,
         conn_options: Optional[ConsumerConnectionOptions] = None,
-        msg_options: Optional[MessagesOptions] = None,
+        msg_options: Optional[ConsumerMessagesOptions] = None,
         schema_config: Optional[SchemaRegistryConfig] = None,
         test: bool = False,
     ) -> None:
         self._topics: list[str] = []
         self._messages: dict[str, list[Event]] = {}
 
-    def subscribe(
-        self, topics: str | list[str], pattern: Pattern | None = None
-    ) -> None:
+    def subscribe(self, topics: str | list[str]) -> None:
         if isinstance(topics, str):
             self._topics.append(topics)
         else:

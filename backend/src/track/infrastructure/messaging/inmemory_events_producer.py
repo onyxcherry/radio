@@ -1,7 +1,7 @@
 from typing import Optional
 from track.application.interfaces.events import (
     EventsProducer,
-    MessagesOptions,
+    ProducerMessagesOptions,
     ProducerConnectionOptions,
 )
 from track.domain.events.base import Event
@@ -12,7 +12,7 @@ class InMemoryEventsProducer(EventsProducer):
     def __init__(
         self,
         conn_options: Optional[ProducerConnectionOptions] = None,
-        msg_options: Optional[MessagesOptions] = None,
+        msg_options: Optional[ProducerMessagesOptions] = None,
         schema_config: Optional[SchemaRegistryConfig] = None,
         test: bool = False,
     ) -> None:
