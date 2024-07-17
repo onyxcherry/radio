@@ -1,5 +1,7 @@
 import pytest
 
+from track.application.interfaces.events import EventsConsumer, EventsProducer
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -18,3 +20,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "realdb" in item.keywords:
             item.add_marker(skip_realdb)
+
+
+def sync_messages_from_producer_to_consumer(
+    producer: EventsProducer, consumer: EventsConsumer
+):
+    UNIT = True
+    if UNIT:
+        consumer._messages = producer._messages

@@ -1,6 +1,7 @@
 from datetime import datetime
 from kink import di
 from pytest import fixture
+from tests.conftest import sync_messages_from_producer_to_consumer
 from building_blocks.clock import Clock
 from track.domain.events.library import (
     TrackAccepted,
@@ -21,6 +22,10 @@ events_producer = library._events_producer
 clock = di[Clock]
 
 fixed_dt = datetime(2024, 7, 16, 14, 19, 21)
+
+
+def sync_messages():
+    sync_messages_from_producer_to_consumer(events_producer, events_consumer)
 
 
 @fixture(autouse=True)
