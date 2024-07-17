@@ -11,7 +11,7 @@ from track.domain.events.base import Event
 class ConsumerConnectionOptions:
     bootstrap_servers: str
     client_id: str
-    group_id: Optional[str]
+    group_id: str
 
 
 @dataclass(frozen=True)
@@ -21,10 +21,16 @@ class ProducerConnectionOptions:
 
 
 @dataclass(frozen=True)
-class MessagesOptions:
-    partitioner: Optional[Callable] = None
+class ConsumerMessagesOptions:
+    value_deserializer: Callable
+    key_deserializer: Optional[Callable] = None
+
+
+@dataclass(frozen=True)
+class ProducerMessagesOptions:
+    value_serializer: Callable
     key_serializer: Optional[Callable] = None
-    value_serializer: Optional[Callable] = None
+    partitioner: Optional[Callable] = None
 
 
 class EventsConsumer(ABC):
@@ -32,7 +38,7 @@ class EventsConsumer(ABC):
     def __init__(
         self,
         conn_options: ConsumerConnectionOptions,
-        msg_options: MessagesOptions,
+        msg_options: ConsumerConnectionOptions,
         schema_config: SchemaRegistryConfig,
         test: bool = False,
     ) -> None:
@@ -40,7 +46,7 @@ class EventsConsumer(ABC):
 
     @abstractmethod
     def subscribe(
-        self, topics: str | list[str], pattern: Optional[re.Pattern] = None
+        self, topic: str | list[str], pattern: Optional[re.Pattern] = None
     ) -> None:
         pass
 
@@ -54,7 +60,7 @@ class EventsProducer(ABC):
     def __init__(
         self,
         conn_options: ProducerConnectionOptions,
-        msg_options: MessagesOptions,
+        msg_options: ProducerConnectionOptions,
         schema_config: SchemaRegistryConfig,
         test: bool = False,
     ) -> None:
