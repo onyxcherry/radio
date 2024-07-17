@@ -8,12 +8,7 @@ from track.infrastructure.persistence.database import SessionLocal
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.entities import Status, TrackQueued, TrackToQueue
 from track.domain.playlist_repository import PlaylistRepository
-from track.domain.provided import (
-    Identifier,
-    ProviderName,
-    Seconds,
-    TrackProvidedIdentity,
-)
+from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity
 
 
 class DBPlaylistRepository(PlaylistRepository):

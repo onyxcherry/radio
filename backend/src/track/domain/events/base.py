@@ -1,9 +1,7 @@
 from abc import abstractmethod
-from dataclasses import field
 
 
 class Serializable:
-
     @abstractmethod
     def to_json(self):
         pass
