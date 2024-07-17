@@ -1,7 +1,7 @@
 from datetime import datetime
 from kink import di
 from pytest import fixture, mark
-from tests.conftest import sync_messages_from_producer_to_consumer
+from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from track.domain.events.playlist import (
     TrackAddedToPlaylist,
     TrackDeletedFromPlaylist,
@@ -23,9 +23,19 @@ clock = di[Clock]
 
 fixed_dt = datetime(2024, 7, 16, 14, 19, 21)
 
+_realmsgbroker: bool
+
 
 def sync_messages():
-    sync_messages_from_producer_to_consumer(events_producer, events_consumer)
+    sync_messages_from_producer_to_consumer(
+        events_producer, events_consumer, real_msg_broker=_realmsgbroker
+    )
+
+
+@fixture(autouse=True, scope="session")
+def provide_config(request):
+    global _realmsgbroker
+    _realmsgbroker = request.config.getoption("realmsgbroker")
 
 
 @fixture(autouse=True)

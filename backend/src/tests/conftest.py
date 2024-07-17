@@ -1,30 +1,42 @@
 import pytest
 
-from track.application.interfaces.events import EventsConsumer, EventsProducer
+from .bootstrap import bootstrap_di
 
 
 def pytest_addoption(parser):
     parser.addoption(
         "--realdb", action="store_true", default=False, help="run tests with real db"
     )
+    parser.addoption(
+        "--realmsgbroker",
+        action="store_true",
+        default=False,
+        help="run tests with real message broker",
+    )
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "realdb: mark test which needs real db")
+    config.addinivalue_line(
+        "markers", "realmsgbroker: mark test which needs real message broker"
+    )
+
+    REAL_DB = config.getoption("realdb")
+    REAL_MSG_BROKER = config.getoption("realmsgbroker")
+    bootstrap_di(real_db=REAL_DB, real_msg_broker=REAL_MSG_BROKER)
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--realdb"):
+    REAL_DB = config.getoption("realdb")
+    REAL_MSG_BROKER = config.getoption("realmsgbroker")
+
+    if all([REAL_DB, REAL_MSG_BROKER]):
         return
+
     skip_realdb = pytest.mark.skip(reason="need --realdb option to run")
+    skip_realmsgbroker = pytest.mark.skip(reason="need --realmsgbroker option to run")
     for item in items:
-        if "realdb" in item.keywords:
+        if "realdb" in item.keywords and REAL_DB is False:
             item.add_marker(skip_realdb)
-
-
-def sync_messages_from_producer_to_consumer(
-    producer: EventsProducer, consumer: EventsConsumer
-):
-    UNIT = True
-    if UNIT:
-        consumer._messages = producer._messages
+        if "realmsgbroker" in item.keywords and REAL_MSG_BROKER is False:
+            item.add_marker(skip_realmsgbroker)
