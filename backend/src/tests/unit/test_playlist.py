@@ -127,7 +127,9 @@ def test_marks_as_played(accepted_tracks):
     expected_event = TrackMarkedAsPlayed(
         identity=requested.identity, when=requested.when, created=fixed_dt
     )
-    assert expected_event in events_consumer.consume(10)
+    events = events_consumer.consume(10)
+    assert len(events) == 2
+    assert expected_event in events
 
 
 @mark.realdb()
