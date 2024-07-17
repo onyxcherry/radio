@@ -141,7 +141,7 @@ class YoutubeTrackProvided(TrackProvided):
         topic_suffix = "- Topic"
         if not any([ch in track_title for ch in delims]):
             channel_title: str = api_response["channelTitle"]
-            channel_id: str = api_response["channelId"]
+            # channel_id: str = api_response["channelId"]
             # if self._check_channel_belongs_official_artist(channel_id):
             #     author = channel_title
             #     full_title = f"{author} - {track_title}"

@@ -1,6 +1,6 @@
 from datetime import date
 from pytest import fixture
-from track.domain.entities import TrackQueued, TrackToQueue
+from track.domain.entities import TrackToQueue
 from tests.infra.data import IDENTITIES, TRACKS
 from track.infrastructure.db_library_repository import DBLibraryRepository
 from track.infrastructure.db_playlist_repository import DBPlaylistRepository

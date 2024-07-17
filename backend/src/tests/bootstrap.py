@@ -12,7 +12,6 @@ from track.infrastructure.messaging.kafka_events_consumer import (
 from track.infrastructure.messaging.kafka_events_producer import (
     KafkaAvroEventsProducer,
 )
-from track.domain.library_repository import LibraryRepository
 from track.infrastructure.db_library_repository import DBLibraryRepository
 from track.infrastructure.db_playlist_repository import DBPlaylistRepository
 from track.application.playlist import Playlist
