@@ -30,55 +30,44 @@ from track.infrastructure.inmemory_playlist_repository import (
 from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 
-UNIT = True
-
 fixed_dt = datetime(2024, 7, 16, 14, 19, 21)
 
 
-def bootstrap_di() -> None:
+def bootstrap_di(real_db: bool, real_msg_broker: bool) -> None:
     fixed_clock = FixedClock(fixed_dt)
     di[Clock] = fixed_clock
-    if UNIT:
-        inmemory_library_repo = InMemoryLibraryRepository()
-        inmemory_playlist_repo = InMemoryPlaylistRepository()
-        inmemory_events_consumer = InMemoryEventsConsumer()
-        inmemory_events_producer = InMemoryEventsProducer()
-        di[EventsProducer] = inmemory_events_producer
-        di[EventsConsumer] = inmemory_events_consumer
-        di[Library] = Library(
-            inmemory_library_repo, inmemory_events_producer, fixed_clock
-        )
-        di[Playlist] = Playlist(
-            inmemory_playlist_repo,
-            inmemory_events_producer,
-            inmemory_events_consumer,
-            fixed_clock,
-        )
-        di[RequestsService] = RequestsService(
-            inmemory_library_repo,
-            inmemory_playlist_repo,
-            inmemory_events_producer,
-            inmemory_events_consumer,
-            fixed_clock,
-        )
-    elif False:
-        real_library_repo = DBLibraryRepository()
-        real_playlist_repo = DBPlaylistRepository()
-        real_events_producer = KafkaAvroEventsProducer()
-        real_events_consumer = KafkaAvroEventsConsumer()
-        di[Library] = Library(real_library_repo, real_events_producer, fixed_clock)
-        di[Playlist] = Playlist(
-            real_playlist_repo,
-            real_events_producer,
-            real_events_consumer,
-            fixed_clock,
-        )
-        di[RequestsService] = RequestsService(
-            real_library_repo,
-            real_playlist_repo,
-            real_events_producer,
-            real_events_consumer,
-            fixed_clock,
-        )
+
+    if real_db:
+        library_repo = DBLibraryRepository()
+        playlist_repo = DBPlaylistRepository()
+    else:
+        library_repo = InMemoryLibraryRepository()
+        playlist_repo = InMemoryPlaylistRepository()
+
+    if real_msg_broker and False:
+        events_producer = KafkaAvroEventsProducer()
+        events_consumer = KafkaAvroEventsConsumer()
+    else:
+        events_consumer = InMemoryEventsConsumer()
+        events_producer = InMemoryEventsProducer()
+
+    di[EventsProducer] = events_producer
+    di[EventsConsumer] = events_consumer
+
+    di[Library] = Library(library_repo, events_producer, fixed_clock)
+    di[Playlist] = Playlist(
+        playlist_repo,
+        events_producer,
+        events_consumer,
+        fixed_clock,
+    )
+    di[RequestsService] = RequestsService(
+        library_repo,
+        playlist_repo,
+        events_producer,
+        events_consumer,
+        fixed_clock,
+    )
+
     di[YoutubeAPIInterface] = InMemoryYoutubeAPI()
     di[YoutubeTrackProvided] = InMemoryYoutubeAPI
