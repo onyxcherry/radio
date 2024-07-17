@@ -1,4 +1,3 @@
-from datetime import datetime
 from kink import di
 from pytest import fixture, mark
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
@@ -13,6 +12,8 @@ from track.application.library import Library
 from track.domain.entities import TrackRequested
 from track.application.playlist import Playlist
 from .data import ACCEPTED_TRACKS, FUTURE_PT, PENDING_APPROVAL_TRACKS
+from tests.helpers.dt import fixed_dt
+
 
 playlist = di[Playlist]
 library = di[Library]
@@ -21,7 +22,6 @@ events_consumer.subscribe([library._events_topic, playlist._events_topic])
 events_producer = library._events_producer
 clock = di[Clock]
 
-fixed_dt = datetime(2024, 7, 16, 14, 19, 21)
 
 _realmsgbroker: bool
 
