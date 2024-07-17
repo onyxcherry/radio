@@ -9,15 +9,22 @@ from fastavro.types import Schema
 @dataclass
 class SchemaRegistryConfig:
     url: str
+    topic_name: str
     schema_id: int | Literal["latest"]
-    subject_name: Optional[str]
+    subject_name: Optional[str] = None
 
 
-def fetch_schema(config: SchemaRegistryConfig) -> tuple[SchemaRegistryClient, str]:
+def create_client(config: SchemaRegistryConfig) -> SchemaRegistryClient:
     schema_registry_conf = {"url": config.url}
     client = SchemaRegistryClient(schema_registry_conf)
-    schema_id = config.schema_id
-    subject_name = config.subject_name
+    return client
+
+
+def fetch_schema(
+    client: SchemaRegistryClient,
+    schema_id: int | Literal["latest"],
+    subject_name: Optional[str],
+) -> str:
     schema_str = None
     if schema_id == "latest" and subject_name is not None:
         schema = client.get_latest_version(subject_name)
@@ -27,7 +34,7 @@ def fetch_schema(config: SchemaRegistryConfig) -> tuple[SchemaRegistryClient, st
         schema_str = schema.schema_str
     else:
         raise RuntimeError(f"Invalid schema_id: {schema_id}")
-    return client, schema_str
+    return schema_str
 
 
 def merge_sub_schemas(schema: Literal["queue", "library"]) -> Schema:
