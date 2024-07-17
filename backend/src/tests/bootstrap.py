@@ -1,4 +1,3 @@
-from datetime import datetime
 from kink import di
 from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.infrastructure.messaging.inmemory_events_consumer import (
@@ -30,7 +29,7 @@ from track.infrastructure.inmemory_playlist_repository import (
 from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 
-fixed_dt = datetime(2024, 7, 16, 14, 19, 21)
+from tests.helpers.dt import fixed_dt
 
 
 def bootstrap_di(real_db: bool, real_msg_broker: bool) -> None:
