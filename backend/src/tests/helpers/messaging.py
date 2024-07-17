@@ -16,3 +16,4 @@ def sync_messages_from_producer_to_consumer(
         and isinstance(producer, InMemoryEventsProducer)
     ):
         consumer._messages = producer._messages
+        producer._messages = {}
