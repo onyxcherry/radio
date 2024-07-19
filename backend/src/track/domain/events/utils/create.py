@@ -56,7 +56,7 @@ def _playing_time_from_dict(data: Optional[dict]) -> Optional[PlayingTime]:
 
 
 def event_from_dict(data: dict) -> Event:
-    if "name" not in data:
+    if "event_name" not in data:
         raise RuntimeError("No event name in data!")
     if not isinstance(data.get("identity"), dict):
         raise RuntimeError('No "identity" in data!')
@@ -65,7 +65,7 @@ def event_from_dict(data: dict) -> Event:
         raise RuntimeError('Bad "identity"!')
 
     # czy created musi być przekazywane do domeny aplikacyjnej?
-    event_name = data["name"]
+    event_name = data["event_name"]
     match event_name:
         case "TrackAddedToPlaylist":
             pt = _playing_time_from_dict(data.get("when"))
