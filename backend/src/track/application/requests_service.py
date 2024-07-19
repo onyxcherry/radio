@@ -57,14 +57,15 @@ class RequestsService:
         self,
         library_repo: LibraryRepository,
         playlist_repo: PlaylistRepository,
-        events_producer: EventsProducer,
-        events_consumer: EventsConsumer,
+        library_events_producer: EventsProducer,
+        playlist_events_producer: EventsProducer,
+        playlist_events_consumer: EventsConsumer,
         clock: Clock,
     ):
         self._clock = clock
-        self._library = Library(library_repo, events_producer, clock)
+        self._library = Library(library_repo, library_events_producer, clock)
         self._playlist = Playlist(
-            playlist_repo, events_producer, events_consumer, clock
+            playlist_repo, playlist_events_producer, playlist_events_consumer, clock
         )
 
     @staticmethod

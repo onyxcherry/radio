@@ -1,5 +1,6 @@
 from kink import di
 from pytest import fixture, mark
+from track.infrastructure.messaging.types import PlaylistEventsConsumer
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from track.domain.events.playlist import (
     TrackAddedToPlaylist,
@@ -17,9 +18,9 @@ from tests.helpers.dt import fixed_dt
 
 playlist = di[Playlist]
 library = di[Library]
-events_consumer = di[EventsConsumer]
-events_consumer.subscribe([library._events_topic, playlist._events_topic])
-events_producer = library._events_producer
+events_consumer = di[PlaylistEventsConsumer]
+events_consumer.subscribe(playlist._events_topic)
+events_producer = playlist._events_producer
 clock = di[Clock]
 
 

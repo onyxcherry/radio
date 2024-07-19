@@ -1,5 +1,6 @@
 from kink import di
 from pytest import fixture
+from track.infrastructure.messaging.types import LibraryEventsConsumer
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from building_blocks.clock import Clock
 from track.domain.events.library import (
@@ -15,7 +16,7 @@ from tests.helpers.dt import fixed_dt
 
 
 library = di[Library]
-events_consumer = di[EventsConsumer]
+events_consumer = di[LibraryEventsConsumer]
 events_consumer.subscribe(library._events_topic)
 events_producer = library._events_producer
 clock = di[Clock]
