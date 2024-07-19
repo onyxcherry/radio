@@ -11,15 +11,12 @@ from track.infrastructure.messaging.schema_utils import SchemaRegistryConfig
 class InMemoryEventsProducer(EventsProducer):
     def __init__(
         self,
-        conn_options: Optional[ProducerConnectionOptions] = None,
-        msg_options: Optional[ProducerMessagesOptions] = None,
-        schema_config: Optional[SchemaRegistryConfig] = None,
+        conn_options: ProducerConnectionOptions,
+        msg_options: ProducerMessagesOptions,
+        schema_config: SchemaRegistryConfig,
         test: bool = False,
     ) -> None:
         # topic name -> messages
         self._messages: dict[str, list[Event]] = {}
-
-    def produce(self, topic: str, message: Event) -> None:
-        if topic not in self._messages:
-            self._messages[topic] = []
-        self._messages[topic].append(message)
+        self._topic_name = self._schema_config.topic_name
+    def produce(self, message: Event) -> None:
