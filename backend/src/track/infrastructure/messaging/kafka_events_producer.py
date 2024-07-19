@@ -46,12 +46,19 @@ def delivery_report(err, msg):
     )
 
 
-def json_serial(obj):
+def json_serial(obj: Event, ctx):
     """JSON serializer for objects not serializable by default json code"""
     if isinstance(obj, date):
         return obj.isoformat()
     else:
-        return obj.__dict__
+        obj_dict = obj.__dict__
+        obj_dict["event_name"] = obj.name
+        obj_dict["identity"] = obj.identity.__dict__
+        obj_dict["created"] = int(obj.created.timestamp() * 10**6)
+        if "when" in obj_dict:
+            when = {"date": obj.when.date_.toordinal(), "break": obj.when.break_}
+            obj_dict["when"] = when
+        return obj_dict
 
 
 class KafkaAvroEventsProducer(EventsProducer):
