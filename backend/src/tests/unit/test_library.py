@@ -62,7 +62,7 @@ def test_new_track_has_pending_approval_state():
     assert got_track.status == Status.PENDING_APPROVAL
     sync_messages()
     expected_event = TrackAddedToLibrary(identity=track.identity, created=fixed_dt)
-    assert expected_event in events_consumer.consume(10)
+    assert expected_event in events_consumer.consume(1)
 
 
 def test_accept_track(tracks_one_accepted):
@@ -78,7 +78,7 @@ def test_accept_track(tracks_one_accepted):
         previous_status=Status.PENDING_APPROVAL,
         created=fixed_dt,
     )
-    assert expected_event in events_consumer.consume(10)
+    assert expected_event in events_consumer.consume(1)
 
 
 def test_reject_track(tracks_one_accepted):
@@ -95,7 +95,7 @@ def test_reject_track(tracks_one_accepted):
         previous_status=Status.PENDING_APPROVAL,
         created=fixed_dt,
     )
-    assert expected_event in events_consumer.consume(10)
+    assert expected_event in events_consumer.consume(1)
 
 
 def test_filters_tracks_by_status(tracks_one_accepted):
