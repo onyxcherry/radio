@@ -29,7 +29,7 @@ class ConsumerMessagesOptions:
 @dataclass(frozen=True)
 class ProducerMessagesOptions:
     value_serializer: Callable
-    key_serializer: Optional[Callable] = None
+    key_serializer: Callable
     partitioner: Optional[Callable] = None
 
 
