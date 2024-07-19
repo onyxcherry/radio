@@ -45,9 +45,7 @@ class EventsConsumer(ABC):
         pass
 
     @abstractmethod
-    def subscribe(
-        self, topic: str | list[str], pattern: Optional[re.Pattern] = None
-    ) -> None:
+    def subscribe(self, topic: str | list[str]) -> None:
         pass
 
     @abstractmethod
@@ -67,5 +65,5 @@ class EventsProducer(ABC):
         pass
 
     @abstractmethod
-    def produce(self, topic: str, message: Event) -> None:
+    def produce(self, message: Event) -> None:
         pass

@@ -64,7 +64,7 @@ class Playlist:
         event = TrackAddedToPlaylist(
             saved.identity, saved.when, saved.waiting, created=self._clock.now()
         )
-        self._events_producer.produce(topic=self._events_topic, message=event)
+        self._events_producer.produce(message=event)
         return saved
 
     def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
@@ -73,7 +73,7 @@ class Playlist:
             event = TrackDeletedFromPlaylist(
                 deleted.identity, deleted.when, created=self._clock.now()
             )
-            self._events_producer.produce(topic=self._events_topic, message=event)
+            self._events_producer.produce(message=event)
         return deleted
 
     def mark_as_played(self, track: TrackQueued) -> TrackQueued:
@@ -84,7 +84,7 @@ class Playlist:
         event = TrackMarkedAsPlayed(
             saved.identity, saved.when, created=self._clock.now()
         )
-        self._events_producer.produce(topic=self._events_topic, message=event)
+        self._events_producer.produce(message=event)
         return saved
 
     def get_tracks_duration_on_break(

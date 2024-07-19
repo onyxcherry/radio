@@ -85,8 +85,8 @@ class KafkaAvroEventsProducer(EventsProducer):
         )
         return avro_serializer
 
-    def produce(self, topic: str, message: Event) -> None:
-        key = self._string_serializer(str(uuid4()))
+    def produce(self, message: Event) -> None:
+        key = self._key_serializer(str(uuid4()))
         try:
             self._producer.produce(
                 topic=topic,

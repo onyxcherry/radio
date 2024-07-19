@@ -54,7 +54,7 @@ class Library:
         )
         self._library_repository.add(track_to_add)
         event = TrackAddedToLibrary(track.identity, created=self._clock.now())
-        self._events_producer.produce(topic=self._events_topic, message=event)
+        self._events_producer.produce(message=event)
 
     def _change_status(
         self, identity: TrackProvidedIdentity, status: Status
@@ -73,7 +73,7 @@ class Library:
         event = TrackAccepted(
             identity, previous_status=result.previous.status, created=self._clock.now()
         )
-        self._events_producer.produce(topic=self._events_topic, message=event)
+        self._events_producer.produce(message=event)
         return result.current
 
     def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
@@ -82,5 +82,5 @@ class Library:
         event = TrackRejected(
             identity, previous_status=result.previous.status, created=self._clock.now()
         )
-        self._events_producer.produce(topic=self._events_topic, message=event)
+        self._events_producer.produce(message=event)
         return result.current

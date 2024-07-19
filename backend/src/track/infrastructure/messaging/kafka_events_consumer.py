@@ -42,10 +42,8 @@ class KafkaAvroEventsConsumer(EventsConsumer):
         avro_deserializer = AvroDeserializer(schema_reg_client, schema_str)
         return avro_deserializer
 
-    def subscribe(
-        self, topics: str | list[str] | None, pattern: Optional[Pattern] = None
-    ) -> None:
-        self._consumer.subscribe(topics or pattern)
+    def subscribe(self, topic: str) -> None:
+        self._consumer.subscribe([topic])
 
     def consume(self, limit: int) -> list[Event]:
         while True:

@@ -12,25 +12,19 @@ from track.infrastructure.messaging.schema_utils import SchemaRegistryConfig
 class InMemoryEventsConsumer(EventsConsumer):
     def __init__(
         self,
-        conn_options: Optional[ConsumerConnectionOptions] = None,
-        msg_options: Optional[ConsumerMessagesOptions] = None,
-        schema_config: Optional[SchemaRegistryConfig] = None,
+        conn_options: ConsumerConnectionOptions,
+        msg_options: ConsumerMessagesOptions,
+        schema_config: SchemaRegistryConfig,
         test: bool = False,
     ) -> None:
-        self._topics: list[str] = []
+        self._topic = schema_config.topic_name
         self._messages: dict[str, list[Event]] = {}
 
-    def subscribe(self, topics: str | list[str]) -> None:
-        if isinstance(topics, str):
-            self._topics.append(topics)
-        else:
-            for topic in topics:
-                self._topics.append(topic)
+    def subscribe(self, topic: str) -> None:
+        self._topic = topic
 
     def consume(self, limit: int) -> list[Event]:
-        messages: list[Event] = []
-        for topic in self._topics:
-            topic_messages = self._messages.get(topic)
-            if topic_messages is not None:
-                messages += topic_messages
+        messages = self._messages[self._topic]
+        if len(messages) != limit:
+            raise RuntimeError(f"Found {len(messages)} events, but limit is {limit}")
         return messages[:limit]
