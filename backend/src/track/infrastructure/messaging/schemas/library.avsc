@@ -1,0 +1,28 @@
+{
+    "namespace": "app.wisniewski.radio",
+    "type": "record",
+    "name": "library",
+    "fields": [
+        {
+            "name": "event_name",
+            "type": "string"
+        },
+        {
+            "name": "identity",
+            "type": "TrackProvidedIdentity"
+        },
+        {
+            "name": "previous_status",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "created",
+            "type": "long",
+            "logicalType": "timestamp-micros"
+        }
+    ]
+}
