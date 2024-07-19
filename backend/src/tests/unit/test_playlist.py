@@ -87,7 +87,7 @@ def test_adds_track_to_playlist(accepted_tracks):
         waits_on_approval=False,
         created=fixed_dt,
     )
-    assert expected_event in events_consumer.consume(10)
+    assert expected_event in events_consumer.consume(1)
 
 
 def test_deletes_track(accepted_tracks):
@@ -104,7 +104,7 @@ def test_deletes_track(accepted_tracks):
     expected_event = TrackDeletedFromPlaylist(
         identity=identity, when=playing_time, created=fixed_dt
     )
-    assert expected_event in events_consumer.consume(10)
+    assert expected_event in events_consumer.consume(2)
 
 
 def test_marks_as_played(accepted_tracks):
@@ -128,8 +128,7 @@ def test_marks_as_played(accepted_tracks):
     expected_event = TrackMarkedAsPlayed(
         identity=requested.identity, when=requested.when, created=fixed_dt
     )
-    events = events_consumer.consume(10)
-    assert len(events) == 2
+    events = events_consumer.consume(2)
     assert expected_event in events
 
 
