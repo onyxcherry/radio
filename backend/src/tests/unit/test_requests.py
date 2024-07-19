@@ -2,6 +2,11 @@ from datetime import date
 from typing import Any
 from kink import di
 from pytest import fixture, raises, mark
+from track.infrastructure.messaging.types import (
+    LibraryEventsProducer,
+    PlaylistEventsConsumer,
+    PlaylistEventsProducer,
+)
 from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.builder import NotKnownProviderError
 from building_blocks.clock import Clock
@@ -19,8 +24,9 @@ from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity, TrackUrl
 
 clock = di[Clock]
-events_producer = di[EventsProducer]
-events_consumer = di[EventsConsumer]
+library_events_producer: EventsProducer = di[LibraryEventsProducer]
+playlist_events_producer: EventsProducer = di[PlaylistEventsProducer]
+playlist_events_consumer: EventsConsumer = di[PlaylistEventsConsumer]
 playlist = di[Playlist]
 library = di[Library]
 playlist_repo = playlist._playlist_repository
@@ -29,8 +35,9 @@ library_repo = library._library_repository
 rs = RequestsService(
     library_repo,
     playlist_repo,
-    events_producer,
-    events_consumer,
+    library_events_producer,
+    playlist_events_producer,
+    playlist_events_consumer,
     clock,
 )
 
