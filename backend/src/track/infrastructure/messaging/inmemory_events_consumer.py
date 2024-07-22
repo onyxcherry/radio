@@ -24,7 +24,11 @@ class InMemoryEventsConsumer(EventsConsumer):
         self._topic = topic
 
     def consume(self, limit: int) -> list[Event]:
-        messages = self._messages[self._topic]
+        messages = self._messages.get(self._topic) or list()
         if len(messages) != limit:
             raise RuntimeError(f"Found {len(messages)} events, but limit is {limit}")
-        return messages[:limit]
+        self._messages = {}
+        return messages
+
+    def reset(self) -> None:
+        self._messages = {}

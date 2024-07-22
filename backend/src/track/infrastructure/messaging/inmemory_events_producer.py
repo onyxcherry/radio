@@ -26,3 +26,6 @@ class InMemoryEventsProducer(EventsProducer):
         if self._topic_name not in self._messages:
             self._messages[self._topic_name] = []
         self._messages[self._topic_name].append(message)
+
+    def reset(self) -> None:
+        self._messages = {}

@@ -1,7 +1,10 @@
 from datetime import date
-from typing import Any
+from typing import Any, Sequence
 from kink import di
 from pytest import fixture, raises, mark
+from track.domain.events.playlist import TrackDeletedFromPlaylist
+from tests.helpers.dt import fixed_dt
+from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from track.infrastructure.messaging.types import (
     LibraryEventsProducer,
     PlaylistEventsConsumer,
@@ -22,6 +25,7 @@ from track.application.requests_service import (
 )
 from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity, TrackUrl
+from .fixtures.events import reset_events, provide_config
 
 clock = di[Clock]
 library_events_producer: EventsProducer = di[LibraryEventsProducer]
@@ -40,6 +44,38 @@ rs = RequestsService(
     playlist_events_consumer,
     clock,
 )
+
+
+_realmsgbroker: bool
+
+
+def sync_messages():
+    sync_messages_from_producer_to_consumer(
+        playlist_events_producer,
+        playlist_events_consumer,
+        real_msg_broker=_realmsgbroker,
+    )
+
+
+@fixture(autouse=True)
+def reset(provide_config):
+    global _realmsgbroker
+    _realmsgbroker = provide_config
+
+    playlist_repo.delete_all()
+    library_repo.delete_all()
+
+    events_handlers: Sequence = [
+        library_events_producer,
+        playlist_events_producer,
+        playlist_events_consumer,
+    ]
+    reset_events(_realmsgbroker, events_handlers)
+
+    yield
+
+    playlist_repo.delete_all()
+    library_repo.delete_all()
 
 
 @fixture
@@ -95,17 +131,6 @@ def max_tracks_count_on_queue():
 
         req = TrackRequested(track.identity, playing_time)
         playlist.add(req)
-
-
-@fixture(autouse=True)
-def reset():
-    playlist_repo.delete_all()
-    library_repo.delete_all()
-
-    yield
-
-    playlist_repo.delete_all()
-    library_repo.delete_all()
 
 
 def test_adds_track_to_library_successfully():
@@ -330,3 +355,28 @@ def test_multiple_playlist_errors(yt_tracks, whole_break_scheduled):
 #     count = playlist.get_tracks_duration_on_break()
 #     playlist.
 #     assert count == 1
+
+
+def test_rejecting_track_removes_all_playlist_occurrences(yt_tracks):
+    track = NEW_YT_TRACKS[0]
+    library.accept(track.identity)
+    first_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 1))
+    second_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 2))
+    assert playlist.add(TrackRequested(track.identity, first_pt))
+    assert playlist.add(TrackRequested(track.identity, second_pt))
+
+    rs.reject(track.identity)
+
+    assert playlist.get(track.identity, first_pt.date_) is None
+    assert playlist.get(track.identity, second_pt.date_) is None
+    sync_messages()
+
+    event_1 = TrackDeletedFromPlaylist(
+        identity=track.identity, when=first_pt, created=fixed_dt
+    )
+    event_2 = TrackDeletedFromPlaylist(
+        identity=track.identity, when=second_pt, created=fixed_dt
+    )
+    events = playlist_events_consumer.consume(4)
+    assert event_1 in events
+    assert event_2 in events
