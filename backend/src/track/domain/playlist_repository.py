@@ -11,7 +11,7 @@ class PlaylistRepository(ABC):
     @abstractmethod
     def get_track_on(
         self,
-        track: TrackProvidedIdentity,
+        identity: TrackProvidedIdentity,
         date_: date,
         break_: Optional[Breaks] = None,
     ) -> Optional[TrackQueued]:

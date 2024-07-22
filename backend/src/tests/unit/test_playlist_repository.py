@@ -1,19 +1,19 @@
 from datetime import date
-from pytest import fixture
+from kink import di
+from pytest import fixture, mark
+from track.application.library import Library
+from track.application.playlist import Playlist
 from track.domain.entities import TrackToQueue
-from tests.infra.data import IDENTITIES, TRACKS
-from track.infrastructure.db_library_repository import DBLibraryRepository
-from track.infrastructure.db_playlist_repository import DBPlaylistRepository
+from tests.unit.data import IDENTITIES, TRACKS
 from track.domain.breaks import Breaks, PlayingTime
 
 
-# playlist_repo = di[PlaylistRepository]
-# library_repo = di[LibraryRepository]
+playlist = di[Playlist]
+library = di[Library]
+playlist_repo = playlist._playlist_repository
+library_repo = library._library_repository
 
-playlist_repo = DBPlaylistRepository()
-library_repo = DBLibraryRepository()
-
-
+# dziwne, zmienić typ
 TRACK_QUEUED = TrackToQueue(
     identity=IDENTITIES[0],
     when=PlayingTime(date_=date(2099, 1, 1), break_=Breaks.FIRST),
@@ -39,9 +39,7 @@ def reset():
 
 def test_gets_track():
     result = playlist_repo.get_track_on(
-        identity=TRACK_QUEUED.identity,
-        date_=TRACK_QUEUED.when.date_,
-        break_=TRACK_QUEUED.when.break_,
+        TRACK_QUEUED.identity, TRACK_QUEUED.when.date_, TRACK_QUEUED.when.break_
     )
     assert result is not None
     assert result.identity == TRACK_QUEUED.identity
@@ -68,6 +66,7 @@ def test_counts_tracks():
     assert result == 1
 
 
+@mark.realdb()
 def test_gets_sum_of_durations():
     result = playlist_repo.sum_durations_on(
         date_=TRACK_QUEUED.when.date_, break_=TRACK_QUEUED.when.break_
@@ -83,9 +82,7 @@ def test_adds_track_to_playlist():
 
     playlist_repo.insert(new_queued_track)
     result = playlist_repo.get_track_on(
-        identity=new_queued_track.identity,
-        date_=playing_time.date_,
-        break_=playing_time.break_,
+        new_queued_track.identity, playing_time.date_, playing_time.break_
     )
     assert result is not None
     assert result.identity == new_queued_track.identity
