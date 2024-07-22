@@ -3,7 +3,7 @@ from kink import di
 from pytest import fixture, mark
 from track.application.library import Library
 from track.application.playlist import Playlist
-from track.domain.entities import TrackToQueue
+from track.domain.entities import TrackQueued, TrackToQueue
 from tests.unit.data import IDENTITIES, TRACKS
 from track.domain.breaks import Breaks, PlayingTime
 
@@ -13,11 +13,17 @@ library = di[Library]
 playlist_repo = playlist._playlist_repository
 library_repo = library._library_repository
 
-# dziwne, zmienić typ
-TRACK_QUEUED = TrackToQueue(
+TRACK_TO_QUEUE = TrackToQueue(
     identity=IDENTITIES[0],
     when=PlayingTime(date_=date(2099, 1, 1), break_=Breaks.FIRST),
     played=False,
+)
+
+TRACK_QUEUED = TrackQueued(
+    identity=TRACK_TO_QUEUE.identity,
+    when=TRACK_TO_QUEUE.when,
+    played=TRACK_TO_QUEUE.played,
+    waiting=False,
 )
 
 
@@ -29,7 +35,7 @@ def reset():
     library_repo.add(TRACKS[0])
     library_repo.add(TRACKS[1])
 
-    playlist_repo.insert(TRACK_QUEUED)
+    playlist_repo.insert(TRACK_TO_QUEUE)
 
     yield
 
