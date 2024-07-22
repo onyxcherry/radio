@@ -23,9 +23,11 @@ class DBLibraryRepository(LibraryRepository):
 
     def filter_by_statuses(self, statuses: list[Status]) -> list[TrackInLibrary]:
         # paginacja?
-        stmt = select(LibraryTrackModel).where(
-            LibraryTrackModel.status.in_(statuses),
-        )
+        stmt = select(LibraryTrackModel)
+        if len(statuses) > 0:
+            stmt = stmt.where(
+                LibraryTrackModel.status.in_(statuses),
+            )
         with SessionLocal() as session:
             result = session.execute(stmt).all()
 
