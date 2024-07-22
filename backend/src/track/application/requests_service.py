@@ -178,3 +178,14 @@ class RequestsService:
             return RequestResult(success=True, errors=None)
         else:
             return RequestResult(success=False, errors=playlist_errors)
+
+    def accept(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
+        new_status = Status.ACCEPTED
+        result = self._library._change_status(identity, new_status)
+        return result.current
+
+    def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
+        new_status = Status.REJECTED
+        result = self._library._change_status(identity, new_status)
+        self._playlist.delete_all_by(identity)
+        return result.current

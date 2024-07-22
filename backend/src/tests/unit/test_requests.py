@@ -2,10 +2,12 @@ from datetime import date
 from typing import Any, Sequence
 from kink import di
 from pytest import fixture, raises, mark
+from track.domain.events.library import TrackAccepted, TrackRejected
 from track.domain.events.playlist import TrackDeletedFromPlaylist
 from tests.helpers.dt import fixed_dt
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from track.infrastructure.messaging.types import (
+    LibraryEventsConsumer,
     LibraryEventsProducer,
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
@@ -29,6 +31,7 @@ from .fixtures.events import reset_events, provide_config
 
 clock = di[Clock]
 library_events_producer: EventsProducer = di[LibraryEventsProducer]
+library_events_consumer: EventsConsumer = di[LibraryEventsConsumer]
 playlist_events_producer: EventsProducer = di[PlaylistEventsProducer]
 playlist_events_consumer: EventsConsumer = di[PlaylistEventsConsumer]
 playlist = di[Playlist]
@@ -47,9 +50,23 @@ rs = RequestsService(
 
 
 _realmsgbroker: bool
+_events_handlers: Sequence = [
+    library_events_producer,
+    library_events_consumer,
+    playlist_events_producer,
+    playlist_events_consumer,
+]
 
 
-def sync_messages():
+def sync_library_messages():
+    sync_messages_from_producer_to_consumer(
+        library_events_producer,
+        library_events_consumer,
+        real_msg_broker=_realmsgbroker,
+    )
+
+
+def sync_playlist_messages():
     sync_messages_from_producer_to_consumer(
         playlist_events_producer,
         playlist_events_consumer,
@@ -65,12 +82,7 @@ def reset(provide_config):
     playlist_repo.delete_all()
     library_repo.delete_all()
 
-    events_handlers: Sequence = [
-        library_events_producer,
-        playlist_events_producer,
-        playlist_events_consumer,
-    ]
-    reset_events(_realmsgbroker, events_handlers)
+    reset_events(_realmsgbroker, _events_handlers)
 
     yield
 
@@ -85,6 +97,8 @@ def yt_tracks():
 
     for track in NEW_YT_TRACKS:
         library.add(track)
+
+    reset_events(_realmsgbroker, _events_handlers)
 
 
 @fixture
@@ -106,10 +120,12 @@ def whole_break_scheduled():
             duration=Seconds(break_duration // tracks_count),
         )
         library.add(track)
-        library.accept(track.identity)
+        rs.accept(track.identity)
 
         req = TrackRequested(track.identity, playing_time)
         playlist.add(req)
+
+    reset_events(_realmsgbroker, _events_handlers)
 
 
 @fixture
@@ -127,10 +143,12 @@ def max_tracks_count_on_queue():
             duration=Seconds(3 * idx),
         )
         library.add(track)
-        library.accept(track.identity)
+        rs.accept(track.identity)
 
         req = TrackRequested(track.identity, playing_time)
         playlist.add(req)
+
+    reset_events(_realmsgbroker, _events_handlers)
 
 
 def test_adds_track_to_library_successfully():
@@ -219,7 +237,7 @@ def test_adds_pending_approval_track_to_playlist(yt_tracks):
 @mark.realdb()
 def test_adds_accepted_track_to_playlist(yt_tracks):
     track = NEW_YT_TRACKS[0]
-    library.accept(track.identity)
+    rs.accept(track.identity)
     pt = FUTURE_PT
 
     result = rs.request_on(track.identity, pt)
@@ -233,7 +251,7 @@ def test_adds_accepted_track_to_playlist(yt_tracks):
 
 def test_not_add_rejected_track_to_playlist(yt_tracks):
     track = NEW_YT_TRACKS[0]
-    library.reject(track.identity)
+    rs.reject(track.identity)
     pt = FUTURE_PT
 
     result = rs.request_on(track.identity, pt)
@@ -271,7 +289,7 @@ def test_error_as_requested_on_weekend(yt_tracks):
 @mark.realdb()
 def test_error_as_track_played_on_this_day(yt_tracks):
     track = NEW_YT_TRACKS[0]
-    library.accept(track.identity)
+    rs.accept(track.identity)
     same_day = date(2099, 1, 1)
     pt1 = PlayingTime(break_=Breaks.FIRST, date_=same_day)
     pt2 = PlayingTime(break_=Breaks.SECOND, date_=same_day)
@@ -292,7 +310,7 @@ def test_error_as_track_played_on_this_day(yt_tracks):
 @mark.realdb()
 def test_error_as_track_already_queued_on_this_day(yt_tracks):
     track = NEW_YT_TRACKS[0]
-    library.accept(track.identity)
+    rs.accept(track.identity)
     same_day = date(2099, 1, 1)
     pt1 = PlayingTime(break_=Breaks.FIRST, date_=same_day)
     pt2 = PlayingTime(break_=Breaks.SECOND, date_=same_day)
@@ -358,9 +376,43 @@ def test_multiple_playlist_errors(yt_tracks, whole_break_scheduled):
 #     assert count == 1
 
 
+def test_accept_track(yt_tracks):
+    track = NEW_YT_TRACKS[0]
+
+    rs.accept(track.identity)
+
+    got_track = library.get(track.identity)
+    assert got_track is not None
+    assert got_track.status == Status.ACCEPTED
+    sync_library_messages()
+    expected_event = TrackAccepted(
+        identity=track.identity,
+        previous_status=Status.PENDING_APPROVAL,
+        created=fixed_dt,
+    )
+    assert expected_event in library_events_consumer.consume(1)
+
+
+def test_reject_track(yt_tracks):
+    track = NEW_YT_TRACKS[0]
+
+    rs.reject(track.identity)
+
+    got_track = library.get(track.identity)
+    assert got_track is not None
+    assert got_track.status == Status.REJECTED
+    sync_library_messages()
+    expected_event = TrackRejected(
+        identity=track.identity,
+        previous_status=Status.PENDING_APPROVAL,
+        created=fixed_dt,
+    )
+    assert expected_event in library_events_consumer.consume(1)
+
+
 def test_rejecting_track_removes_all_playlist_occurrences(yt_tracks):
     track = NEW_YT_TRACKS[0]
-    library.accept(track.identity)
+    rs.accept(track.identity)
     first_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 1))
     second_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 2))
     assert playlist.add(TrackRequested(track.identity, first_pt))
@@ -370,7 +422,7 @@ def test_rejecting_track_removes_all_playlist_occurrences(yt_tracks):
 
     assert playlist.get(track.identity, first_pt.date_) is None
     assert playlist.get(track.identity, second_pt.date_) is None
-    sync_messages()
+    sync_playlist_messages()
 
     event_1 = TrackDeletedFromPlaylist(
         identity=track.identity, when=first_pt, created=fixed_dt
