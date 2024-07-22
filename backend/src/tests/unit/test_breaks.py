@@ -1,5 +1,5 @@
 from datetime import date
-from src.track.domain.breaks import (
+from track.domain.breaks import (
     Breaks,
     PlayingTime,
     get_breaks_starting_times,
