@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 
-from track.domain.entities import TrackToQueue
+from track.domain.entities import TrackToQueue, TrackUnqueued
 from src.track.domain.breaks import Breaks
 from src.track.domain.entities import TrackQueued
 from src.track.domain.provided import Seconds, TrackProvidedIdentity
@@ -144,5 +144,31 @@ class InMemoryPlaylistRepository(PlaylistRepository):
         else:
             return track
 
-    def delete_all(self) -> None:
+    def delete_all(self) -> int:
+        removed: list[TrackQueued] = []
+        for breaks_with_queued in list(self._tracks.values()):
+            for track_list in list(breaks_with_queued.values()):
+                removed += track_list
         self._tracks = {}
+        return len(removed)
+
+    def delete_all_with_identity(
+        self, identity: TrackProvidedIdentity
+    ) -> list[TrackUnqueued]:
+        removed: list[TrackQueued] = []
+        unqueued: list[TrackUnqueued] = []
+
+        for breaks_with_queued in list(self._tracks.values()):
+            for break_key, track_list in list(breaks_with_queued.items()):
+                filtered: list[TrackQueued] = []
+                for track in track_list:
+                    if track.identity == identity:
+                        removed.append(track)
+                    else:
+                        filtered.append(track)
+                breaks_with_queued[break_key] = filtered
+        for track_removed in removed:
+            track_unqueued = TrackUnqueued(identity=identity, when=track_removed.when)
+            unqueued.append(track_unqueued)
+
+        return unqueued

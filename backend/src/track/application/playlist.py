@@ -9,7 +9,12 @@ from track.domain.events.playlist import (
     TrackDeletedFromPlaylist,
     TrackMarkedAsPlayed,
 )
-from track.domain.entities import TrackQueued, TrackRequested, TrackToQueue
+from track.domain.entities import (
+    TrackQueued,
+    TrackRequested,
+    TrackToQueue,
+    TrackUnqueued,
+)
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Seconds, TrackProvidedIdentity
@@ -60,6 +65,11 @@ class Playlist:
             req.when,
             played=False,
         )
+        already_added = self._playlist_repository.get_track_on(
+            req.identity, req.when.date_, req.when.break_
+        )
+        if already_added is not None:
+            return already_added
         saved = self._playlist_repository.insert(to_save)
         event = TrackAddedToPlaylist(
             saved.identity, saved.when, saved.waiting, created=self._clock.now()
@@ -75,6 +85,14 @@ class Playlist:
             )
             self._events_producer.produce(message=event)
         return deleted
+
+    def delete_all_by(self, identity: TrackProvidedIdentity) -> list[TrackUnqueued]:
+        deleted_list = self._playlist_repository.delete_all_with_identity(identity)
+        now = self._clock.now()
+        for track in deleted_list:
+            event = TrackDeletedFromPlaylist(track.identity, track.when, created=now)
+            self._events_producer.produce(message=event)
+        return deleted_list
 
     def mark_as_played(self, track: TrackQueued) -> TrackQueued:
         to_save = track

@@ -47,6 +47,12 @@ class TrackQueued:
 
 
 @dataclass
+class TrackUnqueued:
+    identity: TrackProvidedIdentity
+    when: PlayingTime
+
+
+@dataclass
 class TrackToQueue:
     identity: TrackProvidedIdentity
     when: PlayingTime
