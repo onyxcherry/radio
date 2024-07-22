@@ -65,37 +65,7 @@ def test_new_track_has_pending_approval_state():
     assert expected_event in events_consumer.consume(1)
 
 
-def test_accept_track(tracks_one_accepted):
-    track = PENDING_APPROVAL_TRACKS[0]
-    library.accept(track.identity)
 
-    got_track = library.get(track.identity)
-    assert got_track is not None
-    assert got_track.status == Status.ACCEPTED
-    sync_messages()
-    expected_event = TrackAccepted(
-        identity=track.identity,
-        previous_status=Status.PENDING_APPROVAL,
-        created=fixed_dt,
-    )
-    assert expected_event in events_consumer.consume(1)
-
-
-def test_reject_track(tracks_one_accepted):
-    track = PENDING_APPROVAL_TRACKS[0]
-
-    library.reject(track.identity)
-
-    got_track = library.get(track.identity)
-    assert got_track is not None
-    assert got_track.status == Status.REJECTED
-    sync_messages()
-    expected_event = TrackRejected(
-        identity=track.identity,
-        previous_status=Status.PENDING_APPROVAL,
-        created=fixed_dt,
-    )
-    assert expected_event in events_consumer.consume(1)
 
 
 def test_filters_tracks_by_status(tracks_one_accepted):

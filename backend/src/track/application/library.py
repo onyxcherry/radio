@@ -65,22 +65,15 @@ class Library:
         old_track = deepcopy(track)
         track.status = status
         new_track = self._library_repository.update(track)
+        if status == Status.ACCEPTED:
+            event = TrackAccepted(
+                identity, previous_status=old_track.status, created=self._clock.now()
+            )
+            self._events_producer.produce(message=event)
+        elif status == Status.REJECTED:
+            event = TrackRejected(
+                identity, previous_status=old_track.status, created=self._clock.now()
+            )
+            self._events_producer.produce(message=event)
+
         return _ChangeStatusResult(previous=old_track, current=new_track)
-
-    def accept(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
-        new_status = Status.ACCEPTED
-        result = self._change_status(identity, new_status)
-        event = TrackAccepted(
-            identity, previous_status=result.previous.status, created=self._clock.now()
-        )
-        self._events_producer.produce(message=event)
-        return result.current
-
-    def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
-        new_status = Status.REJECTED
-        result = self._change_status(identity, new_status)
-        event = TrackRejected(
-            identity, previous_status=result.previous.status, created=self._clock.now()
-        )
-        self._events_producer.produce(message=event)
-        return result.current
