@@ -6,7 +6,7 @@ from track.application.models.library import LibraryTrackModel
 from track.application.models.queue import QueueTrackModel
 from track.infrastructure.persistence.database import SessionLocal
 from track.domain.breaks import Breaks, PlayingTime
-from track.domain.entities import Status, TrackQueued, TrackToQueue
+from track.domain.entities import Status, TrackQueued, TrackToQueue, TrackUnqueued
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity
 
@@ -151,13 +151,14 @@ class DBPlaylistRepository(PlaylistRepository):
 
         return track
 
-    def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
+    def delete(self, track: TrackQueued) -> Optional[TrackUnqueued]:
         track_id = self._get_track_id(track.identity)
         stmt = (
             delete(QueueTrackModel)
             .where(QueueTrackModel.break_ == track.when.break_)
             .where(QueueTrackModel.date_ == track.when.date_)
             .where(QueueTrackModel.track_id == track_id)
+            .where(QueueTrackModel.played == False)
         )
         with SessionLocal() as session:
             result = session.execute(stmt).rowcount
@@ -165,7 +166,8 @@ class DBPlaylistRepository(PlaylistRepository):
             if result == 0:
                 return None
             elif result == 1:
-                return track
+                track_unqueued = TrackUnqueued(identity=track.identity, when=track.when)
+                return track_unqueued
             else:
                 raise RuntimeError("Why more than 1?!")
 
@@ -175,6 +177,43 @@ class DBPlaylistRepository(PlaylistRepository):
             result = session.execute(stmt).rowcount
             session.commit()
             return result
+
+    def delete_all_with_identity(
+        self, identity: TrackProvidedIdentity
+    ) -> list[TrackUnqueued]:
+        track_id_subquery = (
+            select(LibraryTrackModel.id)
+            .filter(LibraryTrackModel.identifier == identity.identifier)
+            .filter(LibraryTrackModel.provider == identity.provider)
+        ).scalar_subquery()
+        stmt = select(
+            QueueTrackModel.id,
+            QueueTrackModel.date_,
+            QueueTrackModel.break_,
+        ).where(QueueTrackModel.track_id == track_id_subquery)
+
+        tracks_unqueued = []
+        ids_to_delete = []
+
+        with SessionLocal() as session:
+            result = session.execute(stmt)
+
+        for data in result:
+            data_dict = data._asdict()
+            id_ = data_dict["id"]
+            break_ = data_dict["break_"]
+            date_ = data_dict["date_"]
+            pt = PlayingTime(break_=break_, date_=date_)
+            track = TrackUnqueued(identity=identity, when=pt)
+            tracks_unqueued.append(track)
+            ids_to_delete.append(id_)
+
+        stmt = delete(QueueTrackModel).where(QueueTrackModel.id.in_(ids_to_delete))
+        with SessionLocal() as session:
+            result = session.execute(stmt).rowcount
+            session.commit()
+
+        return tracks_unqueued
 
     @staticmethod
     def _get_track_id(identity: TrackProvidedIdentity) -> int:

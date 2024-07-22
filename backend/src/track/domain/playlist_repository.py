@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional
 from track.domain.breaks import Breaks
 
-from track.domain.entities import TrackQueued, TrackToQueue
+from track.domain.entities import TrackQueued, TrackToQueue, TrackUnqueued
 from track.domain.provided import Seconds, TrackProvidedIdentity
 
 
@@ -60,5 +60,11 @@ class PlaylistRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_all(self) -> None:
+    def delete_all(self) -> int:
+        pass
+
+    @abstractmethod
+    def delete_all_with_identity(
+        self, identity: TrackProvidedIdentity
+    ) -> list[TrackUnqueued]:
         pass
