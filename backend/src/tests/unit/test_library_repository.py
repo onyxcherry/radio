@@ -1,11 +1,13 @@
+from kink import di
 from pytest import fixture
 
+from tests.unit.data import IDENTITIES, TRACKS
+from track.application.library import Library
 from track.domain.entities import Status
-from track.infrastructure.db_library_repository import DBLibraryRepository
-from tests.infra.data import IDENTITIES, TRACKS
 
 
-library_repo = DBLibraryRepository()
+library = di[Library]
+library_repo = library._library_repository
 
 
 @fixture(autouse=True)
