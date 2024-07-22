@@ -135,10 +135,10 @@ def max_tracks_count_on_queue():
 
 def test_adds_track_to_library_successfully():
     identity = NEW_YT_TRACKS[0].identity
-    result, errors = rs.add_to_library(identity)
+    result = rs.add_to_library(identity)
     assert result.added is True
     assert result.waits_on_decision is True
-    assert errors is None
+    assert result.errors is None
 
     got_track = library.get(identity)
     assert got_track is not None
@@ -149,7 +149,8 @@ def test_too_long_track_not_added_to_library():
     identity = TrackProvidedIdentity(
         identifier=Identifier("c_iRx2Un07k"), provider="Youtube"
     )
-    result, errors = rs.add_to_library(identity)
+    result = rs.add_to_library(identity)
+    errors = result.errors
     assert result.added is False
     assert result.waits_on_decision is False
     assert errors is not None and len(errors) == 1
@@ -175,11 +176,11 @@ def test_requests_to_add_already_pending_approval_track_in_library():
     )
     library.add(track)
 
-    result, errors = rs.add_to_library(identity)
+    result = rs.add_to_library(identity)
 
     assert result.added is False
     assert result.waits_on_decision is True
-    assert errors is None
+    assert result.errors is None
 
     got_track = library.get(identity)
     assert got_track is not None

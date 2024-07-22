@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 import enum
-from typing import NewType, Optional
+from typing import Optional, Sequence
 from kink import inject
 from track.application.interfaces.events import EventsConsumer, EventsProducer
-from track.domain.entities import NewTrack, Status, TrackRequested
+from track.domain.entities import NewTrack, Status, TrackInLibrary, TrackRequested
 from building_blocks.clock import Clock
 from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.application.library import Library
@@ -35,20 +35,17 @@ class PlayingTimeError(enum.StrEnum):
     MAX_COUNT_EXEEDED = enum.auto()
 
 
-LibraryTrackErrors = NewType("LibraryTrackErrors", list[LibraryTrackError])
-PlayingTimeErrors = NewType("PlayingTimeErrors", list[PlayingTimeError])
-
-
 @dataclass(frozen=True)
 class AddToLibraryStatus:
     added: bool
     waits_on_decision: bool
+    errors: Optional[list[LibraryTrackError]] = None
 
 
 @dataclass(frozen=True)
 class RequestResult:
     success: bool
-    errors: Optional[LibraryTrackErrors | PlayingTimeErrors]
+    errors: Optional[Sequence[LibraryTrackError | PlayingTimeError]] = None
 
 
 @inject
@@ -86,7 +83,9 @@ class RequestsService:
         break_duration = get_breaks_durations()[break_]
         return Seconds(break_duration - duration - margin)
 
-    def can_add_to_playlist(self, req: TrackRequested) -> Optional[PlayingTimeErrors]:
+    def can_add_to_playlist(
+        self, req: TrackRequested
+    ) -> Optional[list[PlayingTimeError]]:
         errors = list()
 
         if self._requested_playing_time_passed(req.when):
@@ -118,30 +117,25 @@ class RequestsService:
             errors.append(PlayingTimeError.MAX_COUNT_EXEEDED)
 
         if len(errors) > 0:
-            return PlayingTimeErrors(errors)
+            return errors
         return None
 
-    def add_to_library(
-        self, identity: TrackProvidedIdentity
-    ) -> tuple[AddToLibraryStatus, Optional[LibraryTrackErrors]]:
+    def add_to_library(self, identity: TrackProvidedIdentity) -> AddToLibraryStatus:
         track_in_library = self._library.get(identity)
         track_status = track_in_library.status if track_in_library is not None else None
 
         if track_status == Status.REJECTED:
-            return (
-                AddToLibraryStatus(added=False, waits_on_decision=False),
-                LibraryTrackErrors([LibraryTrackError.TRACK_REJECTED]),
+            return AddToLibraryStatus(
+                added=False,
+                waits_on_decision=False,
+                errors=[LibraryTrackError.TRACK_REJECTED],
             )
+
         elif track_status == Status.ACCEPTED:
-            return (
-                AddToLibraryStatus(added=False, waits_on_decision=False),
-                None,
-            )
+            return AddToLibraryStatus(added=False, waits_on_decision=False)
+
         elif track_status == Status.PENDING_APPROVAL:
-            return (
-                AddToLibraryStatus(added=False, waits_on_decision=True),
-                None,
-            )
+            return AddToLibraryStatus(added=False, waits_on_decision=True)
 
         elif track_status is None:
             track = TrackBuilder.build(identity)
@@ -154,9 +148,8 @@ class RequestsService:
                 errors.append(LibraryTrackError.INVALID_DURATION)
 
             if len(errors) > 0:
-                return (
-                    AddToLibraryStatus(added=False, waits_on_decision=False),
-                    LibraryTrackErrors(errors),
+                return AddToLibraryStatus(
+                    added=False, waits_on_decision=False, errors=errors
                 )
 
             new_track = NewTrack(
@@ -166,10 +159,7 @@ class RequestsService:
                 duration=track.duration,
             )
             self._library.add(new_track)
-            return (
-                AddToLibraryStatus(added=True, waits_on_decision=True),
-                None,
-            )
+            return AddToLibraryStatus(added=True, waits_on_decision=True)
 
         else:
             raise NotImplementedError("Słabo generalnie")
@@ -177,9 +167,9 @@ class RequestsService:
     def request_on(
         self, identity: TrackProvidedIdentity, when: PlayingTime
     ) -> RequestResult:
-        library_result, library_errors = self.add_to_library(identity)
-        if library_errors is not None and len(library_errors) > 0:
-            return RequestResult(success=False, errors=library_errors)
+        library_result = self.add_to_library(identity)
+        if library_result.errors is not None and len(library_result.errors) > 0:
+            return RequestResult(success=False, errors=library_result.errors)
 
         requested = TrackRequested(identity, when)
         playlist_errors = self.can_add_to_playlist(requested)
