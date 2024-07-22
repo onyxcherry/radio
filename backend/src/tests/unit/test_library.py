@@ -1,5 +1,7 @@
+from typing import Sequence
 from kink import di
 from pytest import fixture
+from tests.unit.fixtures.events import reset_events, provide_config
 from track.infrastructure.messaging.types import LibraryEventsConsumer
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from building_blocks.clock import Clock
@@ -8,7 +10,6 @@ from track.domain.events.library import (
     TrackAddedToLibrary,
     TrackRejected,
 )
-from track.application.interfaces.events import EventsConsumer
 from tests.unit.data import ACCEPTED_TRACKS, NEW_TRACKS, PENDING_APPROVAL_TRACKS
 from track.application.library import Library
 from track.domain.entities import Status
@@ -16,6 +17,7 @@ from tests.helpers.dt import fixed_dt
 
 
 library = di[Library]
+library_repo = library._library_repository
 events_consumer = di[LibraryEventsConsumer]
 events_consumer.subscribe(library._events_topic)
 events_producer = library._events_producer
@@ -31,16 +33,15 @@ def sync_messages():
     )
 
 
-@fixture(autouse=True, scope="session")
-def provide_config(request):
-    global _realmsgbroker
-    _realmsgbroker = request.config.getoption("realmsgbroker")
-
-
 @fixture(autouse=True)
-def reset():
-    library_repo = library._library_repository
+def reset(provide_config):
+    global _realmsgbroker
+    _realmsgbroker = provide_config
+
     library_repo.delete_all()
+
+    events_handlers: Sequence = [events_producer, events_consumer]
+    reset_events(_realmsgbroker, events_handlers)
 
     yield
 
@@ -49,7 +50,6 @@ def reset():
 
 @fixture()
 def tracks_one_accepted(reset):
-    library_repo = library._library_repository
     library_repo.add(PENDING_APPROVAL_TRACKS[0])
     library_repo.add(ACCEPTED_TRACKS[0])
 

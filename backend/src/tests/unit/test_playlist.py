@@ -1,5 +1,7 @@
+from typing import Sequence
 from kink import di
 from pytest import fixture, mark
+from tests.unit.fixtures.events import reset_events, provide_config
 from track.infrastructure.messaging.types import PlaylistEventsConsumer
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from track.domain.events.playlist import (
@@ -18,6 +20,8 @@ from tests.helpers.dt import fixed_dt
 
 playlist = di[Playlist]
 library = di[Library]
+playlist_repo = playlist._playlist_repository
+library_repo = library._library_repository
 events_consumer = di[PlaylistEventsConsumer]
 events_consumer.subscribe(playlist._events_topic)
 events_producer = playlist._events_producer
@@ -33,18 +37,16 @@ def sync_messages():
     )
 
 
-@fixture(autouse=True, scope="session")
-def provide_config(request):
-    global _realmsgbroker
-    _realmsgbroker = request.config.getoption("realmsgbroker")
-
-
 @fixture(autouse=True)
-def reset():
-    playlist_repo = playlist._playlist_repository
-    library_repo = library._library_repository
+def reset(provide_config):
+    global _realmsgbroker
+    _realmsgbroker = provide_config
+
     playlist_repo.delete_all()
     library_repo.delete_all()
+
+    events_handlers: Sequence = [events_producer, events_consumer]
+    reset_events(_realmsgbroker, events_handlers)
 
     yield
 
@@ -54,16 +56,12 @@ def reset():
 
 @fixture
 def accepted_tracks():
-    library_repo = library._library_repository
-
     for track in ACCEPTED_TRACKS:
         library_repo.add(track)
 
 
 @fixture
 def pending_approval_tracks():
-    library_repo = library._library_repository
-
     for track in PENDING_APPROVAL_TRACKS:
         library_repo.add(track)
 
