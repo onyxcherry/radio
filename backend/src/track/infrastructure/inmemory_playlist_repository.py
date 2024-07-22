@@ -2,10 +2,10 @@ from datetime import date
 from typing import Optional
 
 from track.domain.entities import TrackToQueue, TrackUnqueued
-from src.track.domain.breaks import Breaks
-from src.track.domain.entities import TrackQueued
-from src.track.domain.provided import Seconds, TrackProvidedIdentity
-from src.track.domain.playlist_repository import PlaylistRepository
+from track.domain.breaks import Breaks
+from track.domain.entities import TrackQueued
+from track.domain.provided import Seconds, TrackProvidedIdentity
+from track.domain.playlist_repository import PlaylistRepository
 
 
 class InMemoryPlaylistRepository(PlaylistRepository):

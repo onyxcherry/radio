@@ -1,4 +1,4 @@
-from src.track.domain.duration import parse_isoduration
+from track.domain.duration import parse_isoduration
 
 
 def test_parse_isoduration_seconds():
