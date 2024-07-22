@@ -124,13 +124,8 @@ class InMemoryPlaylistRepository(PlaylistRepository):
             played=track.played,
             waiting=False,  # no possibility to reflect this property
         )
-        if len(self._tracks_at(date_, break_)) == 0:
-            self._tracks[date_][break_].append(queued)
-            return queued
-
-        for idx, track_queued in enumerate(self._tracks_at(date_, break_)):
-            if track_queued.identity == track.identity:
-                self._tracks[date_][break_][idx] = queued
+        self._tracks_at(date_, break_)
+        self._tracks[date_][break_].append(queued)
         return queued
 
     def delete(self, track: TrackQueued) -> TrackQueued:
