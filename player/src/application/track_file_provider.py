@@ -1,5 +1,5 @@
 import asyncio
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from datetime import date, datetime, time, timezone
 import os
 from pathlib import Path
@@ -9,12 +9,12 @@ from player.src.domain.breaks import Break, Seconds
 from player.src.domain.track import Identifier, ScheduledTrack, TrackProvidedIdentity
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlayableTrackProviderConfig:
     tracks_filepathdir: os.PathLike
 
 
-@dataclass
+@dataclass(frozen=True)
 class TrackToPlay:
     track: ScheduledTrack
     path: Path

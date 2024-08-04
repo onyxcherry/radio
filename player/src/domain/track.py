@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
+
 
 from player.src.domain.breaks import Break
 from player.src.domain.types import Identifier, ProviderName, Seconds

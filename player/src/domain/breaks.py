@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from pydantic import model_validator
+from pydantic.dataclasses import dataclass
 from datetime import datetime, date, timedelta
-from typing import Optional
+from typing import Optional, Self
 
 from kink import inject
 
@@ -13,8 +14,14 @@ from player.src.domain.types import Seconds
 @dataclass(frozen=True)
 class Break:
     start: datetime
-    end: datetime  # check if same date as start
+    end: datetime
     ordinal: int
+
+    @model_validator(mode="after")
+    def check_same_day(self) -> Self:
+        if self.start.date() != self.end.date():
+            raise ValueError("start and end dates are different days")
+        return self
 
     @property
     def duration(self) -> Seconds:
