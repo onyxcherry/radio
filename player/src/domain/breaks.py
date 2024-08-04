@@ -55,15 +55,15 @@ class Breaks:
                 return Break(break_.start, break_.end, break_.ordinal)
         return None
 
-    def get_next(self, today=True) -> Optional[Break]:
+    def get_next_today(self) -> Optional[Break]:
         now = self._clock.now()
         for break_ in self.as_list():
             if now < break_.start:
                 return break_
-        if today:
-            return None
-        else:
-            return self._get_tomorrow_first()
+        return None
+
+    def get_next(self) -> Break:
+        return self.get_next_today() or self._get_tomorrow_first()
 
     def get_next_after(self, ordinal: int, today=True) -> Optional[Break]:
         for current, next_ in zip(self._breaks, self._breaks[1:]):
@@ -81,7 +81,7 @@ class Breaks:
         return tomorrow_first_break
 
     def get_remaining_time_to_next(self) -> Seconds:
-        next_ = self.get_next(today=False)
+        next_ = self.get_next()
         if next_ is None:
             raise RuntimeError()
         logger.debug(f"{next_=}")
