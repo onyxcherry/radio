@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime, date, timedelta
 from typing import Optional
 
+from kink import inject
+
 
 from player.src.building_blocks.clock import Clock
 from player.src.config import BreaksConfig, get_logger
@@ -22,20 +24,21 @@ class Break:
 logger = get_logger(__name__)
 
 
+@inject
 class Breaks:
-    def __init__(self, clock: Clock) -> None:
+    def __init__(self, config: BreaksConfig, clock: Clock) -> None:
+        self._config = config
         self._clock = clock
         self._today = self._clock.get_current_date()
         self._breaks = self._get_breaks(self._today)
 
-    @staticmethod
-    def _get_breaks(today: date) -> list[Break]:
+    def _get_breaks(self, today: date) -> list[Break]:
         _breaks: list[Break] = []
-        for idx, item in enumerate(BreaksConfig.START_TIMES.items()):
+        for idx, item in enumerate(self._config.start_times.items()):
             start_time, dur = item
             start_datetime = (
-                datetime.combine(today, start_time, tzinfo=BreaksConfig.TIMEZONE)
-                + BreaksConfig.OFFSET
+                datetime.combine(today, start_time, tzinfo=self._config.timezone)
+                + self._config.offset
             )
             end_datetime = start_datetime + timedelta(seconds=dur)
             break_ = Break(start_datetime, end_datetime, idx)

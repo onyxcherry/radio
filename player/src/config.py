@@ -38,16 +38,13 @@ def get_logger(name: str) -> logging.Logger:
     return logger
 
 
+@dataclass(frozen=True)
 class BreaksConfig:
-    START_TIMES: Final = {
-        time(8, 30): Seconds(10 * 60),
-        time(9, 25): Seconds(10 * 60),
-        time(10, 20): Seconds(10 * 60),
-        time(11, 15): Seconds(15 * 60),
-        time(12, 15): Seconds(10 * 60),
-        time(13, 10): Seconds(10 * 60),
-        time(14, 5): Seconds(10 * 60),
-        time(15, 00): Seconds(10 * 60),
-    }
-    OFFSET: Final = timedelta(seconds=17)
-    TIMEZONE: Final = ZoneInfo("Europe/Warsaw")
+    start_times: dict[time, Seconds]
+    offset: timedelta
+    timezone: timezone | ZoneInfo
+
+
+@dataclass(frozen=True)
+class Config:
+    breaks: BreaksConfig
