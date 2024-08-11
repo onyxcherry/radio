@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Callable, Coroutine, Optional
 
 from player.src.domain.breaks import Break, Seconds
-from player.src.domain.track import Identifier, ScheduledTrack, TrackProvidedIdentity
+from player.src.domain.entities import Identifier, ScheduledTrack, TrackProvidedIdentity
+from player.src.config import get_logger
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,9 @@ class PlayableTrackProviderConfig:
 class TrackToPlay:
     track: ScheduledTrack
     path: Path
+
+
+logger = get_logger(__name__)
 
 
 class PlayableTrackProvider:
@@ -32,7 +36,9 @@ class PlayableTrackProvider:
 
     @property
     def wait_a_bit_on_track_to_play(self) -> Callable[[], Coroutine]:
-        return lambda: asyncio.sleep(2**self._track_to_play_misses / 100)
+        waiting_time = 2**self._track_to_play_misses / 100
+        logger.debug(f"Will wait {waiting_time} seconds")
+        return lambda: asyncio.sleep(waiting_time)
 
     def _get_file_path_of(self, identity: TrackProvidedIdentity) -> Optional[Path]:
         filename = f"{identity.provider}_{identity.identifier}"
