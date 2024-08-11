@@ -68,9 +68,8 @@ class PlayingObserver:
             break_=playing_break.ordinal,
             start=start_playing_dt,
             end=end_playing_dt,
+            created=self._clock.now(),
         )
-        # event_sending_queue.add(track_played)
-        # TODO
 
     def playing_ends_callback(self) -> None:
         # TODO
