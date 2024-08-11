@@ -75,6 +75,19 @@ class PlayingObserver:
         )
         playlist_producer.produce(track_played)
 
+    def _mark_as_played(self, end_playing_dt: datetime) -> None:
+        if (currently_playing := self._currently_playing) is None:
+            raise RuntimeError("No currently playing!")
+        marked = ScheduledTrack(
+            identity=currently_playing.identity,
+            break_=currently_playing.break_,
+            duration=currently_playing.duration,
+            played=True,
+            created=currently_playing.created,
+            last_changed=currently_playing.last_changed,
+        )
+        self._scheduled_tracks_repo.update(marked)
+
     def playing_ends_callback(self) -> None:
         # TODO
         # if player.playing:
@@ -82,5 +95,6 @@ class PlayingObserver:
         #     player.stop()
         logger.debug("Playing ended")
         end_playing_dt = self._clock.now()
+        self._mark_as_played(end_playing_dt)
         self._emit_played_event(end_playing_dt)
         self.update_no_track_playing()
