@@ -3,7 +3,7 @@ from pathlib import Path
 import time
 from typing import Callable, Optional
 
-from player.src.domain.track import Seconds
+from player.src.domain.types import Seconds
 from player.src.domain.interfaces.player import Player
 
 

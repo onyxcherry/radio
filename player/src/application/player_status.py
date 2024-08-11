@@ -2,7 +2,7 @@ from typing import Optional
 from kink import inject
 from player.src.application.break_observer import BreakObserver
 from player.src.application.playing_observer import PlayingObserver
-from player.src.domain.track import ScheduledTrack
+from player.src.domain.entities import ScheduledTrack
 
 
 @inject
