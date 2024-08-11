@@ -17,15 +17,20 @@ from player.src.domain.interfaces.player import Player
 from player.src.domain.events.track import Event
 from just_playback.ma_result import MiniaudioError
 
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+
 logger = get_logger(__name__)
 
 _clock = di[Clock]
-breaks = Breaks(_clock)
+breaks = di[Breaks]
 player = di[Player]
+scheduled_tracks_repo = di[ScheduledTracksRepository]
 
 
-break_observer = BreakObserver(clock=_clock)
-playing_observer = PlayingObserver(break_observer, clock=_clock)
+break_observer = BreakObserver(breaks=breaks, clock=_clock)
+playing_observer = PlayingObserver(
+    breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=_clock
+)
 player_status = PlayerStatus(playing_observer, break_observer)
 test_data_dir = Path("/home/tomasz/radio/player/tests/data/")
 playable_track_provider = PlayableTrackProvider(
