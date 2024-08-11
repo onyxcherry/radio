@@ -1,5 +1,5 @@
 import asyncio
-from typing import Callable, Coroutine, Optional
+from typing import Callable, Coroutine, Never, Optional
 
 from kink import inject
 
@@ -13,16 +13,16 @@ logger = get_logger(__name__)
 
 @inject
 class BreakObserver:
-    def __init__(self, clock: Clock) -> None:
+    def __init__(self, breaks: Breaks, clock: Clock) -> None:
         self._clock = clock
-        self._breaks = Breaks(self._clock)
+        self._breaks = breaks
         self._event = asyncio.Event()
         # defaults to no-break state as it is safer
         # self._event.set()
         self._current: Optional[Break] = None
         self._seconds_left: Seconds = Seconds(0)
 
-    async def create_task(self):
+    async def create_task(self) -> asyncio.Task:
         self._updating_task = asyncio.create_task(self.update_current_break())
         return self._updating_task
 
@@ -38,10 +38,11 @@ class BreakObserver:
     def wait_next(self) -> Callable[[], Coroutine]:
         return self._event.wait
 
-    def reload_breaks(self) -> None:
-        ...
+    def reload_breaks(self) -> None: ...
 
-    async def update_current_break(self):
+    async def update_current_break(self) -> Never:
+        _waiting_noop_time = 0.01
+
         while True:
             current = self._breaks.get_current()
             if current is not None:
@@ -49,11 +50,11 @@ class BreakObserver:
                 self._event.set()
                 seconds_left = self._breaks.get_seconds_left_during_current()
                 self._seconds_left = seconds_left or Seconds(0)
-                print(f"{self._seconds_left=}")
-                await asyncio.sleep(self._seconds_left)
+                logger.debug(f"{self._seconds_left=}")
+                await asyncio.sleep(max(self._seconds_left, _waiting_noop_time))
             else:
                 self._current = None
                 self._event.clear()
                 seconds_to_next = self._breaks.get_remaining_time_to_next()
-                print(f"{seconds_to_next=}")
-                await asyncio.sleep(seconds_to_next)
+                logger.debug(f"{seconds_to_next=}")
+                await asyncio.sleep(max(seconds_to_next, _waiting_noop_time))
