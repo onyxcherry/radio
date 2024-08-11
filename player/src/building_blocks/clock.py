@@ -28,6 +28,20 @@ class SystemClock(Clock):
         return datetime.now(timezone.utc)
 
 
+class FeignedWallClock(Clock):
+    def __init__(self, feigned_dt: datetime) -> None:
+        now = datetime.now(tz=timezone.utc)
+        if feigned_dt.tzinfo is None:
+            raise RuntimeError("Timezone for this feigned datetime cannot be empty!")
+        self._time_shift = feigned_dt - now
+
+    def get_current_date(self) -> date:
+        return self.now().date()
+
+    def now(self) -> datetime:
+        return datetime.now(timezone.utc) + self._time_shift
+
+
 class FixedClock(Clock):
     def __init__(self, at: datetime) -> None:
         self._at = at
