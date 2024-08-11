@@ -27,6 +27,10 @@ class Break:
     def duration(self) -> Seconds:
         return Seconds((self.end - self.start).seconds)
 
+    @property
+    def date(self) -> date:
+        return self.start.date()
+
 
 logger = get_logger(__name__)
 
@@ -101,3 +105,11 @@ class Breaks:
             return None
         diff = current.end - self._clock.now()
         return Seconds(diff.seconds)
+
+    def lookup_details(self, date_: date, ordinal: int) -> tuple[Break, Seconds]:
+        breaks_info = list(self._config.start_times.items())
+        start_time, duration = breaks_info[ordinal]
+        start_dt = datetime.combine(date_, start_time, tzinfo=self._config.timezone)
+        end_dt = start_dt + timedelta(seconds=duration)
+        break_ = Break(start=start_dt, end=end_dt, ordinal=ordinal)
+        return break_, duration
