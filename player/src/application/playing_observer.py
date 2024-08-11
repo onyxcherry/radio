@@ -4,6 +4,7 @@ from typing import Callable, Coroutine, Optional
 
 from kink import di
 from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.infrastructure.messaging.types import PlaylistEventsProducer
 from player.src.config import get_logger
 
 from player.src.building_blocks.clock import Clock
@@ -13,6 +14,8 @@ from player.src.domain.events.track import TrackPlayed
 from player.src.domain.types import Seconds
 
 logger = get_logger(__name__)
+
+playlist_producer = di[PlaylistEventsProducer]
 
 
 class PlayingObserver:
@@ -70,6 +73,7 @@ class PlayingObserver:
             end=end_playing_dt,
             created=self._clock.now(),
         )
+        playlist_producer.produce(track_played)
 
     def playing_ends_callback(self) -> None:
         # TODO
