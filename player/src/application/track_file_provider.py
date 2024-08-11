@@ -1,13 +1,13 @@
 import asyncio
 from pydantic.dataclasses import dataclass
-from datetime import date, datetime, time, timezone
 import os
 from pathlib import Path
 from typing import Callable, Coroutine, Optional
 
-from player.src.domain.breaks import Break, Seconds
-from player.src.domain.entities import Identifier, ScheduledTrack, TrackProvidedIdentity
+from player.src.building_blocks.clock import Clock
+from player.src.domain.entities import ScheduledTrack, TrackProvidedIdentity
 from player.src.config import get_logger
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
 
 
 @dataclass(frozen=True)
@@ -25,11 +25,16 @@ logger = get_logger(__name__)
 
 
 class PlayableTrackProvider:
-    def __init__(self, config: PlayableTrackProviderConfig) -> None:
+    def __init__(
+        self,
+        config: PlayableTrackProviderConfig,
+        scheduled_tracks_repo: ScheduledTracksRepository,
+        clock: Clock,
+    ) -> None:
         self._filepathdir = Path(config.tracks_filepathdir)
+        self._scheduled_tracks_repo = scheduled_tracks_repo
+        self._clock = clock
         self._track_to_play_misses = 0
-
-        self._TEMP_podano = False
 
     def add_track_to_play_miss(self) -> None:
         self._track_to_play_misses = (self._track_to_play_misses + 1) % 6
@@ -48,29 +53,16 @@ class PlayableTrackProvider:
         return path
 
     def get_track_to_play(self) -> Optional[TrackToPlay]:
-        if self._TEMP_podano:
+        date_ = self._clock.get_current_date()
+        scheduled_tracks = self._scheduled_tracks_repo.get_all(
+            date_=date_, played=False
+        )
+        if len(scheduled_tracks) == 0:
             return None
-        self._TEMP_podano = True
-        date_ = date(2024, 8, 3)
-        break_ = Break(
-            start=datetime.combine(date_, time(13, 15), tzinfo=timezone.utc),
-            end=datetime.combine(date_, time(13, 25), tzinfo=timezone.utc),
-            ordinal=4,
-        )
 
-        scheduled_track = ScheduledTrack(
-            identity=TrackProvidedIdentity(
-                identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"
-            ),
-            break_=break_,
-            duration=Seconds(42),
-            played=False,
-            created=datetime(2024, 7, 16, 13, 14, 15, tzinfo=timezone.utc),
-            last_changed=datetime(2024, 7, 16, 13, 14, 15, tzinfo=timezone.utc),
-        )
+        scheduled_track = scheduled_tracks[0]
         track_path = self._get_file_path_of(scheduled_track.identity)
         if track_path is None:
             raise RuntimeError("No track downloaded!")
-            return None
         to_play = TrackToPlay(scheduled_track, track_path)
         return to_play

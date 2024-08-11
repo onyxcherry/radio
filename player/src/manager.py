@@ -21,20 +21,22 @@ from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepos
 
 logger = get_logger(__name__)
 
-_clock = di[Clock]
+clock = di[Clock]
 breaks = di[Breaks]
 player = di[Player]
 scheduled_tracks_repo = di[ScheduledTracksRepository]
 
 
-break_observer = BreakObserver(breaks=breaks, clock=_clock)
+break_observer = BreakObserver(breaks=breaks, clock=clock)
 playing_observer = PlayingObserver(
-    breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=_clock
+    breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=clock
 )
 player_status = PlayerStatus(playing_observer, break_observer)
 test_data_dir = Path("/home/tomasz/radio/player/tests/data/")
 playable_track_provider = PlayableTrackProvider(
-    config=PlayableTrackProviderConfig(test_data_dir)
+    config=PlayableTrackProviderConfig(test_data_dir),
+    scheduled_tracks_repo=scheduled_tracks_repo,
+    clock=clock,
 )
 
 
