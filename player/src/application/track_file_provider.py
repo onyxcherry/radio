@@ -64,6 +64,9 @@ class PlayableTrackProvider:
             ),
             break_=break_,
             duration=Seconds(42),
+            played=False,
+            created=datetime(2024, 7, 16, 13, 14, 15, tzinfo=timezone.utc),
+            last_changed=datetime(2024, 7, 16, 13, 14, 15, tzinfo=timezone.utc),
         )
         track_path = self._get_file_path_of(scheduled_track.identity)
         if track_path is None:
