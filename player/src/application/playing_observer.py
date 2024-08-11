@@ -2,17 +2,28 @@ import asyncio
 from datetime import datetime
 from typing import Callable, Coroutine, Optional
 
-from player.src.application.break_observer import BreakObserver
+from kink import di
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.config import get_logger
+
 from player.src.building_blocks.clock import Clock
-from player.src.domain.breaks import Break
-from player.src.domain.track import ScheduledTrack
+from player.src.domain.breaks import Break, Breaks
+from player.src.domain.entities import ScheduledTrack
 from player.src.domain.events.track import TrackPlayed
 from player.src.domain.types import Seconds
 
+logger = get_logger(__name__)
+
 
 class PlayingObserver:
-    def __init__(self, break_observer: BreakObserver, clock: Clock) -> None:
-        self._break_observer = break_observer
+    def __init__(
+        self,
+        breaks: Breaks,
+        scheduled_tracks_repo: ScheduledTracksRepository,
+        clock: Clock,
+    ) -> None:
+        self._breaks = breaks
+        self._scheduled_tracks_repo = scheduled_tracks_repo
         self._clock = clock
         self._track_playing_event = asyncio.Event()
         self._get_track_to_play_event = asyncio.Event()
@@ -41,7 +52,7 @@ class PlayingObserver:
     def update_track_playing(self, track: ScheduledTrack, duration: Seconds) -> None:
         self._track_playing_event.clear()
         self._start_playing_dt = self._clock.now()
-        self._playing_break = self._break_observer.current
+        self._playing_break = self._breaks.get_current()
         self._currently_playing = track
 
     def _emit_played_event(self, end_playing_dt: datetime) -> None:
@@ -62,9 +73,11 @@ class PlayingObserver:
         # TODO
 
     def playing_ends_callback(self) -> None:
+        # TODO
         # if player.playing:
-        #     logger.error("Jak to możliwe?!")
+        #     logger.error("How?!")
         #     player.stop()
+        logger.debug("Playing ended")
         end_playing_dt = self._clock.now()
         self._emit_played_event(end_playing_dt)
         self.update_no_track_playing()
