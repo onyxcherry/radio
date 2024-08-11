@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic.dataclasses import dataclass
 
 
@@ -12,7 +13,17 @@ class TrackProvidedIdentity:
 
 
 @dataclass(frozen=True)
+class TrackToSchedule:
+    identity: TrackProvidedIdentity
+    break_: Break
+    duration: Seconds
+
+
+@dataclass(frozen=True)
 class ScheduledTrack:
     identity: TrackProvidedIdentity
     break_: Break
     duration: Seconds
+    played: bool
+    created: datetime
+    last_changed: datetime
