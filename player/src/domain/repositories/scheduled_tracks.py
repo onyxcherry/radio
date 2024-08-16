@@ -45,7 +45,5 @@ class ScheduledTracksRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_all_with_identity(
-        self, identity: TrackProvidedIdentity
-    ) -> list[ScheduledTrack]:
+    def delete_all_with_identity(self, identity: TrackProvidedIdentity) -> int:
         pass

@@ -130,9 +130,7 @@ class InMemoryScheduledTracksRepository(ScheduledTracksRepository):
         self._tracks = {}
         return len(removed)
 
-    def delete_all_with_identity(
-        self, identity: TrackProvidedIdentity
-    ) -> list[ScheduledTrack]:
+    def delete_all_with_identity(self, identity: TrackProvidedIdentity) -> int:
         removed: list[ScheduledTrack] = []
 
         for breaks_with_queued in list(self._tracks.values()):
@@ -144,4 +142,4 @@ class InMemoryScheduledTracksRepository(ScheduledTracksRepository):
                     else:
                         filtered.append(track)
                 breaks_with_queued[break_key] = filtered
-        return removed
+        return len(removed)
