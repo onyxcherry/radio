@@ -1,22 +1,48 @@
-from datetime import datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime
+from pathlib import Path
 from kink import di
 
 
-from player.src.infrastructure.messaging.types import LibraryEventsConsumer, PlaylistEventsConsumer, PlaylistEventsProducer
-from player.src.application.interfaces.events import ProducerMessagesOptions, ConsumerMessagesOptions
-from player.src.application.interfaces.events import ConsumerConnectionOptions, ProducerConnectionOptions
-from player.src.building_blocks.clock import Clock, FixedClock
+from player.src.application.break_observer import BreakObserver
+from player.src.application.playing_manager import PlayingConditions, PlayingManager
+from player.src.application.playing_observer import PlayingObserver
+from player.src.application.track_file_provider import (
+    PlayableTrackProvider,
+    PlayableTrackProviderConfig,
+)
+from player.src.building_blocks.awakable import EventBasedAwakable
+from player.src.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
+from player.src.infrastructure.messaging.types import (
+    LibraryEventsConsumer,
+    PlaylistEventsConsumer,
+    PlaylistEventsProducer,
+)
+from player.src.application.interfaces.events import (
+    ProducerMessagesOptions,
+    ConsumerMessagesOptions,
+)
+from player.src.application.interfaces.events import (
+    ConsumerConnectionOptions,
+    ProducerConnectionOptions,
+)
+from player.src.building_blocks.clock import Clock, FeignedWallClock
 from player.src.config import BreaksConfig
 from player.src.domain.breaks import Breaks
 from player.src.domain.interfaces.player import Player
 from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.src.domain.types import Seconds
 from player.src.infrastructure.madeup_player import MadeupPlayer
-from player.src.infrastructure.messaging.inmemory_events_consumer import InMemoryEventsConsumer
-from player.src.infrastructure.messaging.inmemory_events_producer import InMemoryEventsProducer
-from player.src.infrastructure.messaging.kafka_events_consumer import KafkaAvroEventsConsumer
-from player.src.infrastructure.messaging.kafka_events_producer import KafkaAvroEventsProducer
+from player.src.infrastructure.messaging.inmemory_events_consumer import (
+    InMemoryEventsConsumer,
+)
+from player.src.infrastructure.messaging.inmemory_events_producer import (
+    InMemoryEventsProducer,
+)
+from player.src.infrastructure.messaging.kafka_events_consumer import (
+    KafkaAvroEventsConsumer,
+)
+from player.src.infrastructure.messaging.kafka_events_producer import (
+    KafkaAvroEventsProducer,
+)
 from player.src.infrastructure.messaging.schema_utils import SchemaRegistryConfig
 from player.src.infrastructure.messaging.types import LibraryEventsProducer
 from player.src.infrastructure.persistence.db_scheduled_tracks_repository import (
@@ -27,40 +53,97 @@ from player.src.infrastructure.persistence.inmemory_scheduled_tracks_repository 
 )
 from confluent_kafka.serialization import StringSerializer
 
+from player.tests.choices import DIChoices, breaks_config
 
 
-_breaks_config = BreaksConfig(
-    start_times={
-        time(8, 30): Seconds(10 * 60),
-        time(9, 25): Seconds(10 * 60),
-        time(10, 20): Seconds(10 * 60),
-        time(11, 15): Seconds(15 * 60),
-        time(12, 15): Seconds(10 * 60),
-        time(13, 10): Seconds(10 * 60),
-        time(14, 5): Seconds(10 * 60),
-        time(15, 00): Seconds(10 * 60),
-    },
-    offset=timedelta(seconds=17),
-    timezone=ZoneInfo("Europe/Warsaw"),
-)
+def reregister_deps_with_clock(clock: Clock):
+    di_choices = di[DIChoices]
 
+    breaks = Breaks(breaks_config, clock)
+    di[Breaks] = breaks
+    break_observer = BreakObserver(breaks=breaks, clock=clock)
+    di[BreakObserver] = break_observer
 
-def bootstrap_di(real_db: bool, real_msg_broker: bool) -> None:
-    dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=_breaks_config.timezone)
-    clock = FixedClock(dt)
-    di[Clock] = clock
-    di[Player] = MadeupPlayer()
-    di[BreaksConfig] = _breaks_config
-    di[Breaks] = Breaks(_breaks_config, clock)
-
-    if real_db:
+    if di_choices.real_db:
         scheduled_tracks_repo = DBScheduledTracksRepository(clock=clock)
     else:
         scheduled_tracks_repo = InMemoryScheduledTracksRepository(clock=clock)
 
     di[ScheduledTracksRepository] = scheduled_tracks_repo
 
-    if real_msg_broker and False:
+    playing_observer = PlayingObserver(
+        breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=clock
+    )
+    di[PlayingObserver] = playing_observer
+    playable_track_provider = PlayableTrackProvider(
+        config=di[PlayableTrackProviderConfig],
+        scheduled_tracks_repo=scheduled_tracks_repo,
+        clock=clock,
+    )
+    di[PlayableTrackProvider] = playable_track_provider
+
+    playing_manager = PlayingManager(
+        playing_observer,
+        break_observer,
+        di[PlayingConditions],
+        playable_track_provider,
+        di[Player],
+    )
+    di[PlayingManager] = playing_manager
+
+
+def bootstrap_di(di_choices: DIChoices) -> None:
+    di[DIChoices] = di_choices
+    dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone)
+    # clock = FixedClock(dt)
+    clock = FeignedWallClock(dt)
+
+    di[Clock] = clock
+    player = MadeupPlayer()
+    di[Player] = player
+    di[BreaksConfig] = breaks_config
+    breaks = Breaks(breaks_config, clock)
+    di[Breaks] = breaks
+    break_observer = BreakObserver(breaks=breaks, clock=clock)
+    di[BreakObserver] = break_observer
+
+    if di_choices.real_db:
+        scheduled_tracks_repo = DBScheduledTracksRepository(clock=clock)
+    else:
+        scheduled_tracks_repo = InMemoryScheduledTracksRepository(clock=clock)
+
+    di[ScheduledTracksRepository] = scheduled_tracks_repo
+
+    test_data_dir = Path("/home/tomasz/radio/player/tests/data/")
+    playing_observer = PlayingObserver(
+        breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=clock
+    )
+    di[PlayingObserver] = playing_observer
+    playable_track_provider_config = PlayableTrackProviderConfig(test_data_dir)
+    di[PlayableTrackProviderConfig] = playable_track_provider_config
+    playable_track_provider = PlayableTrackProvider(
+        config=playable_track_provider_config,
+        scheduled_tracks_repo=scheduled_tracks_repo,
+        clock=clock,
+    )
+    di[PlayableTrackProvider] = playable_track_provider
+
+    playing_conditions = PlayingConditions(
+        manually_stopped=EventBasedAwakable(),
+        stopped_due_to_tech_error=EventBasedAwakable(),
+    )
+    di[PlayingConditions] = playing_conditions
+
+    playing_manager = PlayingManager(
+        playing_observer,
+        break_observer,
+        playing_conditions,
+        playable_track_provider,
+        player,
+    )
+    di[PlayingManager] = playing_manager
+
+    if di_choices.real_msg_broker and False:
         producer_conn_options = ProducerConnectionOptions(
             bootstrap_servers="localhost:19092", client_id="producer-tests-1"
         )
@@ -125,6 +208,7 @@ def bootstrap_di(real_db: bool, real_msg_broker: bool) -> None:
         )
         producer_msg_options = ProducerMessagesOptions(lambda x: x, lambda x: x)
         consumer_msg_options = ConsumerMessagesOptions(value_deserializer=lambda x: x)
+        di[InMemoryEvents] = InMemoryEvents()
         playlist_events_consumer = InMemoryEventsConsumer(
             consumer_conn_options, consumer_msg_options, playlist_schema_config
         )
