@@ -51,3 +51,9 @@ class FixedClock(Clock):
 
     def now(self) -> datetime:
         return self._at
+
+    def __str__(self):
+        return f"FixedClock(at={self._at!s})"
+
+    def __repr__(self):
+        return f"FixedClock(at={self._at!r})"
