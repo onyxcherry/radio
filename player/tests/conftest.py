@@ -1,6 +1,7 @@
 import pytest
 
 from .bootstrap import bootstrap_di
+from .fixtures.reset import reset_db_fixt, reset_events_fixt  # noqa
 
 
 def pytest_addoption(parser):

@@ -1,19 +1,17 @@
-from player.src.infrastructure.messaging.inmemory_events_consumer import (
-    InMemoryEventsConsumer,
-)
-from player.src.infrastructure.messaging.inmemory_events_producer import (
-    InMemoryEventsProducer,
-)
-from player.src.application.interfaces.events import EventsConsumer, EventsProducer
+import subprocess
+from kink import di
+from player.src.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
+from player.tests.choices import DIChoices
 
 
-def sync_messages_from_producer_to_consumer(
-    producer: EventsProducer, consumer: EventsConsumer, *, real_msg_broker: bool
-):
-    if (
-        not real_msg_broker
-        and isinstance(consumer, InMemoryEventsConsumer)
-        and isinstance(producer, InMemoryEventsProducer)
-    ):
-        consumer._messages = producer._messages
-        producer._messages = {}
+def reset_events() -> None:
+    di_choices = di[DIChoices]
+    if di_choices.real_msg_broker:
+        command = "/home/tomasz/.local/bin/rpk -X brokers=127.0.0.1:19092 topic trim-prefix queue -o end --no-confirm"
+        result = subprocess.run(
+            command, shell=True, check=False, text=True, capture_output=True
+        )
+        # ./kafka-delete-records.sh --bootstrap-server localhost:19092 --offset-json-file ~/delete-records.json
+        # {"partitions": [{"topic": "queue", "partition": 0, "offset": 1}], "version": 1}
+    else:
+        di[InMemoryEvents].reset()
