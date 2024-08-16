@@ -56,6 +56,8 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             select(*ScheduledTrackModel.__table__.columns)
             .filter(func.DATE(ScheduledTrackModel.start) == date_)
             .filter(func.DATE(ScheduledTrackModel.end) == date_)
+            .order_by(ScheduledTrackModel.ordinal)
+            .order_by(ScheduledTrackModel.created)
         )
         if break_ is not None:
             stmt = stmt.filter(ScheduledTrackModel.ordinal == break_)

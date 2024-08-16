@@ -59,7 +59,10 @@ class InMemoryScheduledTracksRepository(ScheduledTracksRepository):
         break_: Optional[int] = None,
         played: Optional[bool] = None,
     ) -> list[ScheduledTrack]:
-        tracks = self._tracks_at(date_, break_, played=played)
+        tracks = sorted(
+            self._tracks_at(date_, break_, played=played),
+            key=lambda x: (x.break_.ordinal, x.created, x.identity),
+        )
 
         return tracks
 
