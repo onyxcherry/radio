@@ -1,4 +1,4 @@
-from pydantic import model_validator
+from pydantic import AwareDatetime, model_validator
 from pydantic.dataclasses import dataclass
 from datetime import datetime, date, timedelta
 from typing import Optional, Self
@@ -13,8 +13,8 @@ from player.src.domain.types import Seconds
 
 @dataclass(frozen=True)
 class Break:
-    start: datetime
-    end: datetime
+    start: AwareDatetime
+    end: AwareDatetime
     ordinal: int
 
     @model_validator(mode="after")

@@ -1,4 +1,4 @@
-from datetime import datetime
+from pydantic import AwareDatetime
 from pydantic.dataclasses import dataclass
 
 
@@ -25,5 +25,5 @@ class ScheduledTrack:
     break_: Break
     duration: Seconds
     played: bool
-    created: datetime
-    last_changed: datetime
+    created: AwareDatetime
+    last_changed: AwareDatetime
