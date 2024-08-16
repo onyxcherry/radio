@@ -1,12 +1,9 @@
 from datetime import date, datetime, time, timedelta
-from typing import Final, Sequence
+from typing import Final
 from zoneinfo import ZoneInfo
 
 from kink import di
 from pytest import fixture
-from player.tests.fixtures.events import provide_config  # noqa
-from player.tests.fixtures.events import reset_events
-from player.tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from player.src.infrastructure.messaging.types import (
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
@@ -66,29 +63,11 @@ events_consumer = di[PlaylistEventsConsumer]
 events_producer = di[PlaylistEventsProducer]
 
 
-_realmsgbroker: bool
-
-
-def sync_messages():
-    sync_messages_from_producer_to_consumer(
-        events_producer, events_consumer, real_msg_broker=_realmsgbroker
-    )
-
-
 @fixture(autouse=True)
-def reset(provide_config):
-    global _realmsgbroker
-    _realmsgbroker = provide_config
-
-    scheduled_tracks_repo.delete_all()
+def reset(reset_db_fixt, reset_events_fixt):
     scheduled_tracks_repo.insert(track_to_schedule)
 
-    events_handlers: Sequence = [events_producer, events_consumer]
-    reset_events(_realmsgbroker, events_handlers)
-
     yield
-
-    scheduled_tracks_repo.delete_all()
 
 
 @fixture
@@ -122,7 +101,6 @@ def test_playing_ends_callback(pl_obs):
     )
     assert updated_track is not None
     assert updated_track.played is True
-    sync_messages()
     assert events_consumer.consume(1)[0] == TrackPlayed(
         identity=scheduled_track.identity,
         break_=0,
