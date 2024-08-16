@@ -1,9 +1,8 @@
-from datetime import date
-from typing import Any, Optional
+from datetime import date, datetime, timezone
+from typing import Optional
 from sqlalchemy import func
 
-from sqlalchemy import Select, delete, func, select, update
-from player.src.domain.types import Seconds
+from sqlalchemy import delete, func, select, update
 from player.src.application.models.scheduled_tracks import ScheduledTrackModel
 from player.src.building_blocks.clock import Clock
 from player.src.domain.breaks import Break
@@ -86,13 +85,13 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
         scheduled = ScheduledTrackModel(
             identifier=track.identity.identifier,
             provider=track.identity.provider,
-            start=track.break_.start,
-            end=track.break_.end,
+            start=track.break_.start.astimezone(timezone.utc),
+            end=track.break_.end.astimezone(timezone.utc),
             ordinal=track.break_.ordinal,
             duration=track.duration,
             played=False,
-            created=now,
-            last_changed=now,
+            created=now.astimezone(timezone.utc),
+            last_changed=now.astimezone(timezone.utc),
         )
 
         with SessionLocal() as session:
@@ -113,16 +112,18 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             update(ScheduledTrackModel)
             .where(ScheduledTrackModel.identifier == track.identity.identifier)
             .where(ScheduledTrackModel.provider == track.identity.provider)
-            .where(ScheduledTrackModel.start == track.break_.start)
-            .where(ScheduledTrackModel.end == track.break_.end)
+            .where(
+                ScheduledTrackModel.start == track.break_.start.astimezone(timezone.utc)
+            )
+            .where(ScheduledTrackModel.end == track.break_.end.astimezone(timezone.utc))
             .where(ScheduledTrackModel.ordinal == track.break_.ordinal)
             .where(ScheduledTrackModel.played == False)
             .values(duration=track.duration)
             .values(played=track.played)
-            .values(last_changed=self._clock.now())
+            .values(last_changed=self._clock.now().astimezone(timezone.utc))
             .execution_options(synchronize_session="fetch")
         )
-        
+
         with SessionLocal() as session:
             rowcount = session.execute(stmt).rowcount
             if rowcount == 0:
@@ -136,8 +137,10 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             delete(ScheduledTrackModel)
             .where(ScheduledTrackModel.identifier == track.identity.identifier)
             .where(ScheduledTrackModel.provider == track.identity.provider)
-            .where(ScheduledTrackModel.start == track.break_.start)
-            .where(ScheduledTrackModel.end == track.break_.end)
+            .where(
+                ScheduledTrackModel.start == track.break_.start.astimezone(timezone.utc)
+            )
+            .where(ScheduledTrackModel.end == track.break_.end.astimezone(timezone.utc))
             .where(ScheduledTrackModel.ordinal == track.break_.ordinal)
             .where(ScheduledTrackModel.played == False)
             .execution_options(synchronize_session="fetch")
@@ -175,25 +178,30 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
         return result
 
     @staticmethod
-    def _map_on_domain_model(scheduled_track_dict: dict) -> ScheduledTrack:
+    def _set_utc_timezone(dt: datetime) -> datetime:
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
+    @classmethod
+    def _map_on_domain_model(cls, scheduled_track_dict: dict) -> ScheduledTrack:
         identity = TrackProvidedIdentity(
             Identifier(scheduled_track_dict["identifier"]),
             scheduled_track_dict["provider"],
         )
         break_ = Break(
-            scheduled_track_dict["start"],
-            scheduled_track_dict["end"],
+            cls._set_utc_timezone(scheduled_track_dict["start"]),
+            cls._set_utc_timezone(scheduled_track_dict["end"]),
             scheduled_track_dict["ordinal"],
         )
-        # track_queued = ScheduledTrack(
-        #     identity=identity,
-        #     break_=break_,
-        #     duration=scheduled_track_dict["duration"],
-        #     played=scheduled_track_dict["played"],
-        #     created=scheduled_track_dict["created"],
-        #     last_changed=scheduled_track_dict["last_changed"],
-        # )
+        created = cls._set_utc_timezone(scheduled_track_dict["created"])
+        last_changed = cls._set_utc_timezone(scheduled_track_dict["last_changed"])
         track_queued = ScheduledTrack(
-            **scheduled_track_dict, identity=identity, break_=break_
+            identity=identity,
+            break_=break_,
+            duration=scheduled_track_dict["duration"],
+            played=scheduled_track_dict["played"],
+            created=created,
+            last_changed=last_changed,
         )
         return track_queued
