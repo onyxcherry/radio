@@ -3,13 +3,7 @@ from pydantic.dataclasses import dataclass
 from datetime import date, datetime
 
 from player.src.domain.events.base import Event
-from player.src.domain.entities import TrackProvidedIdentity
-
-
-@dataclass(frozen=True)
-class PlayingTime:
-    date_: date
-    break_: int
+from player.src.domain.entities import PlayingTime, TrackProvidedIdentity
 
 
 @dataclass(frozen=True)

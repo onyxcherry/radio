@@ -1,9 +1,16 @@
+from datetime import date
 from pydantic import AwareDatetime
 from pydantic.dataclasses import dataclass
 
 
 from player.src.domain.breaks import Break
 from player.src.domain.types import Identifier, ProviderName, Seconds
+
+
+@dataclass(frozen=True)
+class PlayingTime:
+    date_: date
+    break_: int
 
 
 @dataclass(frozen=True, order=True)
