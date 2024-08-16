@@ -1,5 +1,7 @@
 import pytest
 
+from player.tests.choices import DIChoices
+
 from .bootstrap import bootstrap_di
 from .fixtures.reset import reset_db_fixt, reset_events_fixt  # noqa
 
@@ -24,7 +26,8 @@ def pytest_configure(config):
 
     REAL_DB = config.getoption("realdb")
     REAL_MSG_BROKER = config.getoption("realmsgbroker")
-    bootstrap_di(real_db=REAL_DB, real_msg_broker=REAL_MSG_BROKER)
+    di_choices = DIChoices(real_db=REAL_DB, real_msg_broker=REAL_MSG_BROKER)
+    bootstrap_di(di_choices)
 
 
 def pytest_collection_modifyitems(config, items):
