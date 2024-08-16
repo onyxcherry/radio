@@ -19,7 +19,7 @@ class JustPlaybackPlayer(Player):
     def playing(self) -> bool:
         return self._playback.playing
 
-    def play(
+    async def play(
         self, duration: Seconds, callback_end: Optional[Callable[[], None]]
     ) -> None:
         # TODO: play no more than `duration` seconds!!

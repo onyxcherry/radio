@@ -16,7 +16,7 @@ class Player:
         pass
 
     @abstractmethod
-    def play(
+    async def play(
         self, duration: Seconds, callback_end: Optional[Callable[[], None]]
     ) -> None:
         pass

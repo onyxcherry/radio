@@ -1,3 +1,4 @@
+import asyncio
 import os
 from pathlib import Path
 import time
@@ -21,13 +22,12 @@ class MadeupPlayer(Player):
     def playing(self) -> bool:
         return self._playing
 
-    def play(
+    async def play(
         self, duration: Seconds, callback_end: Optional[Callable[[], None]]
     ) -> None:
         self._playing = True
         print(f"Start playing: {self._filepath}", flush=True)
-        # wait
-        time.sleep(1)
+        await asyncio.sleep(duration)
         if callback_end is not None:
             callback_end()
 
