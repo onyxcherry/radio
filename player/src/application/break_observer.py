@@ -1,11 +1,12 @@
 import asyncio
 from typing import Callable, Coroutine, Never, Optional
 
-from kink import inject
+from kink import di, inject
 
 from player.src.building_blocks.clock import Clock
 from player.src.config import get_logger
 from player.src.domain.breaks import Break, Breaks
+from player.src.domain.interfaces.player import Player
 from player.src.domain.types import Seconds
 
 logger = get_logger(__name__)
@@ -42,6 +43,7 @@ class BreakObserver:
 
     async def update_current_break(self) -> Never:
         logger.info("Started updating current breaks")
+        player = di[Player]
         _waiting_noop_time = 0.01
 
         while True:
