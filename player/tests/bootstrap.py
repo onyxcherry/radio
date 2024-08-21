@@ -4,6 +4,7 @@ from kink import di
 
 
 from player.src.application.break_observer import BreakObserver
+from player.src.application.events.handle import EventHandler
 from player.src.application.playing_manager import PlayingConditions, PlayingManager
 from player.src.application.playing_observer import PlayingObserver
 from player.src.application.track_file_provider import (
@@ -90,6 +91,9 @@ def reregister_deps_with_clock(clock: Clock):
         di[Player],
     )
     di[PlayingManager] = playing_manager
+    di[EventHandler] = EventHandler(
+        breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=clock
+    )
 
 
 def bootstrap_di(di_choices: DIChoices) -> None:
@@ -97,36 +101,14 @@ def bootstrap_di(di_choices: DIChoices) -> None:
     dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone)
     # clock = FixedClock(dt)
     clock = FeignedWallClock(dt)
-
     di[Clock] = clock
     player = MadeupPlayer()
     di[Player] = player
     di[BreaksConfig] = breaks_config
-    breaks = Breaks(breaks_config, clock)
-    di[Breaks] = breaks
-    break_observer = BreakObserver(breaks=breaks, clock=clock)
-    di[BreakObserver] = break_observer
-
-    if di_choices.real_db:
-        scheduled_tracks_repo = DBScheduledTracksRepository(clock=clock)
-    else:
-        scheduled_tracks_repo = InMemoryScheduledTracksRepository(clock=clock)
-
-    di[ScheduledTracksRepository] = scheduled_tracks_repo
 
     test_data_dir = Path("/home/tomasz/radio/player/tests/data/")
-    playing_observer = PlayingObserver(
-        breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=clock
-    )
-    di[PlayingObserver] = playing_observer
     playable_track_provider_config = PlayableTrackProviderConfig(test_data_dir)
     di[PlayableTrackProviderConfig] = playable_track_provider_config
-    playable_track_provider = PlayableTrackProvider(
-        config=playable_track_provider_config,
-        scheduled_tracks_repo=scheduled_tracks_repo,
-        clock=clock,
-    )
-    di[PlayableTrackProvider] = playable_track_provider
 
     playing_conditions = PlayingConditions(
         manually_stopped=EventBasedAwakable(),
@@ -134,14 +116,7 @@ def bootstrap_di(di_choices: DIChoices) -> None:
     )
     di[PlayingConditions] = playing_conditions
 
-    playing_manager = PlayingManager(
-        playing_observer,
-        break_observer,
-        playing_conditions,
-        playable_track_provider,
-        player,
-    )
-    di[PlayingManager] = playing_manager
+    reregister_deps_with_clock(clock)
 
     if di_choices.real_msg_broker and False:
         producer_conn_options = ProducerConnectionOptions(
