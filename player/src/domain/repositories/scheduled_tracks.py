@@ -37,6 +37,10 @@ class ScheduledTracksRepository(ABC):
         pass
 
     @abstractmethod
+    def insert_or_update(self, track: TrackToSchedule | ScheduledTrack) -> ScheduledTrack:
+        pass
+
+    @abstractmethod
     def delete(self, track: ScheduledTrack) -> Optional[ScheduledTrack]:
         pass
 

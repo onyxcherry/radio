@@ -130,7 +130,29 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
                 raise RuntimeError("No object was updated!")
             session.commit()
 
-        return track
+    def insert_or_update(
+        self, track: TrackToSchedule | ScheduledTrack
+    ) -> ScheduledTrack:
+        already_scheduled_track = self.get_track_on(
+            track.identity, track.break_.date, track.break_.ordinal
+        )
+        if already_scheduled_track is None:
+            to_scheduled = TrackToSchedule(
+                identity=track.identity, break_=track.break_, duration=track.duration
+            )
+            return self.insert(to_scheduled)
+
+        if isinstance(track, TrackToSchedule):
+            scheduled = ScheduledTrack(
+                identity=track.identity,
+                break_=track.break_,
+                duration=track.duration,
+                played=already_scheduled_track.played,
+                created=already_scheduled_track.created,
+                last_changed=self._clock.now(),
+            )
+            return self.update(scheduled)
+        return self.update(track)
 
     def delete(self, track: ScheduledTrack) -> Optional[ScheduledTrack]:
         stmt = (
