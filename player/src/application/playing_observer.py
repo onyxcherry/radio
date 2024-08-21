@@ -15,8 +15,6 @@ from player.src.domain.types import Seconds
 
 logger = get_logger(__name__)
 
-playlist_producer = di[PlaylistEventsProducer]
-
 
 class PlayingObserver:
     def __init__(
@@ -59,6 +57,7 @@ class PlayingObserver:
         self._currently_playing = track
 
     def _emit_played_event(self, end_playing_dt: datetime) -> None:
+        playlist_producer = di[PlaylistEventsProducer]
         if (currently_playing := self._currently_playing) is None:
             raise RuntimeError("No currently playing!")
         if (playing_break := self._playing_break) is None:
