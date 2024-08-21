@@ -8,6 +8,7 @@ from player.src.domain.entities import (
     TrackProvidedIdentity,
     TrackToSchedule,
 )
+from player.src.domain.events.compare import events_differ_only_last_changed
 from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
 
 
@@ -91,8 +92,7 @@ class InMemoryScheduledTracksRepository(ScheduledTracksRepository):
         return scheduled
 
     def update(self, track: ScheduledTrack) -> ScheduledTrack:
-        updated = False
-        date_ = track.break_.start.date()
+        date_ = track.break_.date
         break_ = track.break_
 
         for idx, track_queued in enumerate(self._tracks_at(date_, break_.ordinal)):
@@ -105,11 +105,8 @@ class InMemoryScheduledTracksRepository(ScheduledTracksRepository):
                     created=track_queued.created,
                     last_changed=self._clock.now(),
                 )
-                self._tracks[date_][break_.ordinal][idx] = scheduled
-                updated = True
-                break
-        if updated is False:
-            raise RuntimeError("No object was updated!")
+                if not events_differ_only_last_changed(track_queued, scheduled):
+                    self._tracks[date_][break_.ordinal][idx] = scheduled
         return scheduled
 
     def insert_or_update(

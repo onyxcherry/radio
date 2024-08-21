@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 from typing import Optional
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from sqlalchemy import delete, func, select, update
 from player.src.application.models.scheduled_tracks import ScheduledTrackModel
@@ -118,6 +118,12 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             .where(ScheduledTrackModel.end == track.break_.end.astimezone(timezone.utc))
             .where(ScheduledTrackModel.ordinal == track.break_.ordinal)
             .where(ScheduledTrackModel.played == False)
+            .where(
+                or_(
+                    ScheduledTrackModel.duration != track.duration,
+                    ScheduledTrackModel.played != track.played,
+                )
+            )
             .values(duration=track.duration)
             .values(played=track.played)
             .values(last_changed=self._clock.now().astimezone(timezone.utc))
@@ -126,9 +132,15 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
 
         with SessionLocal() as session:
             rowcount = session.execute(stmt).rowcount
-            if rowcount == 0:
-                raise RuntimeError("No object was updated!")
+            if rowcount > 1:
+                raise RuntimeError("More than one track has been updated")
             session.commit()
+
+        to_return = self.get_track_on(
+            track.identity, track.break_.date, track.break_.ordinal
+        )
+        assert to_return is not None
+        return to_return
 
     def insert_or_update(
         self, track: TrackToSchedule | ScheduledTrack

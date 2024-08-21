@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Final
 from kink import di
 from pytest import fixture
@@ -93,8 +93,6 @@ def test_inserts_track(repo):
         created=dt,
         last_changed=dt,
     )
-    print(f"{result=}")
-    print(f"{expected=}")
     assert result == expected
 
 
@@ -116,6 +114,28 @@ def test_updates_track(repo, tracks_added):
         repo.get_track_on(TRACK.identity, TRACK.break_.date, TRACK.break_.ordinal)
         == modified_track
     )
+
+
+def test_does_not_update_last_changed_if_no_other_field_is_changing(repo, tracks_added):
+    TRACK = tracks_added[0]
+    got_track = repo.get_track_on(
+        TRACK.identity, TRACK.break_.date, TRACK.break_.ordinal
+    )
+    assert got_track is not None
+
+    example_dt = dt + timedelta(minutes=3, seconds=12)
+    modified_track = ScheduledTrack(
+        identity=got_track.identity,
+        break_=got_track.break_,
+        duration=got_track.duration,
+        played=got_track.played,
+        created=got_track.created,
+        last_changed=example_dt,
+    )
+    update_result = repo.update(modified_track)
+    assert update_result != modified_track
+    assert update_result.last_changed != modified_track.last_changed
+    assert update_result.last_changed == got_track.last_changed
 
 
 def test_deletes_track(repo, tracks_added):
