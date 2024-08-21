@@ -41,6 +41,7 @@ class BreakObserver:
     def reload_breaks(self) -> None: ...
 
     async def update_current_break(self) -> Never:
+        logger.info("Started updating current breaks")
         _waiting_noop_time = 0.01
 
         while True:

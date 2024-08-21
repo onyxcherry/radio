@@ -59,6 +59,7 @@ class PlayingManager:
         self._waits = False
 
     async def manage_playing(self) -> None:
+        logger.info("Started managing playing")
         while True:
             await self.until_music_should_play()
 
