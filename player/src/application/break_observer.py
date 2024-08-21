@@ -57,4 +57,5 @@ class BreakObserver:
                 self._event.clear()
                 seconds_to_next = self._breaks.get_remaining_time_to_next()
                 logger.debug(f"{seconds_to_next=}")
+                player.stop(force=True)
                 await asyncio.sleep(max(seconds_to_next, _waiting_noop_time))

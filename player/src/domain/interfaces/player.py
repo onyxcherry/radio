@@ -22,5 +22,5 @@ class Player:
         pass
 
     @abstractmethod
-    def stop(self) -> None:
+    def stop(self, force=False) -> None:
         pass

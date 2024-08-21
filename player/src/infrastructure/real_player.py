@@ -2,8 +2,11 @@ import os
 from typing import Callable, Optional
 from just_playback import Playback
 
+from player.src.config import get_logger
 from player.src.domain.types import Seconds
 from player.src.domain.interfaces.player import Player
+
+logger = get_logger(__name__)
 
 
 class JustPlaybackPlayer(Player):
@@ -29,5 +32,9 @@ class JustPlaybackPlayer(Player):
         if callback_end is not None:
             callback_end()
 
-    def stop(self) -> None:
+    def stop(self, force=False) -> None:
+        if force is True and self._playback.playing:
+            logger.error("Music is playing but should have had been stopped!")
+            logger.warning("Stopping")
+            # TODO: force stop if possible
         self._playback.stop()

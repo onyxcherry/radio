@@ -4,8 +4,12 @@ from pathlib import Path
 import time
 from typing import Callable, Optional
 
+from player.src.config import get_logger
 from player.src.domain.types import Seconds
 from player.src.domain.interfaces.player import Player
+
+
+logger = get_logger(__name__)
 
 
 class MadeupPlayer(Player):
@@ -26,11 +30,14 @@ class MadeupPlayer(Player):
         self, duration: Seconds, callback_end: Optional[Callable[[], None]]
     ) -> None:
         self._playing = True
-        print(f"Start playing: {self._filepath}", flush=True)
+        logger.info(f"Start playing: {self._filepath}")
         await asyncio.sleep(duration)
         if callback_end is not None:
             callback_end()
 
-    def stop(self) -> None:
+    def stop(self, force=False) -> None:
+        if force is True and self._playing:
+            logger.error("Music is playing but should have had been stopped!")
+            logger.warning("Stopping")
         self._playing = False
-        print(f"Stopped playing: {self._filepath}", flush=True)
+        logger.info(f"Stopped playing: {self._filepath}")
