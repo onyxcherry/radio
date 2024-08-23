@@ -54,6 +54,7 @@ def test_adding_track_event_applied_twice_does_not_change_state(repo):
     event = TrackAddedToPlaylist(
         identity=identity,
         when=PlayingTime(break_=1, date_=track_scheduled_datetime.date()),
+        duration=Seconds(42),
         waits_on_approval=False,
         created=dt - timedelta(seconds=3),
     )
@@ -80,6 +81,7 @@ def test_skips_event_adding_scheduled_track_if_waiting(repo):
     event = TrackAddedToPlaylist(
         identity=identity,
         when=when,
+        duration=Seconds(42),
         waits_on_approval=True,
         created=dt - timedelta(seconds=3),
     )

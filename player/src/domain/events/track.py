@@ -26,6 +26,7 @@ dataclass_config = ConfigDict(populate_by_name=True)
 class TrackAddedToPlaylist(Event):
     identity: TrackProvidedIdentity
     when: PlayingTime
+    duration: int
     waits_on_approval: bool
     created: MillisDatetime
     name: str = Field(default="TrackAddedToPlaylist", init=False, repr=False)

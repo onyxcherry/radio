@@ -11,6 +11,7 @@ from player.src.domain.events.track import (
     TrackDeletedFromPlaylist,
 )
 from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.domain.types import Seconds
 
 logger = get_logger(__name__)
 
@@ -46,14 +47,14 @@ class EventHandler:
             case (
                 TrackAddedToPlaylist() as added_to_playlist
             ) if added_to_playlist.waits_on_approval is False:
-                break_, duration = self._breaks.lookup_details(
+                break_, break_duration = self._breaks.lookup_details(
                     added_to_playlist.when.date_,
                     added_to_playlist.when.break_,
                 )
                 to_schedule = TrackToSchedule(
                     identity=added_to_playlist.identity,
                     break_=break_,
-                    duration=duration,
+                    duration=Seconds(min(added_to_playlist.duration, break_duration)),
                 )
                 result = self._schtr_repo.insert_or_update(to_schedule)
                 if result.last_changed < added_to_playlist.created:
