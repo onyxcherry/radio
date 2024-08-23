@@ -19,37 +19,65 @@ def reset(reset_events_fixt):
     pass
 
 
-def test_parses_event_from_dict():
+def test_parses_event_from_dict_with_iso_datetimes():
+    dt_str = "2024-08-05T18:34:13.033391Z"
     dict_data = {
         "identity": {"identifier": "aa", "provider": "Youtube"},
-        "break_": 1,
-        "start": "2024-08-05T20:34:13.033385",
-        "end": "2024-08-05T18:34:13.033391Z",
-        "created": "2024-08-05T20:34:13.033396",
+        "break": 1,
+        "start": dt_str,
+        "end": dt_str,
+        "created": dt_str,
         "name": "TrackPlayed",
     }
+    dt = datetime(2024, 8, 5, 18, 34, 13, 33391, tzinfo=timezone.utc)
     assert parse_event(dict_data) == TrackPlayed(
         identity=TrackProvidedIdentity(identifier=Identifier("aa"), provider="Youtube"),
         break_=1,
-        start=datetime(2024, 8, 5, 20, 34, 13, 33385),
-        end=datetime(2024, 8, 5, 18, 34, 13, 33391, tzinfo=timezone.utc),
-        created=datetime(2024, 8, 5, 20, 34, 13, 33396),
+        start=dt,
+        end=dt,
+        created=dt,
+    )
+
+
+def test_parses_event_from_dict_with_timestamp_millis_datetimes():
+    millis_timestamp = 1722882853033
+    dict_data = {
+        "identity": {"identifier": "aa", "provider": "Youtube"},
+        "break": 1,
+        "start": millis_timestamp,
+        "end": millis_timestamp,
+        "created": millis_timestamp,
+        "event_name": "TrackPlayed",
+    }
+    dt = datetime(2024, 8, 5, 18, 34, 13, 33000, tzinfo=timezone.utc)
+    assert parse_event(dict_data) == TrackPlayed(
+        identity=TrackProvidedIdentity(identifier=Identifier("aa"), provider="Youtube"),
+        break_=1,
+        start=dt,
+        end=dt,
+        created=dt,
     )
 
 
 def test_serializes_event():
+    dt = datetime(2024, 8, 5, 18, 34, 13, 33391, tzinfo=timezone.utc)
     event = TrackPlayed(
         identity=TrackProvidedIdentity(identifier=Identifier("aa"), provider="Youtube"),
         break_=1,
-        start=datetime(2024, 8, 5, 20, 34, 13, 33385),
-        end=datetime(2024, 8, 5, 18, 34, 13, 33391, tzinfo=timezone.utc),
-        created=datetime(2024, 8, 5, 20, 34, 13, 33396),
+        start=dt,
+        end=dt,
+        created=dt,
     )
-    expected = (
-        '{"identity":{"identifier":"aa","provider":"Youtube"},"break_":1,'
-        '"start":"2024-08-05T20:34:13.033385","end":"2024-08-05T18:34:13.033391Z",'
-        '"created":"2024-08-05T20:34:13.033396","name":"TrackPlayed"}'
-    )
+    millis_timestamp = 1722882853033
+    assert int(dt.timestamp() * 1000) == millis_timestamp
+    expected = {
+        "identity": {"identifier": "aa", "provider": "Youtube"},
+        "break": 1,
+        "start": millis_timestamp,
+        "end": millis_timestamp,
+        "created": millis_timestamp,
+        "event_name": "TrackPlayed",
+    }
     assert serialize_event(event) == expected
 
 
