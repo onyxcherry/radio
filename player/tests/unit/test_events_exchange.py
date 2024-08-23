@@ -142,20 +142,31 @@ def test_serializes_event_with_ordinal_date():
     assert serialize_event(event) == expected
 
 
-def test_consume_produced_event(reset):
+def test_consume_produced_events(reset):
     events_producer = di[PlaylistEventsProducer]
     events_consumer = di[PlaylistEventsConsumer]
 
+    identity = TrackProvidedIdentity(
+        identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"
+    )
     event_break = di[Breaks].as_list()[0]
-    event = TrackPlayed(
-        identity=TrackProvidedIdentity(
-            identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"
-        ),
+    event1 = TrackPlayed(
+        identity=identity,
         break_=event_break.ordinal,
         start=event_break.start,
         end=event_break.end,
         created=event_break.end + timedelta(seconds=1),
     )
-    events_producer.produce(event)
+    event2 = TrackAddedToPlaylist(
+        identity=identity,
+        when=PlayingTime(date_=event_break.date, break_=event_break.ordinal),
+        duration=Seconds(42),
+        waits_on_approval=False,
+        created=event_break.end + timedelta(seconds=43),
+    )
+    events_producer.produce(event1)
+    events_producer.produce(event2)
 
-    assert events_consumer.consume(1)[0] == event
+    consumed_events = events_consumer.consume(2)
+    assert consumed_events[0] == event1
+    assert consumed_events[1] == event2
