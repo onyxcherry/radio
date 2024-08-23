@@ -118,7 +118,7 @@ def bootstrap_di(di_choices: DIChoices) -> None:
 
     reregister_deps_with_clock(clock)
 
-    if di_choices.real_msg_broker and False:
+    if di_choices.real_msg_broker:
         producer_conn_options = ProducerConnectionOptions(
             bootstrap_servers="localhost:19092", client_id="producer-tests-1"
         )
