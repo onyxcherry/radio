@@ -12,6 +12,8 @@ from player.src.application.track_file_provider import (
     PlayableTrackProviderConfig,
 )
 from player.src.building_blocks.awakable import EventBasedAwakable
+from player.src.domain.events.recreate import parse_event
+from player.src.domain.events.serialize import serialize_event
 from player.src.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from player.src.infrastructure.messaging.types import (
     LibraryEventsConsumer,
@@ -145,11 +147,9 @@ def bootstrap_di(di_choices: DIChoices) -> None:
             subject_name="queue-value",
         )
         producer_msg_options = ProducerMessagesOptions(
-            key_serializer=StringSerializer("utf_8"), value_serializer=None
+            key_serializer=StringSerializer("utf_8"), value_serializer=serialize_event
         )
-        consumer_msg_options = ConsumerMessagesOptions(
-            value_deserializer=event_from_dict
-        )
+        consumer_msg_options = ConsumerMessagesOptions(value_deserializer=parse_event)
         library_events_producer = KafkaAvroEventsProducer(
             producer_conn_options, producer_msg_options, library_schema_config
         )
