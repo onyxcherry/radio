@@ -1,15 +1,21 @@
 from typing import Annotated, Any
 from pydantic import AwareDatetime, BeforeValidator, ConfigDict, Field, PlainSerializer
 from pydantic.dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from player.src.domain.events.base import Event
-from player.src.domain.entities import PlayingTime, TrackProvidedIdentity
+from player.src.domain.entities import TrackProvidedIdentity
 
 
 def millis_to_timestamp(v: Any) -> datetime:
     if isinstance(v, int):
         return datetime.fromtimestamp(v / 1000, tz=timezone.utc)
+    return v
+
+
+def ordinal_to_date(v: Any) -> date:
+    if isinstance(v, int):
+        return date.fromordinal(v)
     return v
 
 
@@ -19,7 +25,17 @@ MillisDatetime = Annotated[
     PlainSerializer(lambda dt: int(dt.timestamp() * 1000)),
 ]
 
+OrdinalDate = Annotated[
+    date, BeforeValidator(ordinal_to_date), PlainSerializer(lambda d: d.toordinal())
+]
+
 dataclass_config = ConfigDict(populate_by_name=True)
+
+
+@dataclass(frozen=True, config=dataclass_config)
+class PlayingTime:
+    date_: OrdinalDate = Field(validation_alias="date", serialization_alias="date")
+    break_: int = Field(validation_alias="break", serialization_alias="break")
 
 
 @dataclass(frozen=True, config=dataclass_config)

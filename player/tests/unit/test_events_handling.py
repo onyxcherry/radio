@@ -6,11 +6,11 @@ from player.src.application.events.handle import EventHandler
 from player.src.building_blocks.clock import FixedClock
 from player.src.domain.breaks import Breaks
 from player.src.domain.entities import (
-    PlayingTime,
     TrackProvidedIdentity,
     TrackToSchedule,
 )
 from player.src.domain.events.track import (
+    PlayingTime,
     TrackAddedToPlaylist,
     TrackDeletedFromPlaylist,
 )
