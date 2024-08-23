@@ -58,6 +58,14 @@
             "default": null
         },
         {
+            "name": "duration",
+            "type": [
+                "null",
+                "int"
+            ],
+            "default": null
+        },
+        {
             "name": "created",
             "type": "long",
             "logicalType": "timestamp-micros"
