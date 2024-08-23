@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from kink import di
 import pytest
 
@@ -6,8 +6,12 @@ from player.src.domain.breaks import Breaks
 from player.src.domain.entities import TrackProvidedIdentity
 from player.src.domain.events.serialize import serialize_event
 from player.src.domain.events.recreate import parse_event
-from player.src.domain.events.track import TrackPlayed
-from player.src.domain.types import Identifier
+from player.src.domain.events.track import (
+    PlayingTime,
+    TrackAddedToPlaylist,
+    TrackPlayed,
+)
+from player.src.domain.types import Identifier, Seconds
 from player.src.infrastructure.messaging.types import (
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
@@ -19,7 +23,45 @@ def reset(reset_events_fixt):
     pass
 
 
-def test_parses_event_from_dict_with_iso_datetimes():
+def test_parses_event_from_dict_with_ordinal_date_field():
+    dict_data = {
+        "identity": {"identifier": "bb", "provider": "file"},
+        "when": {"date": 739117, "break": 1},
+        "duration": 42,
+        "waits_on_approval": False,
+        "created": 1720681962000,
+        "name": "TrackAddedToPlaylist",
+    }
+    event = TrackAddedToPlaylist(
+        identity=TrackProvidedIdentity(identifier=Identifier("bb"), provider="file"),
+        when=PlayingTime(break_=1, date_=date(2024, 8, 19)),
+        duration=Seconds(42),
+        waits_on_approval=False,
+        created=datetime(2024, 7, 11, 7, 12, 42, tzinfo=timezone.utc),
+    )
+    assert parse_event(dict_data) == event
+
+
+def test_parses_event_from_dict_with_iso_date_field():
+    dict_data = {
+        "identity": {"identifier": "bb", "provider": "file"},
+        "when": {"date": "2024-08-19", "break": 1},
+        "duration": 42,
+        "waits_on_approval": False,
+        "created": 1720681962000,
+        "name": "TrackAddedToPlaylist",
+    }
+    event = TrackAddedToPlaylist(
+        identity=TrackProvidedIdentity(identifier=Identifier("bb"), provider="file"),
+        when=PlayingTime(break_=1, date_=date(2024, 8, 19)),
+        duration=Seconds(42),
+        waits_on_approval=False,
+        created=datetime(2024, 7, 11, 7, 12, 42, tzinfo=timezone.utc),
+    )
+    assert parse_event(dict_data) == event
+
+
+def test_parses_event_from_dict_with_iso_datetimes_fields():
     dt_str = "2024-08-05T18:34:13.033391Z"
     dict_data = {
         "identity": {"identifier": "aa", "provider": "Youtube"},
@@ -39,7 +81,7 @@ def test_parses_event_from_dict_with_iso_datetimes():
     )
 
 
-def test_parses_event_from_dict_with_timestamp_millis_datetimes():
+def test_parses_event_from_dict_with_timestamp_millis_datetimes_fields():
     millis_timestamp = 1722882853033
     dict_data = {
         "identity": {"identifier": "aa", "provider": "Youtube"},
@@ -59,7 +101,7 @@ def test_parses_event_from_dict_with_timestamp_millis_datetimes():
     )
 
 
-def test_serializes_event():
+def test_serializes_event_with_timestamp_millis():
     dt = datetime(2024, 8, 5, 18, 34, 13, 33391, tzinfo=timezone.utc)
     event = TrackPlayed(
         identity=TrackProvidedIdentity(identifier=Identifier("aa"), provider="Youtube"),
@@ -77,6 +119,25 @@ def test_serializes_event():
         "end": millis_timestamp,
         "created": millis_timestamp,
         "event_name": "TrackPlayed",
+    }
+    assert serialize_event(event) == expected
+
+
+def test_serializes_event_with_ordinal_date():
+    event = TrackAddedToPlaylist(
+        identity=TrackProvidedIdentity(identifier=Identifier("bb"), provider="file"),
+        when=PlayingTime(break_=1, date_=date(2024, 8, 19)),
+        duration=Seconds(42),
+        waits_on_approval=False,
+        created=datetime(2024, 7, 11, 7, 12, 42, tzinfo=timezone.utc),
+    )
+    expected = {
+        "identity": {"identifier": "bb", "provider": "file"},
+        "when": {"date": 739117, "break": 1},
+        "duration": 42,
+        "waits_on_approval": False,
+        "created": 1720681962000,
+        "name": "TrackAddedToPlaylist",
     }
     assert serialize_event(event) == expected
 
