@@ -41,7 +41,7 @@
                 "null",
                 {
                     "type": "long",
-                    "logicalType": "timestamp-micros"
+                    "logicalType": "timestamp-millis"
                 }
             ],
             "default": null
@@ -52,23 +52,17 @@
                 "null",
                 {
                     "type": "long",
-                    "logicalType": "timestamp-micros"
+                    "logicalType": "timestamp-millis"
                 }
             ],
             "default": null
         },
         {
-            "name": "duration",
-            "type": [
-                "null",
-                "int"
-            ],
-            "default": null
-        },
-        {
             "name": "created",
-            "type": "long",
-            "logicalType": "timestamp-micros"
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+            }
         }
     ]
 }

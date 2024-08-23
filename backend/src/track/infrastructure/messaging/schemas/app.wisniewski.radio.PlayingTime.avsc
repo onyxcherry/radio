@@ -5,8 +5,10 @@
   "fields": [
     {
       "name": "date",
-      "type": "int",
-      "logicalType": "date"
+      "type": {
+          "type": "int",
+          "logicalType": "date"
+      }
     },
     {
       "name": "break",

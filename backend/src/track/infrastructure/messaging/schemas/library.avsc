@@ -21,8 +21,10 @@
         },
         {
             "name": "created",
-            "type": "long",
-            "logicalType": "timestamp-micros"
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+            }
         }
     ]
 }
