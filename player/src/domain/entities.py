@@ -7,12 +7,6 @@ from player.src.domain.breaks import Break
 from player.src.domain.types import Identifier, ProviderName, Seconds
 
 
-@dataclass(frozen=True)
-class PlayingTime:
-    date_: date
-    break_: int
-
-
 @dataclass(frozen=True, order=True)
 class TrackProvidedIdentity:
     identifier: Identifier
