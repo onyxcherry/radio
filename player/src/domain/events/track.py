@@ -45,7 +45,9 @@ class TrackAddedToPlaylist(Event):
     duration: int
     waits_on_approval: bool
     created: MillisDatetime
-    name: str = Field(default="TrackAddedToPlaylist", init=False, repr=False)
+    name: str = Field(
+        default="TrackAddedToPlaylist", init=False, repr=False, alias="event_name"
+    )
 
 
 @dataclass(frozen=True, config=dataclass_config)
@@ -53,7 +55,9 @@ class TrackDeletedFromPlaylist(Event):
     identity: TrackProvidedIdentity
     when: PlayingTime
     created: MillisDatetime
-    name: str = Field(default="TrackDeletedFromPlaylist", init=False, repr=False)
+    name: str = Field(
+        default="TrackDeletedFromPlaylist", init=False, repr=False, alias="event_name"
+    )
 
 
 @dataclass(frozen=True, config=dataclass_config)
@@ -71,4 +75,6 @@ class TrackMarkedAsPlayed(Event):
     identity: TrackProvidedIdentity
     when: PlayingTime
     created: MillisDatetime
-    name: str = Field(default="TrackMarkedAsPlayed", init=False, repr=False)
+    name: str = Field(
+        default="TrackMarkedAsPlayed", init=False, repr=False, alias="event_name"
+    )

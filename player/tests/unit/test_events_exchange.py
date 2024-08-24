@@ -30,7 +30,7 @@ def test_parses_event_from_dict_with_ordinal_date_field():
         "duration": 42,
         "waits_on_approval": False,
         "created": 1720681962000,
-        "name": "TrackAddedToPlaylist",
+        "event_name": "TrackAddedToPlaylist",
     }
     event = TrackAddedToPlaylist(
         identity=TrackProvidedIdentity(identifier=Identifier("bb"), provider="file"),
@@ -49,7 +49,7 @@ def test_parses_event_from_dict_with_iso_date_field():
         "duration": 42,
         "waits_on_approval": False,
         "created": 1720681962000,
-        "name": "TrackAddedToPlaylist",
+        "event_name": "TrackAddedToPlaylist",
     }
     event = TrackAddedToPlaylist(
         identity=TrackProvidedIdentity(identifier=Identifier("bb"), provider="file"),
@@ -69,7 +69,7 @@ def test_parses_event_from_dict_with_iso_datetimes_fields():
         "start": dt_str,
         "end": dt_str,
         "created": dt_str,
-        "name": "TrackPlayed",
+        "event_name": "TrackPlayed",
     }
     dt = datetime(2024, 8, 5, 18, 34, 13, 33391, tzinfo=timezone.utc)
     assert parse_event(dict_data) == TrackPlayed(
@@ -137,7 +137,7 @@ def test_serializes_event_with_ordinal_date():
         "duration": 42,
         "waits_on_approval": False,
         "created": 1720681962000,
-        "name": "TrackAddedToPlaylist",
+        "event_name": "TrackAddedToPlaylist",
     }
     assert serialize_event(event) == expected
 
