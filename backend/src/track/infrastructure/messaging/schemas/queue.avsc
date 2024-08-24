@@ -20,6 +20,14 @@
             "default": null
         },
         {
+            "name": "duration",
+            "type": [
+                "null",
+                "int"
+            ],
+            "default": null
+        },
+        {
             "name": "waits_on_approval",
             "type": [
                 "null",
