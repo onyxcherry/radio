@@ -23,10 +23,10 @@ def reset(reset_events_fixt):
     pass
 
 
-def test_parses_event_from_dict_with_ordinal_date_field():
+def test_parses_event_from_dict_with_unix_epoch_date_field():
     dict_data = {
         "identity": {"identifier": "bb", "provider": "file"},
-        "when": {"date": 739117, "break": 1},
+        "when": {"date": 19954, "break": 1},
         "duration": 42,
         "waits_on_approval": False,
         "created": 1720681962000,
@@ -123,7 +123,7 @@ def test_serializes_event_with_timestamp_millis():
     assert serialize_event(event) == expected
 
 
-def test_serializes_event_with_ordinal_date():
+def test_serializes_event_with_unix_epoch_date():
     event = TrackAddedToPlaylist(
         identity=TrackProvidedIdentity(identifier=Identifier("bb"), provider="file"),
         when=PlayingTime(break_=1, date_=date(2024, 8, 19)),
@@ -133,7 +133,7 @@ def test_serializes_event_with_ordinal_date():
     )
     expected = {
         "identity": {"identifier": "bb", "provider": "file"},
-        "when": {"date": 739117, "break": 1},
+        "when": {"date": 19954, "break": 1},
         "duration": 42,
         "waits_on_approval": False,
         "created": 1720681962000,
