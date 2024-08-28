@@ -1,5 +1,6 @@
 from kink import di
-from track.domain.events.utils.create import event_from_dict
+from backend.src.track.domain.events.recreate import parse_event
+from backend.src.track.domain.events.serialize import serialize_event
 from track.infrastructure.messaging.types import (
     LibraryEventsProducer,
     PlaylistEventsConsumer,
@@ -52,9 +53,9 @@ def boostrap_di() -> None:
         subject_name="queue-value",
     )
     producer_msg_options = ProducerMessagesOptions(
-        key_serializer=StringSerializer("utf_8"), value_serializer=None
+        key_serializer=StringSerializer("utf_8"), value_serializer=serialize_event
     )
-    consumer_msg_options = ConsumerMessagesOptions(value_deserializer=event_from_dict)
+    consumer_msg_options = ConsumerMessagesOptions(value_deserializer=parse_event)
     library_events_producer = KafkaAvroEventsProducer(
         producer_conn_options, producer_msg_options, library_schema_config
     )

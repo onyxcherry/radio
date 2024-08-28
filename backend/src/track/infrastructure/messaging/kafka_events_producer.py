@@ -1,22 +1,25 @@
-from datetime import date
 from typing import Literal, Optional
 from uuid import uuid4
 
 from confluent_kafka import Producer
-from track.domain.events.base import Event
-from track.infrastructure.messaging.schema_utils import (
-    SchemaRegistryConfig,
-    create_client,
-    fetch_schema,
-)
 from confluent_kafka.schema_registry.avro import AvroSerializer
 
-from track.application.interfaces.events import (
+from confluent_kafka.serialization import SerializationContext, MessageField
+
+from backend.src.track.application.interfaces.events import (
     EventsProducer,
     ProducerConnectionOptions,
     ProducerMessagesOptions,
 )
-from confluent_kafka.serialization import SerializationContext, MessageField
+from backend.src.track.domain.events.base import Event
+from backend.src.track.infrastructure.config import get_logger
+from backend.src.track.infrastructure.messaging.schema_utils import (
+    SchemaRegistryConfig,
+    create_client,
+    fetch_schema,
+)
+
+logger = get_logger(__name__)
 
 
 def delivery_report(err, msg):
@@ -38,27 +41,13 @@ def delivery_report(err, msg):
     """
 
     if err is not None:
-        print(f"Delivery failed for record {msg.key()}: {err}")
+        logger.warning(f"Delivery failed for record {msg.key()}: {err}")
         return
-    print(
+    logger.info(
         f"Record {msg.key()} successfully produced to {msg.topic()} "
         f"[{msg.partition()}] at offset {msg.offset()}"
     )
-
-
-def json_serial(obj: Event, ctx):
-    """JSON serializer for objects not serializable by default json code"""
-    if isinstance(obj, date):
-        return obj.isoformat()
-    else:
-        obj_dict = obj.__dict__
-        obj_dict["event_name"] = obj.name
-        obj_dict["identity"] = obj.identity.__dict__
-        obj_dict["created"] = int(obj.created.timestamp() * 10**6)
-        if "when" in obj_dict:
-            when = {"date": obj.when.date_.toordinal(), "break": obj.when.break_}
-            obj_dict["when"] = when
-        return obj_dict
+    logger.info(f"Message content is: {msg.value()}")
 
 
 class KafkaAvroEventsProducer(EventsProducer):
@@ -84,6 +73,9 @@ class KafkaAvroEventsProducer(EventsProducer):
             schema_id=schema_config.schema_id, subject_name=schema_config.subject_name
         )
 
+    def _serialize_event(self, obj: Event, ctx):
+        return self._value_serializer(obj)
+
     def _create_avro_serializer(
         self, schema_id: int | Literal["latest"], subject_name: Optional[str]
     ) -> AvroSerializer:
@@ -97,7 +89,7 @@ class KafkaAvroEventsProducer(EventsProducer):
             self._schema_reg_client,
             schema_str=schema_str,
             conf=conf,
-            to_dict=json_serial,
+            to_dict=self._serialize_event,
         )
         return avro_serializer
 
@@ -115,7 +107,7 @@ class KafkaAvroEventsProducer(EventsProducer):
                 on_delivery=delivery_report,
             )
         except ValueError as ex:
-            print(f"{ex=}")
-            print("Invalid input, discarding record...")
+            logger.exception(f"{ex=}")
+            logger.error("Invalid input, discarding record...")
 
         self._producer.flush()

@@ -1,6 +1,7 @@
 from typing import Literal, Optional
 
 from confluent_kafka import Consumer
+from track.infrastructure.config import get_logger
 from track.domain.events.base import Event
 from track.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
@@ -15,6 +16,8 @@ from track.application.interfaces.events import (
     EventsConsumer,
 )
 from confluent_kafka.serialization import SerializationContext, MessageField
+
+logger = get_logger(__name__)
 
 
 class KafkaAvroEventsConsumer(EventsConsumer):
@@ -59,7 +62,7 @@ class KafkaAvroEventsConsumer(EventsConsumer):
     def consume(self, limit: int) -> list[Event]:
         results = []
         while len(results) != limit:
-            msg = self._consumer.poll(0.0)
+            msg = self._consumer.poll(0.01)
             if msg is None:
                 continue
 
