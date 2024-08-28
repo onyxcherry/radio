@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any, Sequence
 from kink import di
+from pydantic import ValidationError
 from pytest import fixture, raises, mark
 from track.domain.events.library import TrackAccepted, TrackRejected
 from track.domain.events.playlist import TrackDeletedFromPlaylist
@@ -13,7 +14,6 @@ from track.infrastructure.messaging.types import (
     PlaylistEventsProducer,
 )
 from track.application.interfaces.events import EventsConsumer, EventsProducer
-from track.builder import NotKnownProviderError
 from building_blocks.clock import Clock
 from tests.unit.data import FUTURE_PT, FUTURE_PT_WEEKEND, PASSED_PT, NEW_YT_TRACKS
 from track.application.playlist import Playlist
@@ -179,11 +179,10 @@ def test_too_long_track_not_added_to_library():
 
 def test_no_provider_matched_for_track_requested():
     notknownprovider: Any = "notknownprovider"
-    identity = TrackProvidedIdentity(
-        identifier=Identifier("sth"), provider=notknownprovider
-    )
-    with raises(NotKnownProviderError):
-        rs.add_to_library(identity)
+    with raises(ValidationError):
+        _ = TrackProvidedIdentity(
+            identifier=Identifier("sth"), provider=notknownprovider
+        )
 
 
 def test_requests_to_add_already_pending_approval_track_in_library():
