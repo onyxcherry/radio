@@ -68,6 +68,9 @@ class InMemoryPlaylistRepository(PlaylistRepository):
 
         return tracks
 
+    def get_all_by_identity(self, identity: TrackProvidedIdentity) -> list[TrackQueued]:
+        raise NotImplementedError()
+
     def count_on(
         self,
         date_: date,

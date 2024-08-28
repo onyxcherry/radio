@@ -42,7 +42,7 @@ class Playlist:
         identity: TrackProvidedIdentity,
         date_: date,
         break_: Optional[Breaks] = None,
-    ):
+    ) -> Optional[TrackQueued]:
         return self._playlist_repository.get_track_on(identity, date_, break_)
 
     def get_all(
@@ -51,13 +51,16 @@ class Playlist:
         break_: Optional[Breaks] = None,
         played: Optional[bool] = None,
         waiting: Optional[bool] = None,
-    ):
+    ) -> list[TrackQueued]:
         return self._playlist_repository.get_all(
             date_,
             break_,
             played,
             waiting,
         )
+
+    def get_all_by_identity(self, identity: TrackProvidedIdentity) -> list[TrackQueued]:
+        return self._playlist_repository.get_all_by_identity(identity)
 
     def add(self, req: TrackRequested) -> TrackQueued:
         to_save = TrackToQueue(
@@ -72,14 +75,7 @@ class Playlist:
         if already_added is not None:
             return already_added
         saved = self._playlist_repository.insert(to_save)
-        event = TrackAddedToPlaylist(
-            saved.identity,
-            saved.when,
-            saved.duration,
-            saved.waiting,
-            created=self._clock.now(),
-        )
-        self._events_producer.produce(message=event)
+        self._emit_update_event(saved)
         return saved
 
     def delete(self, track: TrackQueued) -> Optional[TrackQueued]:
@@ -133,3 +129,18 @@ class Playlist:
     ) -> bool:
         got_track = self._playlist_repository.get_track_on(identity, date_)
         return got_track is not None and got_track.waiting is False
+
+    def inform_update(self, identity: TrackProvidedIdentity) -> None:
+        tracks = self.get_all_by_identity(identity)
+        for track in tracks:
+            self._emit_update_event(track)
+
+    def _emit_update_event(self, track: TrackQueued) -> None:
+        event = TrackAddedToPlaylist(
+            track.identity,
+            track.when,
+            track.duration,
+            track.waiting,
+            created=self._clock.now(),
+        )
+        self._events_producer.produce(message=event)

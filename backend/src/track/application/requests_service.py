@@ -187,6 +187,7 @@ class RequestsService:
     def accept(self, identity: TrackProvidedIdentity) -> TrackInLibrary:
         new_status = Status.ACCEPTED
         result = self._library._change_status(identity, new_status)
+        self._playlist.inform_update(identity)
         return result.current
 
     def reject(self, identity: TrackProvidedIdentity) -> TrackInLibrary:

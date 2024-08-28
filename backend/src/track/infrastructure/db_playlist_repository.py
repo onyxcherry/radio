@@ -72,6 +72,29 @@ class DBPlaylistRepository(PlaylistRepository):
             tracks_queued.append(self._map_on_domain_model(row_dict))
         return tracks_queued
 
+    def get_all_by_identity(self, identity: TrackProvidedIdentity) -> list[TrackQueued]:
+        track_id = self._get_track_id(identity)
+        stmt = (
+            select(
+                *QueueTrackModel.__table__.columns,
+                LibraryTrackModel.identifier,
+                LibraryTrackModel.provider,
+                LibraryTrackModel.status,
+                LibraryTrackModel.duration,
+            )
+            .join(LibraryTrackModel)
+            .filter(QueueTrackModel.track_id == track_id)
+        )
+
+        with SessionLocal() as session:
+            result = session.execute(stmt).all()
+
+        tracks_queued = []
+        for row in result:
+            row_dict = row._asdict()
+            tracks_queued.append(self._map_on_domain_model(row_dict))
+        return tracks_queued
+
     def count_on(
         self,
         date_: date,
