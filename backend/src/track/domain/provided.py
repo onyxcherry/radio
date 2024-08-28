@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Any, Literal, NewType, Self
 from abc import ABC, abstractmethod
 
@@ -11,7 +11,7 @@ TrackUrl = NewType("TrackUrl", str)
 Seconds = NewType("Seconds", int)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class TrackProvidedIdentity:
     identifier: Identifier
     provider: ProviderName

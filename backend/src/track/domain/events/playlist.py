@@ -1,41 +1,52 @@
-from dataclasses import dataclass, field
-from datetime import datetime
+from pydantic.dataclasses import dataclass
 
-from track.domain.events.base import Event
+from pydantic import ConfigDict, Field
+
+from track.domain.events.base import Event, MillisDatetime
 from track.domain.provided import TrackProvidedIdentity
-from track.domain.breaks import Breaks, PlayingTime
+from track.domain.breaks import PlayingTime
 
 
-@dataclass(frozen=True)
+dataclass_config = ConfigDict(populate_by_name=True)
+
+
+@dataclass(frozen=True, config=dataclass_config)
 class TrackAddedToPlaylist(Event):
-    name: str = field(default="TrackAddedToPlaylist", init=False, repr=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
+    duration: int
     waits_on_approval: bool
-    created: datetime
+    created: MillisDatetime
+    name: str = Field(
+        default="TrackAddedToPlaylist", init=False, repr=False, alias="event_name"
+    )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=dataclass_config)
 class TrackDeletedFromPlaylist(Event):
-    name: str = field(default="TrackDeletedFromPlaylist", init=False, repr=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
-    created: datetime
+    created: MillisDatetime
+    name: str = Field(
+        default="TrackDeletedFromPlaylist", init=False, repr=False, alias="event_name"
+    )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=dataclass_config)
 class TrackPlayed(Event):
-    name: str = field(default="TrackPlayed", init=False, repr=False)
     identity: TrackProvidedIdentity
-    break_: Breaks
-    start: datetime
-    end: datetime
-    created: datetime
+    start: MillisDatetime
+    end: MillisDatetime
+    created: MillisDatetime
+    break_: int = Field(validation_alias="break", serialization_alias="break")
+    name: str = Field(default="TrackPlayed", init=False, repr=False, alias="event_name")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=dataclass_config)
 class TrackMarkedAsPlayed(Event):
-    name: str = field(default="TrackMarkedAsPlayed", init=False, repr=False)
     identity: TrackProvidedIdentity
     when: PlayingTime
-    created: datetime
+    created: MillisDatetime
+    name: str = Field(
+        default="TrackMarkedAsPlayed", init=False, repr=False, alias="event_name"
+    )

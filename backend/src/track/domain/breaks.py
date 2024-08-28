@@ -1,8 +1,12 @@
-from dataclasses import dataclass
+from pydantic import ConfigDict, Field
+from pydantic.dataclasses import dataclass
 from enum import IntEnum, auto, unique
 from datetime import date, datetime, time, timezone
 
+from backend.src.track.domain.events.base import DateFromUnixEpoch
 from track.domain.provided import Seconds
+
+dataclass_config = ConfigDict(populate_by_name=True)
 
 
 _BREAKS_START_TIMES = {
@@ -43,10 +47,12 @@ class Breaks(IntEnum):
         return f"Breaks.{self.name}"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=dataclass_config)
 class PlayingTime:
-    date_: date
-    break_: Breaks
+    date_: DateFromUnixEpoch = Field(
+        validation_alias="date", serialization_alias="date"
+    )
+    break_: Breaks = Field(validation_alias="break", serialization_alias="break")
 
     def to_datetime(self) -> datetime:
         break_number = self.break_.get_number_from_zero_of()
