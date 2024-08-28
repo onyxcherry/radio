@@ -171,7 +171,12 @@ class RequestsService:
         if library_result.errors is not None and len(library_result.errors) > 0:
             return RequestResult(success=False, errors=library_result.errors)
 
-        requested = TrackRequested(identity, when)
+        track = self._library.get(identity)
+        if track is None:
+            raise RuntimeError("Impossible")
+        if track.duration is None:
+            raise RuntimeError("TODO: handle nullable duration if needed")
+        requested = TrackRequested(identity, when, track.duration)
         playlist_errors = self.can_add_to_playlist(requested)
         if playlist_errors is None:
             self._playlist.add(requested)

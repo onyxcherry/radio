@@ -42,6 +42,7 @@ class NewTrack:
 class TrackQueued:
     identity: TrackProvidedIdentity
     when: PlayingTime
+    duration: Seconds
     played: bool
     waiting: bool
 
@@ -56,6 +57,7 @@ class TrackUnqueued:
 class TrackToQueue:
     identity: TrackProvidedIdentity
     when: PlayingTime
+    duration: Seconds
     played: bool
 
 
@@ -63,3 +65,4 @@ class TrackToQueue:
 class TrackRequested:
     identity: TrackProvidedIdentity
     when: PlayingTime
+    duration: Seconds

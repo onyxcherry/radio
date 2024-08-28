@@ -111,18 +111,19 @@ def whole_break_scheduled():
     tracks_count = 4
     for idx in range(1, tracks_count + 1):
         identifier = f"{idx}".rjust(11, "a")
+        duration = Seconds(break_duration // tracks_count)
         track = NewTrack(
             TrackProvidedIdentity(
                 identifier=Identifier(identifier), provider="Youtube"
             ),
             title=f"Track {idx}",
             url=TrackUrl(f"https://www.youtube.com/watch?v={identifier}"),
-            duration=Seconds(break_duration // tracks_count),
+            duration=duration,
         )
         library.add(track)
         rs.accept(track.identity)
 
-        req = TrackRequested(track.identity, playing_time)
+        req = TrackRequested(track.identity, playing_time, duration)
         playlist.add(req)
 
     reset_events(_realmsgbroker, _events_handlers)
@@ -134,18 +135,19 @@ def max_tracks_count_on_queue():
 
     for idx in range(1, MAX_TRACKS_QUEUED_ONE_BREAK + 1):
         identifier = f"{idx}".rjust(11, "a")
+        duration = Seconds(3 * idx)
         track = NewTrack(
             TrackProvidedIdentity(
                 identifier=Identifier(identifier), provider="Youtube"
             ),
             title=f"Track {idx}",
             url=TrackUrl(f"https://www.youtube.com/watch?v={identifier}"),
-            duration=Seconds(3 * idx),
+            duration=duration,
         )
         library.add(track)
         rs.accept(track.identity)
 
-        req = TrackRequested(track.identity, playing_time)
+        req = TrackRequested(track.identity, playing_time, Seconds(3 * idx))
         playlist.add(req)
 
     reset_events(_realmsgbroker, _events_handlers)
@@ -415,8 +417,8 @@ def test_rejecting_track_removes_all_playlist_occurrences(yt_tracks):
     rs.accept(track.identity)
     first_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 1))
     second_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 2))
-    assert playlist.add(TrackRequested(track.identity, first_pt))
-    assert playlist.add(TrackRequested(track.identity, second_pt))
+    assert playlist.add(TrackRequested(track.identity, first_pt, Seconds(23)))
+    assert playlist.add(TrackRequested(track.identity, second_pt, Seconds(23)))
 
     rs.reject(track.identity)
 

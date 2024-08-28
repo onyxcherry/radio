@@ -107,6 +107,7 @@ class InMemoryPlaylistRepository(PlaylistRepository):
         queued = TrackQueued(
             identity=track.identity,
             when=track.when,
+            duration=track.duration,
             played=track.played,
             waiting=False,  # no possibility to reflect this property
         )
@@ -121,6 +122,7 @@ class InMemoryPlaylistRepository(PlaylistRepository):
         queued = TrackQueued(
             identity=track.identity,
             when=track.when,
+            duration=track.duration,
             played=track.played,
             waiting=False,  # no possibility to reflect this property
         )

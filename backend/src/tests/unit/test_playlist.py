@@ -1,6 +1,7 @@
 from typing import Sequence
 from kink import di
 from pytest import fixture, mark
+from track.domain.provided import Seconds
 from tests.unit.fixtures.events import reset_events, provide_config
 from track.infrastructure.messaging.types import PlaylistEventsConsumer
 from tests.helpers.messaging import sync_messages_from_producer_to_consumer
@@ -69,7 +70,7 @@ def pending_approval_tracks():
 @mark.realdb()
 def test_adds_track_to_playlist(accepted_tracks):
     playing_time = FUTURE_PT
-    requested = TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time)
+    requested = TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time, Seconds(189))
 
     playlist.add(requested)
 
@@ -82,6 +83,7 @@ def test_adds_track_to_playlist(accepted_tracks):
     expected_event = TrackAddedToPlaylist(
         identity=requested.identity,
         when=requested.when,
+        duration=Seconds(189),
         waits_on_approval=False,
         created=fixed_dt,
     )
@@ -91,7 +93,7 @@ def test_adds_track_to_playlist(accepted_tracks):
 def test_deletes_track(accepted_tracks):
     playing_time = FUTURE_PT
     identity = ACCEPTED_TRACKS[0].identity
-    requested = TrackRequested(identity, playing_time)
+    requested = TrackRequested(identity, playing_time, Seconds(42))
 
     added = playlist.add(requested)
 
@@ -106,7 +108,7 @@ def test_deletes_track(accepted_tracks):
 
 
 def test_marks_as_played(accepted_tracks):
-    requested = TrackRequested(ACCEPTED_TRACKS[0].identity, FUTURE_PT)
+    requested = TrackRequested(ACCEPTED_TRACKS[0].identity, FUTURE_PT, Seconds(42))
     playlist.add(requested)
 
     track = playlist.get(
@@ -133,9 +135,13 @@ def test_marks_as_played(accepted_tracks):
 @mark.realdb()
 def test_gets_tracks_count(accepted_tracks, pending_approval_tracks):
     playing_time = FUTURE_PT
-    playlist.add(TrackRequested(PENDING_APPROVAL_TRACKS[0].identity, playing_time))
-    playlist.add(TrackRequested(PENDING_APPROVAL_TRACKS[1].identity, playing_time))
-    playlist.add(TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time))
+    playlist.add(
+        TrackRequested(PENDING_APPROVAL_TRACKS[0].identity, playing_time, Seconds(37))
+    )
+    playlist.add(
+        TrackRequested(PENDING_APPROVAL_TRACKS[1].identity, playing_time, Seconds(28))
+    )
+    playlist.add(TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time, Seconds(91)))
 
     assert playlist.get_tracks_count_on_break(playing_time, waiting=True) == 2
     assert playlist.get_tracks_count_on_break(playing_time, waiting=False) == 1
@@ -149,9 +155,9 @@ def test_gets_tracks_duration(accepted_tracks, pending_approval_tracks):
     track2 = PENDING_APPROVAL_TRACKS[1]
     track3 = ACCEPTED_TRACKS[0]
 
-    playlist.add(TrackRequested(track1.identity, playing_time))
-    playlist.add(TrackRequested(track2.identity, playing_time))
-    playlist.add(TrackRequested(track3.identity, playing_time))
+    playlist.add(TrackRequested(track1.identity, playing_time, Seconds(234)))
+    playlist.add(TrackRequested(track2.identity, playing_time, Seconds(45)))
+    playlist.add(TrackRequested(track3.identity, playing_time, Seconds(212)))
 
     sum_1_2 = sum([track1.duration or 0, track2.duration or 0])
     dur_3 = track3.duration or 0
@@ -164,7 +170,7 @@ def test_gets_tracks_duration(accepted_tracks, pending_approval_tracks):
 def test_checks_track_played_or_queued_this_day(accepted_tracks):
     identity = ACCEPTED_TRACKS[0].identity
     playing_time = FUTURE_PT
-    requested = TrackRequested(identity, playing_time)
+    requested = TrackRequested(identity, playing_time, Seconds(143))
 
     queued = playlist.add(requested)
 

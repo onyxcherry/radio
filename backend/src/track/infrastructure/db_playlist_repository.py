@@ -24,6 +24,7 @@ class DBPlaylistRepository(PlaylistRepository):
                 LibraryTrackModel.identifier,
                 LibraryTrackModel.provider,
                 LibraryTrackModel.status,
+                LibraryTrackModel.duration,
             )
             .join(LibraryTrackModel)
             .filter(QueueTrackModel.date_ == date_)
@@ -55,6 +56,7 @@ class DBPlaylistRepository(PlaylistRepository):
                 LibraryTrackModel.identifier,
                 LibraryTrackModel.provider,
                 LibraryTrackModel.status,
+                LibraryTrackModel.duration,
             )
             .join(LibraryTrackModel)
             .filter(QueueTrackModel.date_ == date_)
@@ -130,6 +132,7 @@ class DBPlaylistRepository(PlaylistRepository):
         queued = TrackQueued(
             identity=track.identity,
             when=track.when,
+            duration=track.duration,
             played=track.played,
             waiting=status[0] == Status.PENDING_APPROVAL,
         )
@@ -257,6 +260,7 @@ class DBPlaylistRepository(PlaylistRepository):
         track_queued = TrackQueued(
             identity=identity,
             when=playing_time,
+            duration=queue_track_dict["duration"],
             played=queue_track_dict["played"],
             waiting=queue_track_dict["status"] != Status.ACCEPTED,
         )

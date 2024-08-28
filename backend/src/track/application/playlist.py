@@ -63,6 +63,7 @@ class Playlist:
         to_save = TrackToQueue(
             req.identity,
             req.when,
+            duration=req.duration,
             played=False,
         )
         already_added = self._playlist_repository.get_track_on(
@@ -72,7 +73,11 @@ class Playlist:
             return already_added
         saved = self._playlist_repository.insert(to_save)
         event = TrackAddedToPlaylist(
-            saved.identity, saved.when, saved.waiting, created=self._clock.now()
+            saved.identity,
+            saved.when,
+            saved.duration,
+            saved.waiting,
+            created=self._clock.now(),
         )
         self._events_producer.produce(message=event)
         return saved

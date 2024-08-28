@@ -1,6 +1,7 @@
 from datetime import date
 from kink import di
 from pytest import fixture, mark
+from track.domain.provided import Seconds
 from track.application.library import Library
 from track.application.playlist import Playlist
 from track.domain.entities import TrackQueued, TrackToQueue
@@ -16,12 +17,14 @@ library_repo = library._library_repository
 TRACK_TO_QUEUE = TrackToQueue(
     identity=IDENTITIES[0],
     when=PlayingTime(date_=date(2099, 1, 1), break_=Breaks.FIRST),
+    duration=Seconds(42),
     played=False,
 )
 
 TRACK_QUEUED = TrackQueued(
     identity=TRACK_TO_QUEUE.identity,
     when=TRACK_TO_QUEUE.when,
+    duration=Seconds(42),
     played=TRACK_TO_QUEUE.played,
     waiting=False,
 )
@@ -83,7 +86,7 @@ def test_gets_sum_of_durations():
 def test_adds_track_to_playlist():
     playing_time = PlayingTime(date_=date(2099, 1, 1), break_=Breaks.FIRST)
     new_queued_track = TrackToQueue(
-        identity=IDENTITIES[1], when=playing_time, played=False
+        identity=IDENTITIES[1], when=playing_time, duration=Seconds(42), played=False
     )
 
     playlist_repo.insert(new_queued_track)
