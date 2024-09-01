@@ -38,10 +38,10 @@ class EventHandler:
 
     def handle_event(
         self,
-        event: Any,
+        event: Event | Any,
     ) -> None:
         if not isinstance(event, Event):
-            raise RuntimeError("Not known event!")
+            logger.warning(f"Not known event: {event}")
 
         match event:
             case (
@@ -61,6 +61,8 @@ class EventHandler:
                     logger.info(
                         "Event doesn't change track's state. May have had been applied before"
                     )
+                else:
+                    logger.info(f"Scheduled track {to_schedule}")
 
             case TrackDeletedFromPlaylist() as deleted_from_playlist:
                 scheduled = self._schtr_repo.get_track_on(
