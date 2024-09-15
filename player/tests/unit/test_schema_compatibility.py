@@ -3,6 +3,7 @@ import io
 from typing import Final
 import fastavro
 from fastavro.validation import validate
+from pytest import fixture
 
 from player.src.domain.events.track import (
     date_as_unix_epoch_date_int,
@@ -10,6 +11,23 @@ from player.src.domain.events.track import (
     millis_timestamp_as_datetime,
     unix_epoch_date_int_as_date,
 )
+from player.src.infrastructure.messaging.schema_utils import (
+    SchemaRegistryConfig,
+    create_client,
+    fetch_schema,
+)
+
+
+@fixture
+def sch_reg_client():
+    schema_registry_config = SchemaRegistryConfig(
+        url="http://localhost:18081",
+        topic_name="queue",
+        schema_id="latest",
+        subject_name="queue-value",
+    )
+    client = create_client(schema_registry_config)
+    return client
 
 
 schema: Final = {
@@ -71,6 +89,18 @@ fastavro.write.LOGICAL_WRITERS["int-date"] = date_as_unix_epoch_date_int
 fastavro.read.LOGICAL_READERS["int-date"] = unix_epoch_date_int_as_date
 fastavro.write.LOGICAL_WRITERS["long-timestamp-millis"] = datetime_as_millis_timestamp
 fastavro.read.LOGICAL_READERS["long-timestamp-millis"] = millis_timestamp_as_datetime
+
+
+def test_fetches_schema_of_specific_version(sch_reg_client):
+    schema = fetch_schema(client=sch_reg_client, schema_id=1, subject_name=None)
+    assert '"namespace":"app.wisniewski.radio"' in schema
+
+
+def test_fetches_latest_schema_of_subject(sch_reg_client):
+    schema = fetch_schema(
+        client=sch_reg_client, schema_id="latest", subject_name="queue-value"
+    )
+    assert '"namespace":"app.wisniewski.radio"' in schema
 
 
 def test_schema_compatibility():
