@@ -1,4 +1,5 @@
 from kink import di
+from tests.choices import DIChoices
 from track.domain.events.recreate import parse_event
 from track.domain.events.serialize import serialize_event
 from track.infrastructure.messaging.types import (
@@ -20,12 +21,8 @@ from track.infrastructure.messaging.inmemory_events_consumer import (
 from track.infrastructure.messaging.inmemory_events_producer import (
     InMemoryEventsProducer,
 )
-from track.infrastructure.messaging.kafka_events_consumer import (
-    KafkaAvroEventsConsumer,
-)
-from track.infrastructure.messaging.kafka_events_producer import (
-    KafkaAvroEventsProducer,
-)
+from track.infrastructure.messaging.kafka_events_consumer import KafkaAvroEventsConsumer
+from track.infrastructure.messaging.kafka_events_producer import KafkaAvroEventsProducer
 from track.infrastructure.db_library_repository import DBLibraryRepository
 from track.infrastructure.db_playlist_repository import DBPlaylistRepository
 from track.application.playlist import Playlist
@@ -33,12 +30,8 @@ from track.application.library import Library
 from track.domain.providers.youtube import YoutubeTrackProvided
 from building_blocks.clock import Clock, FixedClock
 from track.application.requests_service import RequestsService
-from track.infrastructure.inmemory_library_repository import (
-    InMemoryLibraryRepository,
-)
-from track.infrastructure.inmemory_playlist_repository import (
-    InMemoryPlaylistRepository,
-)
+from track.infrastructure.inmemory_library_repository import InMemoryLibraryRepository
+from track.infrastructure.inmemory_playlist_repository import InMemoryPlaylistRepository
 from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 
@@ -47,18 +40,19 @@ from confluent_kafka.serialization import StringSerializer
 from tests.helpers.dt import fixed_dt
 
 
-def bootstrap_di(real_db: bool, real_msg_broker: bool) -> None:
+def bootstrap_di(di_choices: DIChoices) -> None:
+    di[DIChoices] = di_choices
     fixed_clock = FixedClock(fixed_dt)
     di[Clock] = fixed_clock
 
-    if real_db:
+    if di_choices.real_db:
         library_repo = DBLibraryRepository()
         playlist_repo = DBPlaylistRepository()
     else:
         library_repo = InMemoryLibraryRepository()
         playlist_repo = InMemoryPlaylistRepository()
 
-    if real_msg_broker:
+    if di_choices.real_msg_broker:
         producer_conn_options = ProducerConnectionOptions(
             bootstrap_servers="localhost:19092", client_id="producer-tests-1"
         )
