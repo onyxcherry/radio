@@ -1,4 +1,5 @@
 from kink import di
+from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from tests.choices import DIChoices
 from track.domain.events.recreate import parse_event
 from track.domain.events.serialize import serialize_event
@@ -115,6 +116,7 @@ def bootstrap_di(di_choices: DIChoices) -> None:
         )
         producer_msg_options = ProducerMessagesOptions(lambda x: x, lambda x: x)
         consumer_msg_options = ConsumerMessagesOptions(value_deserializer=lambda x: x)
+        di[InMemoryEvents] = InMemoryEvents()
         playlist_events_consumer = InMemoryEventsConsumer(
             consumer_conn_options, consumer_msg_options, playlist_schema_config
         )

@@ -1,17 +1,13 @@
-from typing import Sequence
 from kink import di
 from pytest import fixture, mark
 from track.domain.provided import Seconds
-from tests.unit.fixtures.events import reset_events, provide_config
 from track.infrastructure.messaging.types import PlaylistEventsConsumer
-from tests.helpers.messaging import sync_messages_from_producer_to_consumer
 from track.domain.events.playlist import (
     TrackAddedToPlaylist,
     TrackDeletedFromPlaylist,
     TrackMarkedAsPlayed,
 )
 from building_blocks.clock import Clock
-from track.application.interfaces.events import EventsConsumer
 from track.application.library import Library
 from track.domain.entities import TrackRequested
 from track.application.playlist import Playlist
@@ -29,25 +25,10 @@ events_producer = playlist._events_producer
 clock = di[Clock]
 
 
-_realmsgbroker: bool
-
-
-def sync_messages():
-    sync_messages_from_producer_to_consumer(
-        events_producer, events_consumer, real_msg_broker=_realmsgbroker
-    )
-
-
 @fixture(autouse=True)
-def reset(provide_config):
-    global _realmsgbroker
-    _realmsgbroker = provide_config
-
+def reset():
     playlist_repo.delete_all()
     library_repo.delete_all()
-
-    events_handlers: Sequence = [events_producer, events_consumer]
-    reset_events(_realmsgbroker, events_handlers)
 
     yield
 
@@ -56,19 +37,19 @@ def reset(provide_config):
 
 
 @fixture
-def accepted_tracks():
+def accepted_tracks(reset):
     for track in ACCEPTED_TRACKS:
         library_repo.add(track)
 
 
 @fixture
-def pending_approval_tracks():
+def pending_approval_tracks(reset):
     for track in PENDING_APPROVAL_TRACKS:
         library_repo.add(track)
 
 
 @mark.realdb()
-def test_adds_track_to_playlist(accepted_tracks):
+def test_adds_track_to_playlist(accepted_tracks, reset_events_fixt):
     playing_time = FUTURE_PT
     requested = TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time, Seconds(189))
 
@@ -79,7 +60,6 @@ def test_adds_track_to_playlist(accepted_tracks):
     track_queued = playlist_tracks_list[0]
     assert track_queued.identity == requested.identity
     assert track_queued.when == playing_time
-    sync_messages()
     expected_event = TrackAddedToPlaylist(
         identity=requested.identity,
         when=requested.when,
@@ -90,7 +70,7 @@ def test_adds_track_to_playlist(accepted_tracks):
     assert expected_event in events_consumer.consume(1)
 
 
-def test_deletes_track(accepted_tracks):
+def test_deletes_track(accepted_tracks, reset_events_fixt):
     playing_time = FUTURE_PT
     identity = ACCEPTED_TRACKS[0].identity
     requested = TrackRequested(identity, playing_time, Seconds(42))
@@ -100,14 +80,13 @@ def test_deletes_track(accepted_tracks):
     playlist.delete(added)
 
     assert playlist.get(identity, playing_time.date_) is None
-    sync_messages()
     expected_event = TrackDeletedFromPlaylist(
         identity=identity, when=playing_time, created=fixed_dt
     )
     assert expected_event in events_consumer.consume(2)
 
 
-def test_marks_as_played(accepted_tracks):
+def test_marks_as_played(accepted_tracks, reset_events_fixt):
     requested = TrackRequested(ACCEPTED_TRACKS[0].identity, FUTURE_PT, Seconds(42))
     playlist.add(requested)
 
@@ -124,7 +103,6 @@ def test_marks_as_played(accepted_tracks):
     )
     assert track_marked is not None
     assert track_marked.played is True
-    sync_messages()
     expected_event = TrackMarkedAsPlayed(
         identity=requested.identity, when=requested.when, created=fixed_dt
     )

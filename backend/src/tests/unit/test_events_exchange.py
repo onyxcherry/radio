@@ -1,6 +1,5 @@
 from datetime import date, datetime, timedelta, timezone
 from kink import di
-import pytest
 from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
 from track.domain.events.playlist import TrackAddedToPlaylist, TrackPlayed
 from track.domain.events.recreate import parse_event
@@ -141,8 +140,7 @@ def test_serializes_event_with_unix_epoch_date():
     assert serialize_event(event) == expected
 
 
-@pytest.mark.skip()
-def test_consume_produced_events():
+def test_consume_produced_events(reset_events_fixt):
     events_producer = di[PlaylistEventsProducer]
     events_consumer = di[PlaylistEventsConsumer]
 
