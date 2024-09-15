@@ -7,13 +7,24 @@ from player.src.domain.events.base import Event
 from player.src.domain.entities import TrackProvidedIdentity
 
 
-def millis_to_timestamp(v: Any) -> datetime:
+def datetime_as_millis_timestamp(data, *args) -> int:
+    if not isinstance(data, datetime):
+        dt = datetime.fromisoformat(data)
+    dt = data
+    return int(dt.timestamp() * 1000)
+
+
+def millis_timestamp_as_datetime(v: Any, *args) -> datetime:
     if isinstance(v, int):
         return datetime.fromtimestamp(v / 1000, tz=timezone.utc)
     return v
 
 
-def unix_epoch_date_to_date(v: Any) -> date:
+def date_as_unix_epoch_date_int(data, *args) -> int:
+    return (data - date(1970, 1, 1)).days
+
+
+def unix_epoch_date_int_as_date(v: Any, *args) -> date:
     if isinstance(v, int):
         return date(1970, 1, 1) + timedelta(days=v)
     return v
@@ -21,14 +32,14 @@ def unix_epoch_date_to_date(v: Any) -> date:
 
 MillisDatetime = Annotated[
     AwareDatetime,
-    BeforeValidator(millis_to_timestamp),
-    PlainSerializer(lambda dt: int(dt.timestamp() * 1000)),
+    BeforeValidator(millis_timestamp_as_datetime),
+    PlainSerializer(datetime_as_millis_timestamp),
 ]
 
 DateFromUnixEpoch = Annotated[
     date,
-    BeforeValidator(unix_epoch_date_to_date),
-    PlainSerializer(lambda d: (d - date(1970, 1, 1)).days),
+    BeforeValidator(unix_epoch_date_int_as_date),
+    PlainSerializer(date_as_unix_epoch_date_int),
 ]
 
 dataclass_config = ConfigDict(populate_by_name=True)
