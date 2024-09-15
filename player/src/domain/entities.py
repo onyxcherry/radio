@@ -1,4 +1,3 @@
-from datetime import date
 from pydantic import AwareDatetime
 from pydantic.dataclasses import dataclass
 

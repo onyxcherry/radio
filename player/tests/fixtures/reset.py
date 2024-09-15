@@ -11,8 +11,6 @@ def reset_events_fixt():
 
     yield
 
-    reset_events()
-
 
 @pytest.fixture(scope="function")
 def reset_db_fixt():
