@@ -1,11 +1,12 @@
-from re import Pattern
-from typing import Optional
+from kink import di
+
 from track.application.interfaces.events import (
     ConsumerConnectionOptions,
     ConsumerMessagesOptions,
     EventsConsumer,
 )
 from track.domain.events.base import Event
+from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from track.infrastructure.messaging.schema_utils import SchemaRegistryConfig
 
 
@@ -18,17 +19,13 @@ class InMemoryEventsConsumer(EventsConsumer):
         test: bool = False,
     ) -> None:
         self._topic = schema_config.topic_name
-        self._messages: dict[str, list[Event]] = {}
 
     def subscribe(self, topic: str) -> None:
         self._topic = topic
 
     def consume(self, limit: int) -> list[Event]:
-        messages = self._messages.get(self._topic) or list()
+        events_store = di[InMemoryEvents]
+        messages = events_store.get_and_ack_for(self._topic, limit)
         if len(messages) != limit:
             raise RuntimeError(f"Found {len(messages)} events, but limit is {limit}")
-        self._messages = {}
         return messages
-
-    def reset(self) -> None:
-        self._messages = {}
