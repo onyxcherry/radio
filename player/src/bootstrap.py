@@ -17,6 +17,8 @@ from player.src.config import Config
 from player.src.building_blocks.clock import Clock, SystemClock
 from player.src.config import BreaksConfig
 from player.src.domain.breaks import Breaks
+from player.src.domain.events.recreate import parse_event
+from player.src.domain.events.serialize import serialize_event
 from player.src.domain.interfaces.player import Player
 from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from player.src.domain.types import Seconds
@@ -129,89 +131,49 @@ def bootstrap_di():
         breaks=breaks, scheduled_tracks_repo=scheduled_tracks_repo, clock=clock
     )
 
-    if False:
-        producer_conn_options = ProducerConnectionOptions(
-            bootstrap_servers="localhost:19092", client_id="producer-tests-1"
-        )
-        playlist_consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="localhost:19092",
-            group_id="consumers-player-queue",
-            client_id="consumer-player-queue-tests-1",
-        )
-        library_consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="localhost:19092",
-            group_id="consumers-player-library",
-            client_id="consumer-player-library-tests-1",
-        )
-        library_schema_config = SchemaRegistryConfig(
-            url="http://localhost:18081",
-            topic_name="library",
-            schema_id="latest",
-            subject_name="library-value",
-        )
-        playlist_schema_config = SchemaRegistryConfig(
-            url="http://localhost:18081",
-            topic_name="queue",
-            schema_id="latest",
-            subject_name="queue-value",
-        )
-        producer_msg_options = ProducerMessagesOptions(
-            key_serializer=StringSerializer("utf_8"), value_serializer=None
-        )
-        consumer_msg_options = ConsumerMessagesOptions(
-            value_deserializer=event_from_dict
-        )
-        library_events_producer = KafkaAvroEventsProducer(
-            producer_conn_options, producer_msg_options, library_schema_config
-        )
-        library_events_consumer = KafkaAvroEventsConsumer(
-            library_consumer_conn_options, consumer_msg_options, library_schema_config
-        )
-        playlist_events_producer = KafkaAvroEventsProducer(
-            producer_conn_options, producer_msg_options, playlist_schema_config
-        )
-        playlist_events_consumer = KafkaAvroEventsConsumer(
-            playlist_consumer_conn_options, consumer_msg_options, playlist_schema_config
-        )
-    else:
-        producer_conn_options = ProducerConnectionOptions(
-            bootstrap_servers="", client_id=""
-        )
-        consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="", group_id="", client_id=""
-        )
-        library_schema_config = SchemaRegistryConfig(
-            url="",
-            topic_name="library",
-            schema_id="latest",
-            subject_name="library-value",
-        )
-        playlist_schema_config = SchemaRegistryConfig(
-            url="",
-            topic_name="queue",
-            schema_id="latest",
-            subject_name="queue-value",
-        )
-        producer_msg_options = ProducerMessagesOptions(lambda x: x, lambda x: x)
-        consumer_msg_options = ConsumerMessagesOptions(value_deserializer=lambda x: x)
-        playlist_events_consumer = InMemoryEventsConsumer(
-            consumer_conn_options, consumer_msg_options, playlist_schema_config
-        )
-        library_events_producer = InMemoryEventsProducer(
-            producer_conn_options, producer_msg_options, library_schema_config
-        )
-        library_events_consumer = InMemoryEventsConsumer(
-            consumer_conn_options, consumer_msg_options, library_schema_config
-        )
-        playlist_events_producer = InMemoryEventsProducer(
-            producer_conn_options, producer_msg_options, playlist_schema_config
-        )
-        playlist_events_consumer = InMemoryEventsConsumer(
-            consumer_conn_options, consumer_msg_options, playlist_schema_config
-        )
+    producer_conn_options = ProducerConnectionOptions(
+        bootstrap_servers="localhost:19092", client_id="producer-tests-1"
+    )
+    playlist_consumer_conn_options = ConsumerConnectionOptions(
+        bootstrap_servers="localhost:19092",
+        group_id="consumers-player-queue",
+        client_id="consumer-player-queue-tests-1",
+    )
+    library_consumer_conn_options = ConsumerConnectionOptions(
+        bootstrap_servers="localhost:19092",
+        group_id="consumers-player-library",
+        client_id="consumer-player-library-tests-1",
+    )
+    library_schema_config = SchemaRegistryConfig(
+        url="http://localhost:18081",
+        topic_name="library",
+        schema_id="latest",
+        subject_name="library-value",
+    )
+    playlist_schema_config = SchemaRegistryConfig(
+        url="http://localhost:18081",
+        topic_name="queue",
+        schema_id="latest",
+        subject_name="queue-value",
+    )
+    producer_msg_options = ProducerMessagesOptions(
+        key_serializer=StringSerializer("utf_8"), value_serializer=serialize_event
+    )
+    consumer_msg_options = ConsumerMessagesOptions(value_deserializer=parse_event)
+    library_events_producer = KafkaAvroEventsProducer(
+        producer_conn_options, producer_msg_options, library_schema_config
+    )
+    library_events_consumer = KafkaAvroEventsConsumer(
+        library_consumer_conn_options, consumer_msg_options, library_schema_config
+    )
+    playlist_events_producer = KafkaAvroEventsProducer(
+        producer_conn_options, producer_msg_options, playlist_schema_config
+    )
+    playlist_events_consumer = KafkaAvroEventsConsumer(
+        playlist_consumer_conn_options, consumer_msg_options, playlist_schema_config
+    )
 
     di[LibraryEventsProducer] = library_events_producer
     di[LibraryEventsConsumer] = library_events_consumer
-    print("Ej no wywowłałem to")
     di[PlaylistEventsProducer] = playlist_events_producer
     di[PlaylistEventsConsumer] = playlist_events_consumer
