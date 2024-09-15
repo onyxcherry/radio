@@ -8,9 +8,11 @@ from player.src.domain.entities import TrackProvidedIdentity
 
 
 def datetime_as_millis_timestamp(data, *args) -> int:
-    if not isinstance(data, datetime):
-        dt = datetime.fromisoformat(data)
+    if isinstance(data, int):
+        return data
     dt = data
+    if not isinstance(dt, datetime):
+        dt = datetime.fromisoformat(dt)
     return int(dt.timestamp() * 1000)
 
 
@@ -21,6 +23,8 @@ def millis_timestamp_as_datetime(v: Any, *args) -> datetime:
 
 
 def date_as_unix_epoch_date_int(data, *args) -> int:
+    if isinstance(data, int):
+        return data
     return (data - date(1970, 1, 1)).days
 
 
