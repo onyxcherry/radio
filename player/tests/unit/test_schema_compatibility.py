@@ -3,7 +3,7 @@ import io
 from typing import Final
 import fastavro
 from fastavro.validation import validate
-from pytest import fixture
+from pytest import fixture, mark
 
 from player.src.domain.events.track import (
     date_as_unix_epoch_date_int,
@@ -91,11 +91,13 @@ fastavro.write.LOGICAL_WRITERS["long-timestamp-millis"] = datetime_as_millis_tim
 fastavro.read.LOGICAL_READERS["long-timestamp-millis"] = millis_timestamp_as_datetime
 
 
+@mark.realmsgbroker
 def test_fetches_schema_of_specific_version(sch_reg_client):
     schema = fetch_schema(client=sch_reg_client, schema_id=1, subject_name=None)
     assert '"namespace":"app.wisniewski.radio"' in schema
 
 
+@mark.realmsgbroker
 def test_fetches_latest_schema_of_subject(sch_reg_client):
     schema = fetch_schema(
         client=sch_reg_client, schema_id="latest", subject_name="queue-value"
