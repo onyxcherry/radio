@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://radio.wisniewski.app/config.schema.json",
+  "title": "Radio config",
+  "description": "Configuration schema for radio",
+  "type": "object",
+  "properties": {
+    "breaks": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "object",
+          "properties": {
+            "seconds": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "seconds"
+          ]
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+              },
+              "end": {
+                "type": "string",
+                "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "offset",
+        "timezone",
+        "list"
+      ]
+    }
+  },
+  "required": [
+    "breaks"
+  ]
+}
