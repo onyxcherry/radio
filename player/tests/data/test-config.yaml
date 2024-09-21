@@ -1,0 +1,21 @@
+breaks:
+  offset:
+    seconds: 17
+  timezone: "Europe/Warsaw"
+  list:
+    - start: "08:30"
+      end: "08:40"
+    - start: "09:25"
+      end: "09:35"
+    - start: "10:20"
+      end: "10:30"
+    - start: "11:15"
+      end: "11:30"
+    - start: "12:15"
+      end: "12:25"
+    - start: "13:10"
+      end: "13:20"
+    - start: "14:05"
+      end: "14:15"
+    - start: "15:00"
+      end: "15:10"

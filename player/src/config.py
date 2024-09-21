@@ -1,11 +1,23 @@
+import json
+from os import PathLike
+from pathlib import Path
 from pydantic.dataclasses import dataclass
-from datetime import time, timedelta, timezone
+from datetime import date, datetime, time, timedelta, tzinfo
 import logging
 import logging.config
-from typing import Any
+from typing import Annotated, Any, Optional, Self
 from zoneinfo import ZoneInfo
 
-from pydantic import ConfigDict, field_validator
+from pydantic import (
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    field_validator,
+    model_validator,
+)
+import yaml
+from jsonschema import validate, ValidationError
 
 
 from player.src.domain.types import Seconds
@@ -41,11 +53,82 @@ def get_logger(name: str) -> logging.Logger:
     return logger
 
 
-@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
+def load_config_from_yaml(
+    config_path: Optional[PathLike] = None, schema_path: Optional[PathLike] = None
+) -> dict:
+    if schema_path is None:
+        schema_path = Path(__file__).parent.parent.joinpath("config.schema.json")
+    with open(schema_path, "r") as schema_file:
+        schema = json.load(schema_file)
+
+    if config_path is None:
+        config_path = Path(__file__).parent.joinpath("config.yaml")
+    with open(config_path, "r") as config_file:
+        config_content = yaml.safe_load(config_file)
+
+    try:
+        validate(instance=config_content, schema=schema)
+    except ValidationError as ex:
+        raise ex
+    else:
+        return config_content
+
+
+@dataclass(config=ConfigDict(arbitrary_types_allowed=True))
+class BreakData:
+    start: time
+    duration: Optional[Seconds] = None
+    end: Optional[time] = Field(default=None, exclude=True)
+
+    @model_validator(mode="after")
+    def check_end_or_duration(self):
+        if self.end is None and self.duration is None:
+            raise ValueError("Either 'end' or 'duration' is required")
+        if self.duration is None and self.end is not None:
+            today = date.today()
+            td = datetime.combine(today, self.end) - datetime.combine(today, self.start)
+            self.duration = Seconds(td.seconds)
+        if self.duration is not None and self.end is None:
+            today = date.today()
+            end_dt = datetime.combine(today, self.start) + timedelta(
+                seconds=self.duration
+            )
+            self.end = end_dt.time()
+        return self
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        return TypeAdapter(cls).validate_python(data)
+
+
+def seconds_object_to_timedelta(data: Any) -> timedelta:
+    if isinstance(data, timedelta):
+        return data
+    elif hasattr(data, "seconds") or (isinstance(data, dict) and data.get("seconds")):
+        print(f"{data=}")
+        seconds = int(data["seconds"])
+        return timedelta(seconds=seconds)
+    raise ValidationError("Bad offset object, no seconds param")
+
+
+def tzinfo_from_timezone_name(data: Any) -> tzinfo:
+    if isinstance(data, tzinfo):
+        return data
+    return ZoneInfo(str(data))
+
+
+SecondsTimedelta = Annotated[timedelta, BeforeValidator(seconds_object_to_timedelta)]
+
+TzinfoFromName = Annotated[tzinfo, BeforeValidator(tzinfo_from_timezone_name)]
+
+
+@dataclass(
+    frozen=True, config=ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
+)
 class BreaksConfig:
-    start_times: dict[time, Seconds]
-    offset: timedelta
-    timezone: timezone | ZoneInfo
+    offset: SecondsTimedelta
+    timezone: TzinfoFromName
+    breaks: list[BreakData] = Field(validation_alias="list", serialization_alias="list")
 
     @field_validator("start_times")
     @classmethod
@@ -57,6 +140,10 @@ class BreaksConfig:
         if sorted(list(v.keys())) != list(v.keys()):
             raise ValueError("expected breaks sorted by its start times")
         return v
+
+    @classmethod
+    def from_dict(cls, config: dict) -> Self:
+        return TypeAdapter(cls).validate_python(config)
 
 
 @dataclass(frozen=True)
