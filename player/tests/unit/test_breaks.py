@@ -3,19 +3,19 @@ from zoneinfo import ZoneInfo
 
 from pytest import fixture
 from player.src.building_blocks.clock import FixedClock
-from player.src.config import BreaksConfig
+from player.src.config import BreakData, BreaksConfig
 from player.src.domain.breaks import Break, Breaks
 from player.src.domain.types import Seconds
 
 _timezone = ZoneInfo("Europe/Warsaw")
 _offset = Seconds(17)
 _breaks_config = BreaksConfig(
-    start_times={
-        time(8, 30): Seconds(10 * 60),
-        time(9, 25): Seconds(10 * 60),
-        time(10, 20): Seconds(10 * 60),
-        time(11, 15): Seconds(15 * 60),
-    },
+    breaks=[
+        BreakData(start=time(8, 30), duration=Seconds(10 * 60)),
+        BreakData(start=time(9, 25), duration=Seconds(10 * 60)),
+        BreakData(start=time(10, 20), duration=Seconds(10 * 60)),
+        BreakData(start=time(11, 15), duration=Seconds(15 * 60)),
+    ],
     offset=timedelta(seconds=_offset),
     timezone=_timezone,
 )

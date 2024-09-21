@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from kink import di
 
 
@@ -14,6 +15,7 @@ from player.src.application.track_file_provider import (
 from player.src.building_blocks.awakable import EventBasedAwakable
 from player.src.domain.events.recreate import parse_event
 from player.src.domain.events.serialize import serialize_event
+from player.src.domain.types import Seconds
 from player.src.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from player.src.infrastructure.messaging.types import (
     LibraryEventsConsumer,
@@ -29,7 +31,7 @@ from player.src.application.interfaces.events import (
     ProducerConnectionOptions,
 )
 from player.src.building_blocks.clock import Clock, FeignedWallClock
-from player.src.config import BreaksConfig
+from player.src.config import BreakData, BreaksConfig
 from player.src.domain.breaks import Breaks
 from player.src.domain.interfaces.player import Player
 from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
@@ -56,13 +58,31 @@ from player.src.infrastructure.persistence.inmemory_scheduled_tracks_repository 
 )
 from confluent_kafka.serialization import StringSerializer
 
-from player.tests.choices import DIChoices, breaks_config
+from player.tests.choices import DIChoices
+
+
+def create_breaks_config() -> BreaksConfig:
+    breaks_config = BreaksConfig(
+        breaks=[
+            BreakData(start=time(8, 30), duration=Seconds(10 * 60)),
+            BreakData(start=time(9, 25), duration=Seconds(10 * 60)),
+            BreakData(start=time(10, 20), duration=Seconds(10 * 60)),
+            BreakData(start=time(11, 15), duration=Seconds(15 * 60)),
+            BreakData(start=time(12, 15), duration=Seconds(10 * 60)),
+            BreakData(start=time(13, 10), duration=Seconds(10 * 60)),
+            BreakData(start=time(14, 5), duration=Seconds(10 * 60)),
+            BreakData(start=time(15, 00), duration=Seconds(10 * 60)),
+        ],
+        offset=timedelta(seconds=17),
+        timezone=ZoneInfo("Europe/Warsaw"),
+    )
+    return breaks_config
 
 
 def reregister_deps_with_clock(clock: Clock):
     di_choices = di[DIChoices]
 
-    breaks = Breaks(breaks_config, clock)
+    breaks = Breaks(create_breaks_config(), clock)
     di[Breaks] = breaks
     break_observer = BreakObserver(breaks=breaks, clock=clock)
     di[BreakObserver] = break_observer
@@ -100,6 +120,7 @@ def reregister_deps_with_clock(clock: Clock):
 
 def bootstrap_di(di_choices: DIChoices) -> None:
     di[DIChoices] = di_choices
+    breaks_config = create_breaks_config()
     dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone)
     # clock = FixedClock(dt)
     clock = FeignedWallClock(dt)
@@ -143,6 +164,7 @@ def bootstrap_di(di_choices: DIChoices) -> None:
         playlist_schema_config = SchemaRegistryConfig(
             url="http://localhost:18081",
             topic_name="queue",
+            # schema_id=17,
             schema_id="latest",
             subject_name="queue-value",
         )

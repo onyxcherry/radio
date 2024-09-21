@@ -7,6 +7,7 @@ import pytest
 from player.src.application.break_observer import BreakObserver
 from player.src.application.playing_observer import PlayingObserver
 from player.src.building_blocks.clock import FeignedWallClock
+from player.src.config import BreaksConfig
 from player.src.domain.breaks import Breaks
 from player.src.domain.entities import (
     ScheduledTrack,
@@ -19,7 +20,6 @@ from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepos
 from player.src.domain.types import Identifier, Seconds
 from player.src.infrastructure.messaging.types import PlaylistEventsConsumer
 from player.tests.bootstrap import reregister_deps_with_clock
-from player.tests.choices import breaks_config
 
 scheduled_track: Final = ScheduledTrack(
     identity=TrackProvidedIdentity(
@@ -54,7 +54,8 @@ def get_playing_manager(at: datetime) -> PlayingManager:
 
 @pytest.fixture
 def pm_during_break(reset) -> Generator[PlayingManager, Any, Any]:
-    dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone)
+    timezone = di[BreaksConfig].timezone
+    dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=timezone)
     yield get_playing_manager(dt)
     for task in _tasks:
         if task.done() or task.cancelled() or asyncio.get_event_loop().is_closed:
