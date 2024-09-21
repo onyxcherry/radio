@@ -149,3 +149,7 @@ class BreaksConfig:
 @dataclass(frozen=True)
 class Config:
     breaks: BreaksConfig
+
+
+def config_dict_to_class(config: dict) -> Config:
+    return TypeAdapter(Config).validate_python(config)
