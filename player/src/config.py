@@ -81,7 +81,7 @@ class BreakData:
     end: Optional[time] = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-    def check_end_or_duration(self):
+    def check_end_or_duration_and_set_the_other(self):
         if self.end is None and self.duration is None:
             raise ValueError("Either 'end' or 'duration' is required")
         if self.duration is None and self.end is not None:
