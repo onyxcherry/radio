@@ -1,6 +1,5 @@
 from datetime import date, datetime, time, timedelta
 from typing import Final
-from zoneinfo import ZoneInfo
 
 from kink import di
 from pytest import fixture
@@ -12,7 +11,7 @@ from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepos
 from player.src.application.playing_observer import PlayingObserver
 from player.src.building_blocks.clock import FixedClock
 from player.src.config import BreaksConfig
-from player.src.domain.breaks import Break, Breaks
+from player.src.domain.breaks import Breaks
 from player.src.domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
@@ -21,23 +20,13 @@ from player.src.domain.entities import (
 from player.src.domain.types import Identifier, Seconds
 from player.src.domain.events.track import TrackPlayed
 
-_timezone = ZoneInfo("Europe/Warsaw")
-_offset = Seconds(17)
-_breaks_config = BreaksConfig(
-    start_times={
-        time(8, 30): Seconds(10 * 60),
-        time(9, 25): Seconds(10 * 60),
-        time(10, 20): Seconds(10 * 60),
-        time(11, 15): Seconds(15 * 60),
-    },
-    offset=timedelta(seconds=_offset),
-    timezone=_timezone,
-)
+
+breaks_config = di[BreaksConfig]
 
 _day = date(2024, 8, 1)
-dt = datetime.combine(_day, time(8, 34, 11), tzinfo=_timezone)
+dt = datetime.combine(_day, time(8, 34, 11), tzinfo=breaks_config.timezone)
 clock = FixedClock(dt)
-breaks = Breaks(config=_breaks_config, clock=clock)
+breaks = Breaks(config=breaks_config, clock=clock)
 
 track_to_schedule: Final = TrackToSchedule(
     identity=TrackProvidedIdentity(
@@ -104,7 +93,7 @@ def test_playing_ends_callback(pl_obs):
     assert events_consumer.consume(1)[0] == TrackPlayed(
         identity=scheduled_track.identity,
         break_=0,
-        start=datetime(2024, 8, 1, 8, 34, 11, tzinfo=_timezone),
-        end=datetime(2024, 8, 1, 8, 34, 11, tzinfo=_timezone),
-        created=datetime(2024, 8, 1, 8, 34, 11, tzinfo=_timezone),
+        start=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),
+        end=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),
+        created=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),
     )

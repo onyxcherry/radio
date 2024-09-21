@@ -108,9 +108,11 @@ class Breaks:
         return Seconds(diff.seconds)
 
     def lookup_details(self, date_: date, ordinal: int) -> tuple[Break, Seconds]:
-        breaks_info = list(self._config.start_times.items())
-        start_time, duration = breaks_info[ordinal]
-        start_dt = datetime.combine(date_, start_time, tzinfo=self._config.timezone)
-        end_dt = start_dt + timedelta(seconds=duration)
+        breaks_info = list(self._config.breaks)
+        break_ = breaks_info[ordinal]
+        start_dt = datetime.combine(date_, break_.start, tzinfo=self._config.timezone)
+        if break_.duration is None:
+            raise RuntimeError(f"Duration is None of item: {break_}")
+        end_dt = start_dt + timedelta(seconds=break_.duration)
         break_ = Break(start=start_dt, end=end_dt, ordinal=ordinal)
-        return break_, duration
+        return break_, break_.duration
