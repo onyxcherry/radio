@@ -45,13 +45,14 @@ class Breaks:
 
     def _get_breaks(self, today: date) -> list[Break]:
         _breaks: list[Break] = []
-        for idx, item in enumerate(self._config.start_times.items()):
-            start_time, dur = item
+        for idx, item in enumerate(self._config.breaks):
             start_datetime = (
-                datetime.combine(today, start_time, tzinfo=self._config.timezone)
+                datetime.combine(today, item.start, tzinfo=self._config.timezone)
                 + self._config.offset
             )
-            end_datetime = start_datetime + timedelta(seconds=dur)
+            if item.duration is None:
+                raise RuntimeError(f"Duration is None of item: {item}")
+            end_datetime = start_datetime + timedelta(seconds=item.duration)
             break_ = Break(start_datetime, end_datetime, idx)
             _breaks.append(break_)
         return _breaks
