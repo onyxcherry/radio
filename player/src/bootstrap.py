@@ -13,7 +13,7 @@ from player.src.application.track_file_provider import (
     PlayableTrackProviderConfig,
 )
 from player.src.building_blocks.awakable import EventBasedAwakable
-from player.src.config import Config
+from player.src.config import config_dict_to_class, load_config_from_yaml
 from player.src.building_blocks.clock import Clock, SystemClock
 from player.src.config import BreaksConfig
 from player.src.domain.breaks import Breaks
@@ -66,20 +66,8 @@ from player.src.infrastructure.persistence.db_scheduled_tracks_repository import
 from confluent_kafka.serialization import StringSerializer
 
 
-_breaks_config = BreaksConfig(
-    start_times={
-        time(8, 30): Seconds(10 * 60),
-        time(9, 25): Seconds(10 * 60),
-        time(10, 20): Seconds(10 * 60),
-        time(11, 15): Seconds(15 * 60),
-        time(12, 15): Seconds(10 * 60),
-        time(13, 10): Seconds(10 * 60),
-        time(14, 5): Seconds(10 * 60),
-        time(15, 00): Seconds(10 * 60),
-    },
-    offset=timedelta(seconds=17),
-    timezone=ZoneInfo("Europe/Warsaw"),
-)
+CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.yaml"
+CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"
 
 
 def bootstrap_di():
@@ -89,8 +77,13 @@ def bootstrap_di():
     player = MadeupPlayer()
     di[Player] = player
 
-    di[BreaksConfig] = _breaks_config
-    breaks = Breaks(_breaks_config, clock)
+    config_dict = load_config_from_yaml(
+        config_path=CONFIG_FILE_PATH, schema_path=CONFIG_SCHEMA_PATH
+    )
+    config = config_dict_to_class(config_dict)
+    breaks_config = config.breaks
+    di[BreaksConfig] = breaks_config
+    breaks = Breaks(breaks_config, clock)
     di[Breaks] = breaks
     break_observer = BreakObserver(breaks=breaks, clock=clock)
     di[BreakObserver] = break_observer
