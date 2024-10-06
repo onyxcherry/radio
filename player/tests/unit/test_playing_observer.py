@@ -3,6 +3,7 @@ from typing import Final
 
 from kink import di
 from pytest import fixture
+import pytest
 from player.src.infrastructure.messaging.types import (
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
@@ -78,7 +79,8 @@ def test_updates_track_is_playing_then_stops(pl_obs):
     assert pl_obs.track_is_playing is False
 
 
-def test_playing_ends_callback(pl_obs):
+@pytest.mark.asyncio
+async def test_playing_ends_callback(pl_obs):
     pl_obs.update_track_playing(scheduled_track, duration=Seconds(40))
 
     pl_obs.playing_ends_callback()
@@ -90,7 +92,8 @@ def test_playing_ends_callback(pl_obs):
     )
     assert updated_track is not None
     assert updated_track.played is True
-    assert events_consumer.consume(1)[0] == TrackPlayed(
+    events = await events_consumer.consume(1)
+    assert events[0] == TrackPlayed(
         identity=scheduled_track.identity,
         break_=0,
         start=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),

@@ -142,7 +142,8 @@ def test_serializes_event_with_unix_epoch_date():
     assert serialize_event(event) == expected
 
 
-def test_consume_produced_events(reset):
+@pytest.mark.asyncio
+async def test_consume_produced_events(reset):
     events_producer = di[PlaylistEventsProducer]
     events_consumer = di[PlaylistEventsConsumer]
 
@@ -167,6 +168,6 @@ def test_consume_produced_events(reset):
     events_producer.produce(event1)
     events_producer.produce(event2)
 
-    consumed_events = events_consumer.consume(2)
+    consumed_events = await events_consumer.consume(2)
     assert consumed_events[0] == event1
     assert consumed_events[1] == event2

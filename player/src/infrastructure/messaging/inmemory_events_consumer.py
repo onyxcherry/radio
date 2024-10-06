@@ -22,7 +22,7 @@ class InMemoryEventsConsumer(EventsConsumer):
     def subscribe(self, topic: str) -> None:
         self._topic = topic
 
-    def consume(self, limit: int) -> list[Event]:
+    async def consume(self, limit: int) -> list[Event]:
         events_store = di[InMemoryEvents]
         messages = events_store.get_and_ack_for(self._topic, limit)
         if len(messages) != limit:

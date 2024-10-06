@@ -1,3 +1,4 @@
+import asyncio
 from typing import Literal, Optional
 
 from confluent_kafka import Consumer
@@ -60,11 +61,12 @@ class KafkaAvroEventsConsumer(EventsConsumer):
     def subscribe(self, topic: str) -> None:
         self._consumer.subscribe([topic])
 
-    def consume(self, limit: int) -> list[Event]:
+    async def consume(self, limit: int) -> list[Event]:
         results = []
         while len(results) != limit:
             msg = self._consumer.poll(0.01)
             if msg is None:
+                await asyncio.sleep(0.01)
                 continue
 
             result = self._avro_deserializer(

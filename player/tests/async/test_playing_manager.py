@@ -166,7 +166,8 @@ async def test_plays_track(pm_during_break, scheduled_track_ready):
     )
     assert track is not None and track.played is True
     assert playing_observer.track_is_playing is False
-    event = events_consumer.consume(1)[0]
+    consumed_events = await events_consumer.consume(1)
+    event = consumed_events[0]
     assert isinstance(event, TrackPlayed)
     assert event.identity == TrackProvidedIdentity(
         identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"

@@ -49,7 +49,7 @@ class EventsConsumer(ABC):
         pass
 
     @abstractmethod
-    def consume(self, limit: int) -> list[Event]:
+    async def consume(self, limit: int) -> list[Event]:
         pass
 
 
