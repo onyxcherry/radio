@@ -1,6 +1,6 @@
 from kink import di
-from backend.src.track.domain.events.recreate import parse_event
-from backend.src.track.domain.events.serialize import serialize_event
+from track.domain.events.recreate import parse_event
+from track.domain.events.serialize import serialize_event
 from track.infrastructure.messaging.types import (
     LibraryEventsProducer,
     PlaylistEventsConsumer,

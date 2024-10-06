@@ -6,14 +6,14 @@ from confluent_kafka.schema_registry.avro import AvroSerializer
 
 from confluent_kafka.serialization import SerializationContext, MessageField
 
-from backend.src.track.application.interfaces.events import (
+from track.application.interfaces.events import (
     EventsProducer,
     ProducerConnectionOptions,
     ProducerMessagesOptions,
 )
-from backend.src.track.domain.events.base import Event
-from backend.src.track.infrastructure.config import get_logger
-from backend.src.track.infrastructure.messaging.schema_utils import (
+from track.domain.events.base import Event
+from track.infrastructure.config import get_logger
+from track.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,
     fetch_schema,
