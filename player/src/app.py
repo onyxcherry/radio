@@ -23,10 +23,11 @@ class SubTaskFailed(RuntimeError):
 async def manage_playing_with_exc(playing_manager: PlayingManager) -> None:
     try:
         await playing_manager.manage_playing()
-    except asyncio.CancelledError as err:
+    except asyncio.CancelledError:
         logger.info("Handling CancelledError")
         playing_manager.handle_playing_immediate_stop()
-        raise asyncio.CancelledError from err
+    except Exception as e:
+        raise SubTaskFailed(e) from e
 
 
 async def update_current_break_with_exc(
@@ -34,10 +35,11 @@ async def update_current_break_with_exc(
 ) -> None:
     try:
         await break_observer.update_current_break()
-    except asyncio.CancelledError as err:
+    except asyncio.CancelledError:
         logger.info("Handling CancelledError")
         playing_manager.handle_playing_immediate_stop()
-        raise asyncio.CancelledError from err
+    except Exception as e:
+        raise SubTaskFailed(e) from e
 
 
 async def consume_events_with_exc(
@@ -45,9 +47,10 @@ async def consume_events_with_exc(
 ) -> None:
     try:
         await consume_events(events_consumer, event_handler)
-    except asyncio.CancelledError as err:
+    except asyncio.CancelledError:
         logger.info("Handling CancelledError")
-        raise asyncio.CancelledError from err
+    except Exception as e:
+        raise SubTaskFailed(e) from e
 
 
 async def consume_events(
@@ -75,45 +78,38 @@ async def main_tasks() -> None:
             ce_task = tg.create_task(
                 consume_events_with_exc(playlist_events_consumer, event_handler)
             )
-        tasks_results = [mp_task.result(), ucb_task.result(), ce_task.result()]
-        print(f"{tasks_results=}")
+        _ = [mp_task.result(), ucb_task.result(), ce_task.result()]
+    except* SubTaskFailed as ex:
+        logger.error("Sub task has failed")
+        logger.exception(ex)
     except* RuntimeError as ex:
-        logger.error(f"Caught RuntimeError")
+        logger.error(f"Caught unexpected RuntimeError group")
         logger.exception(ex)
-        raise SubTaskFailed from ex
     except* Exception as ex:
-        logger.error(f"Caught Exception")
-        raise SubTaskFailed from ex
-    except* BaseException as ex:
-        logger.error(f"Caught BaseException")
+        logger.error(f"Caught unexpected Exception group")
         logger.exception(ex)
-        raise SubTaskFailed from ex
+    except* BaseException as ex:
+        logger.error(f"Caught unexpected BaseException group")
+        logger.exception(ex)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     main_task = asyncio.create_task(main_tasks())
     try:
-        await main_task
-    except SubTaskFailed as ex:
-        logger.error(f"Handling stop due to exception {ex=}")
+        yield
+    finally:
+        logger.info("Handling stop")
+        if not main_task.done():
+            main_task.cancel()
+        try:
+            await main_task
+        except asyncio.CancelledError:
+            logger.info("Background task was cancelled successfully.")
+        except Exception as ex:
+            logger.error("Unhandled exception during shutdown")
+            logger.exception(ex)
 
-    yield
-    logger.info("Handling stop")
-
-    # statuses_done = []
-    # while True:
-    #     for task in tasks:
-    #         statuses_done.clear()
-    #         if task.done():
-    #             statuses_done.append(True)
-    #             continue
-    #         task.cancel()
-    #         statuses_done.append(False)
-    #     if not all(statuses_done):
-    #         await asyncio.sleep(0.1)
-    #     else:
-    #         break
     logger.debug("The very end of the lifespan")
 
 
