@@ -58,6 +58,11 @@ class PlayingManager:
 
         self._waits = False
 
+    def handle_playing_immediate_stop(self) -> None:
+        self._player.stop(force=True)
+        logger.warning("Immediately stopped playing")
+        self._playing_observer.update_no_track_playing()
+
     async def manage_playing(self) -> None:
         logger.info("Started managing playing")
         while True:
@@ -81,7 +86,7 @@ class PlayingManager:
             try:
                 await self._player.play(playing_duration, callback)
             except MiniaudioError as mex:
-                self._playing_observer.update_no_track_playing()
+                self.handle_playing_immediate_stop()
                 raise RuntimeError("Playing error :(") from mex
             # else:
             # TODO: fix this - execute in `else` block properly
