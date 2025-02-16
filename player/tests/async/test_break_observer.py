@@ -13,7 +13,6 @@ breaks_config = di[BreaksConfig]
 
 
 def get_break_observer(at: datetime) -> BreakObserver:
-    breaks_config = di[BreaksConfig]
     clock = FeignedWallClock(at)
     breaks = Breaks(breaks_config, clock)
     break_observer = BreakObserver(breaks, clock)
@@ -22,13 +21,13 @@ def get_break_observer(at: datetime) -> BreakObserver:
 
 @pytest.fixture
 def bo_before_start() -> BreakObserver:
-    dt = datetime(2024, 8, 1, 8, 30, 6, 970000, tzinfo=breaks_config.timezone)
+    dt = datetime(2024, 8, 1, 8, 30, 16, 970000, tzinfo=breaks_config.timezone)
     return get_break_observer(dt)
 
 
 @pytest.fixture
 def bo_before_end() -> BreakObserver:
-    dt = datetime(2024, 8, 1, 8, 30, 26, 800000, tzinfo=breaks_config.timezone)
+    dt = datetime(2024, 8, 1, 8, 40, 16, 800000, tzinfo=breaks_config.timezone)
     return get_break_observer(dt)
 
 
@@ -43,8 +42,8 @@ async def test_observes_start_of_break(bo_before_start):
 
     assert bo_before_start.current is not None
     assert bo_before_start.current == Break(
-        start=datetime(2024, 8, 1, 8, 30, 7, tzinfo=breaks_config.timezone),
-        end=datetime(2024, 8, 1, 8, 30, 27, tzinfo=breaks_config.timezone),
+        start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=breaks_config.timezone),
+        end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=breaks_config.timezone),
         ordinal=0,
     )
     task.cancel()
@@ -57,8 +56,8 @@ async def test_observes_end_of_break(bo_before_end):
 
     assert bo_before_end.current is not None
     assert bo_before_end.current == Break(
-        start=datetime(2024, 8, 1, 8, 30, 7, tzinfo=breaks_config.timezone),
-        end=datetime(2024, 8, 1, 8, 30, 27, tzinfo=breaks_config.timezone),
+        start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=breaks_config.timezone),
+        end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=breaks_config.timezone),
         ordinal=0,
     )
     await asyncio.sleep(0.2)
