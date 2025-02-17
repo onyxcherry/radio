@@ -47,14 +47,14 @@ class EventHandler:
             case (
                 TrackAddedToPlaylist() as added_to_playlist
             ) if added_to_playlist.waits_on_approval is False:
-                break_, break_duration = self._breaks.lookup_details(
-                    added_to_playlist.when.date_,
-                    added_to_playlist.when.break_,
+                break_ = self._breaks.on_day_of_ordinal(
+                    added_to_playlist.when.date_, added_to_playlist.when.break_
                 )
+                assert break_ is not None
                 to_schedule = TrackToSchedule(
                     identity=added_to_playlist.identity,
                     break_=break_,
-                    duration=Seconds(min(added_to_playlist.duration, break_duration)),
+                    duration=Seconds(min(added_to_playlist.duration, break_.duration)),
                 )
                 result = self._schtr_repo.insert_or_update(to_schedule)
                 if result.last_changed < added_to_playlist.created:

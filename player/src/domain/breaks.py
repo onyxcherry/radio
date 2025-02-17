@@ -41,13 +41,13 @@ class Breaks:
         self._config = config
         self._clock = clock
         self._today = self._clock.get_current_date()
-        self._breaks = self._get_breaks(self._today)
+        self._breaks: dict[date, list[Break]] = {}
 
-    def _get_breaks(self, today: date) -> list[Break]:
+    def _get_breaks(self, day: date) -> list[Break]:
         _breaks: list[Break] = []
         for idx, item in enumerate(self._config.breaks):
             start_datetime = (
-                datetime.combine(today, item.start, tzinfo=self._config.timezone)
+                datetime.combine(day, item.start, tzinfo=self._config.timezone)
                 + self._config.offset
             )
             if item.duration is None:
@@ -58,61 +58,49 @@ class Breaks:
         return _breaks
 
     def as_list(self) -> list[Break]:
-        return self._breaks
+        return self.on_day(self._today)
+
+    def on_day(self, day: date) -> list[Break]:
+        if day not in self._breaks:
+            self._breaks[day] = self._get_breaks(day)
+        return self._breaks[day]
 
     def get_current(self) -> Optional[Break]:
-        now = self._clock.now()
+        now = self._offsetted_now()
         for break_ in self.as_list():
             if break_.start <= now <= break_.end:
                 return Break(break_.start, break_.end, break_.ordinal)
         return None
 
-    def get_next_today(self) -> Optional[Break]:
-        now = self._clock.now()
+    def get_next(self) -> Break:
+        return self._get_next_today() or self._get_tomorrow_first()
+
+    def _get_next_today(self) -> Optional[Break]:
+        now = self._offsetted_now()
         for break_ in self.as_list():
             if now < break_.start:
                 return break_
         return None
 
-    def get_next(self) -> Break:
-        return self.get_next_today() or self._get_tomorrow_first()
-
-    def get_next_after(self, ordinal: int, today=True) -> Optional[Break]:
-        for current, next_ in zip(self._breaks, self._breaks[1:]):
-            if current.ordinal == ordinal:
-                return next_
-        if today:
-            return None
-        else:
-            return self._get_tomorrow_first()
-
     def _get_tomorrow_first(self) -> Break:
-        tomorrow_dt = self.as_list()[0].start + timedelta(days=1)
-        tomorrow = tomorrow_dt.date()
-        tomorrow_first_break = self._get_breaks(tomorrow)[0]
-        return tomorrow_first_break
+        tomorrow_breaks = self.on_day(self._today + timedelta(days=1))
+        return tomorrow_breaks[0]
 
     def get_remaining_time_to_next(self) -> Seconds:
-        next_ = self.get_next()
-        if next_ is None:
-            raise RuntimeError()
-        logger.debug(f"{next_=}")
-        diff = next_.start - self._clock.now()
+        next_break = self.get_next()
+        diff = next_break.start - self._offsetted_now()
         return Seconds(diff.seconds)
 
     def get_seconds_left_during_current(self) -> Optional[Seconds]:
         current = self.get_current()
         if current is None:
             return None
-        diff = current.end - self._clock.now()
+        diff = current.end - self._offsetted_now()
         return Seconds(diff.seconds)
 
-    def lookup_details(self, date_: date, ordinal: int) -> tuple[Break, Seconds]:
-        breaks_info = list(self._config.breaks)
-        break_ = breaks_info[ordinal]
-        start_dt = datetime.combine(date_, break_.start, tzinfo=self._config.timezone)
-        if break_.duration is None:
-            raise RuntimeError(f"Duration is None of item: {break_}")
-        end_dt = start_dt + timedelta(seconds=break_.duration)
-        break_ = Break(start=start_dt, end=end_dt, ordinal=ordinal)
-        return break_, break_.duration
+    def on_day_of_ordinal(self, date_: date, ordinal: int) -> Optional[Break]:
+        breaks = self.on_day(date_)
+        return breaks[ordinal - 1] if ordinal <= len(breaks) else None
+
+    def _offsetted_now(self) -> datetime:
+        return self._clock.now() + self._config.offset

@@ -21,13 +21,13 @@ def get_break_observer(at: datetime) -> BreakObserver:
 
 @pytest.fixture
 def bo_before_start() -> BreakObserver:
-    dt = datetime(2024, 8, 1, 8, 30, 16, 970000, tzinfo=breaks_config.timezone)
+    dt = datetime(2024, 8, 1, 8, 29, 59, 970000, tzinfo=breaks_config.timezone)
     return get_break_observer(dt)
 
 
 @pytest.fixture
 def bo_before_end() -> BreakObserver:
-    dt = datetime(2024, 8, 1, 8, 40, 16, 800000, tzinfo=breaks_config.timezone)
+    dt = datetime(2024, 8, 1, 8, 39, 59, 800000, tzinfo=breaks_config.timezone)
     return get_break_observer(dt)
 
 
