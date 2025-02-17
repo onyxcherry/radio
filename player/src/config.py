@@ -104,8 +104,7 @@ class BreakData:
 def seconds_object_to_timedelta(data: Any) -> timedelta:
     if isinstance(data, timedelta):
         return data
-    elif hasattr(data, "seconds") or (isinstance(data, dict) and data.get("seconds")):
-        print(f"{data=}")
+    elif hasattr(data, "seconds") or (isinstance(data, dict) and data.get("seconds") is not None):
         seconds = int(data["seconds"])
         return timedelta(seconds=seconds)
     raise ValidationError("Bad offset object, no seconds param")
