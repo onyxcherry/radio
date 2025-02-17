@@ -172,7 +172,7 @@ async def test_plays_track(pm_during_break, scheduled_track_ready):
     assert event.identity == TrackProvidedIdentity(
         identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"
     )
-    assert event.break_ == 0
+    assert event.break_ == 1
 
 
 @pytest.mark.asyncio

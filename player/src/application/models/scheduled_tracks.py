@@ -20,9 +20,8 @@ class ScheduledTrackModel(Base):
     provider: Mapped[ProviderName] = mapped_column(String(32), nullable=False)
     start: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    # TODO: start breaks ordinal from 1
     ordinal: Mapped[int] = mapped_column(
-        Integer, CheckConstraint("ordinal>=0", name="ordinal_gte_0"), nullable=False
+        Integer, CheckConstraint("ordinal>0", name="ordinal_gt_0"), nullable=False
     )
     duration: Mapped[int] = mapped_column(
         Integer, CheckConstraint("duration>0", name="duration_gt_0"), nullable=False

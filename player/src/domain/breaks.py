@@ -1,4 +1,4 @@
-from pydantic import AwareDatetime, model_validator
+from pydantic import AwareDatetime, PositiveInt, model_validator
 from pydantic.dataclasses import dataclass
 from datetime import datetime, date, timedelta
 from typing import Optional, Self
@@ -15,7 +15,7 @@ from player.src.domain.types import Seconds
 class Break:
     start: AwareDatetime
     end: AwareDatetime
-    ordinal: int
+    ordinal: PositiveInt
 
     @model_validator(mode="after")
     def check_same_day(self) -> Self:
@@ -53,7 +53,7 @@ class Breaks:
             if item.duration is None:
                 raise RuntimeError(f"Duration is None of item: {item}")
             end_datetime = start_datetime + timedelta(seconds=item.duration)
-            break_ = Break(start_datetime, end_datetime, idx)
+            break_ = Break(start_datetime, end_datetime, idx + 1)
             _breaks.append(break_)
         return _breaks
 
@@ -98,7 +98,7 @@ class Breaks:
         diff = current.end - self._offsetted_now()
         return Seconds(diff.seconds)
 
-    def on_day_of_ordinal(self, date_: date, ordinal: int) -> Optional[Break]:
+    def on_day_of_ordinal(self, date_: date, ordinal: PositiveInt) -> Optional[Break]:
         breaks = self.on_day(date_)
         return breaks[ordinal - 1] if ordinal <= len(breaks) else None
 

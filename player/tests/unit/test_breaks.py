@@ -50,7 +50,7 @@ def test_gets_breaks_as_list(during_first_break):
     assert breaks_list[2] == Break(
         start=datetime(2024, 8, 1, 10, 20, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 1, 10, 30, 17, tzinfo=_timezone),
-        ordinal=2,
+        ordinal=3,
     )
 
 
@@ -58,7 +58,7 @@ def test_gets_current_break(during_first_break):
     assert during_first_break.get_current() == Break(
         start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=_timezone),
-        ordinal=0,
+        ordinal=1,
     )
 
 
@@ -66,7 +66,7 @@ def test_gets_next_break_when_on_break(during_first_break):
     assert during_first_break.get_next() == Break(
         start=datetime(2024, 8, 1, 9, 25, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 1, 9, 35, 17, tzinfo=_timezone),
-        ordinal=1,
+        ordinal=2,
     )
 
 
@@ -74,7 +74,7 @@ def test_gets_next_break_when_after_break(after_first_break):
     assert after_first_break.get_next() == Break(
         start=datetime(2024, 8, 1, 9, 25, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 1, 9, 35, 17, tzinfo=_timezone),
-        ordinal=1,
+        ordinal=2,
     )
 
 
@@ -103,7 +103,7 @@ def test_does_not_return_current_and_next_breaks_the_same_at_start():
     expected_break = Break(
         start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=_timezone),
-        ordinal=0,
+        ordinal=1,
     )
     assert breaks_service.get_current() == expected_break
     assert breaks_service.get_next() != expected_break
@@ -116,7 +116,7 @@ def test_does_not_return_current_and_next_breaks_the_same_at_end():
     expected_break = Break(
         start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=_timezone),
-        ordinal=0,
+        ordinal=1,
     )
     assert breaks_service.get_current() == expected_break
     assert breaks_service.get_next() != expected_break
@@ -126,5 +126,5 @@ def test_gets_next_break_tomorrow_when_after_last_break(after_last_break):
     assert after_last_break.get_next() == Break(
         start=datetime(2024, 8, 2, 8, 30, 17, tzinfo=_timezone),
         end=datetime(2024, 8, 2, 8, 40, 17, tzinfo=_timezone),
-        ordinal=0,
+        ordinal=1,
     )

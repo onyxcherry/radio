@@ -1,6 +1,6 @@
 from pydantic.dataclasses import dataclass
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, PositiveInt
 
 from track.domain.events.base import Event, MillisDatetime
 from track.domain.provided import TrackProvidedIdentity
@@ -14,7 +14,7 @@ dataclass_config = ConfigDict(populate_by_name=True)
 class TrackAddedToPlaylist(Event):
     identity: TrackProvidedIdentity
     when: PlayingTime
-    duration: int
+    duration: PositiveInt
     waits_on_approval: bool
     created: MillisDatetime
     name: str = Field(

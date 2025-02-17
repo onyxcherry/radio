@@ -95,7 +95,7 @@ async def test_playing_ends_callback(pl_obs):
     events = await events_consumer.consume(1)
     assert events[0] == TrackPlayed(
         identity=scheduled_track.identity,
-        break_=0,
+        break_=1,
         start=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),
         end=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),
         created=datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone),

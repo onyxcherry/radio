@@ -44,7 +44,7 @@ async def test_observes_start_of_break(bo_before_start):
     assert bo_before_start.current == Break(
         start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=breaks_config.timezone),
         end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=breaks_config.timezone),
-        ordinal=0,
+        ordinal=1,
     )
     task.cancel()
 
@@ -58,7 +58,7 @@ async def test_observes_end_of_break(bo_before_end):
     assert bo_before_end.current == Break(
         start=datetime(2024, 8, 1, 8, 30, 17, tzinfo=breaks_config.timezone),
         end=datetime(2024, 8, 1, 8, 40, 17, tzinfo=breaks_config.timezone),
-        ordinal=0,
+        ordinal=1,
     )
     await asyncio.sleep(0.2)
 

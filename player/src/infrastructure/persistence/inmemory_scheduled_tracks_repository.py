@@ -46,12 +46,8 @@ class InMemoryScheduledTracksRepository(ScheduledTracksRepository):
         date_: date,
         break_: Optional[int] = None,
     ) -> Optional[ScheduledTrack]:
-        matched = list(
-            filter(
-                lambda track: track.identity == identity,
-                self._tracks_at(date_, break_),
-            )
-        )
+        tracks = self._tracks_at(date_, break_)
+        matched = list(filter(lambda track: track.identity == identity, tracks))
         return matched[0] if len(matched) == 1 else None
 
     def get_all(

@@ -1,5 +1,5 @@
 from typing import Annotated, Any
-from pydantic import AwareDatetime, BeforeValidator, ConfigDict, Field, PlainSerializer
+from pydantic import AwareDatetime, BeforeValidator, ConfigDict, Field, PlainSerializer, PositiveInt
 from pydantic.dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 
@@ -54,14 +54,14 @@ class PlayingTime:
     date_: DateFromUnixEpoch = Field(
         validation_alias="date", serialization_alias="date"
     )
-    break_: int = Field(validation_alias="break", serialization_alias="break")
+    break_: PositiveInt = Field(validation_alias="break", serialization_alias="break")
 
 
 @dataclass(frozen=True, config=dataclass_config)
 class TrackAddedToPlaylist(Event):
     identity: TrackProvidedIdentity
     when: PlayingTime
-    duration: int
+    duration: PositiveInt
     waits_on_approval: bool
     created: MillisDatetime
     name: str = Field(
@@ -85,7 +85,7 @@ class TrackPlayed(Event):
     start: MillisDatetime
     end: MillisDatetime
     created: MillisDatetime
-    break_: int = Field(validation_alias="break", serialization_alias="break")
+    break_: PositiveInt = Field(validation_alias="break", serialization_alias="break")
     name: str = Field(default="TrackPlayed", init=False, repr=False, alias="event_name")
 
 
