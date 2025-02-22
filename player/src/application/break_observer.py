@@ -44,7 +44,7 @@ class BreakObserver:
     async def update_current_break(self) -> Never:
         logger.info("Started updating current breaks")
         player = di[Player]
-        _waiting_noop_time = 0.01
+        waiting_noop_time = 0.01
 
         while True:
             current = self._breaks.get_current()
@@ -52,13 +52,14 @@ class BreakObserver:
                 self._current = current
                 self._event.set()
                 seconds_left = self._breaks.get_seconds_left_during_current()
-                self._seconds_left = seconds_left or Seconds(0)
+                assert seconds_left is not None
+                self._seconds_left = seconds_left
                 logger.debug(f"{self._seconds_left=}")
-                await asyncio.sleep(max(self._seconds_left, _waiting_noop_time))
+                await asyncio.sleep(max(self._seconds_left // 2, waiting_noop_time))
             else:
                 self._current = None
                 self._event.clear()
                 seconds_to_next = self._breaks.get_remaining_time_to_next()
                 logger.debug(f"{seconds_to_next=}")
                 player.stop(force=True)
-                await asyncio.sleep(max(seconds_to_next, _waiting_noop_time))
+                await asyncio.sleep(max(seconds_to_next // 2, waiting_noop_time))

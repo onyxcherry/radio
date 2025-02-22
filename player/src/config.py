@@ -87,7 +87,7 @@ class BreakData:
         if self.duration is None and self.end is not None:
             today = date.today()
             td = datetime.combine(today, self.end) - datetime.combine(today, self.start)
-            self.duration = Seconds(td.seconds)
+            self.duration = Seconds(int(td.total_seconds()))
         if self.duration is not None and self.end is None:
             today = date.today()
             end_dt = datetime.combine(today, self.start) + timedelta(

@@ -25,7 +25,8 @@ class Break:
 
     @property
     def duration(self) -> Seconds:
-        return Seconds((self.end - self.start).seconds)
+        td = self.end - self.start
+        return Seconds(int(td.total_seconds()))
 
     @property
     def date(self) -> date:
@@ -87,14 +88,14 @@ class Breaks:
     def get_remaining_time_to_next(self) -> Seconds:
         next_break = self.get_next()
         diff = next_break.start - self._offsetted_now()
-        return Seconds(diff.seconds)
+        return Seconds(int(diff.total_seconds()))
 
     def get_seconds_left_during_current(self) -> Optional[Seconds]:
         current = self.get_current()
         if current is None:
             return None
         diff = current.end - self._offsetted_now()
-        return Seconds(diff.seconds)
+        return Seconds(int(diff.total_seconds()))
 
     def on_day_of_ordinal(self, date_: date, ordinal: PositiveInt) -> Optional[Break]:
         breaks = self.on_day(date_)
