@@ -40,8 +40,6 @@ class Breaks:
     def __init__(self, config: BreaksConfig, clock: Clock) -> None:
         self._config = config
         self._clock = clock
-        self._today = self._clock.get_current_date()
-        self._breaks: dict[date, list[Break]] = {}
 
     def _get_breaks(self, day: date) -> list[Break]:
         _breaks: list[Break] = []
@@ -58,12 +56,10 @@ class Breaks:
         return _breaks
 
     def as_list(self) -> list[Break]:
-        return self.on_day(self._today)
+        return self.on_day(self._clock.get_current_date())
 
     def on_day(self, day: date) -> list[Break]:
-        if day not in self._breaks:
-            self._breaks[day] = self._get_breaks(day)
-        return self._breaks[day]
+        return self._get_breaks(day)
 
     def get_current(self) -> Optional[Break]:
         now = self._offsetted_now()
@@ -83,7 +79,9 @@ class Breaks:
         return None
 
     def _get_tomorrow_first(self) -> Break:
-        tomorrow_breaks = self.on_day(self._today + timedelta(days=1))
+        tomorrow_breaks = self.on_day(
+            self._clock.get_current_date() + timedelta(days=1)
+        )
         return tomorrow_breaks[0]
 
     def get_remaining_time_to_next(self) -> Seconds:
