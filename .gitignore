@@ -161,3 +161,7 @@ cython_debug/
 #.idea/
 
 .vscode/
+
+player/data/
+*.db
+*.old
