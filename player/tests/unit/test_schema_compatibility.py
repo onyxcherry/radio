@@ -5,13 +5,13 @@ import fastavro
 from fastavro.validation import validate
 from pytest import fixture, mark
 
-from player.src.domain.events.track import (
+from domain.events.track import (
     date_as_unix_epoch_date_int,
     datetime_as_millis_timestamp,
     millis_timestamp_as_datetime,
     unix_epoch_date_int_as_date,
 )
-from player.src.infrastructure.messaging.schema_utils import (
+from infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,
     fetch_schema,

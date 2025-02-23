@@ -1,7 +1,7 @@
 from kink import di
 import pytest
 
-from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from player.tests.helpers.messaging import reset_events
 
 

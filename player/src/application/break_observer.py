@@ -3,11 +3,11 @@ from typing import Callable, Coroutine, Never, Optional
 
 from kink import di, inject
 
-from player.src.building_blocks.clock import Clock
-from player.src.config import get_logger
-from player.src.domain.breaks import Break, Breaks
-from player.src.domain.interfaces.player import Player
-from player.src.domain.types import Seconds
+from building_blocks.clock import Clock
+from config import get_logger
+from domain.breaks import Break, Breaks
+from domain.interfaces.player import Player
+from domain.types import Seconds
 
 logger = get_logger(__name__)
 

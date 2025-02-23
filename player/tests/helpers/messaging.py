@@ -2,7 +2,7 @@ import json
 import subprocess
 import tempfile
 from kink import di
-from player.src.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
+from infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from player.tests.choices import DIChoices
 
 

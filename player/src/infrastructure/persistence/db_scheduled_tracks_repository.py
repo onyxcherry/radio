@@ -3,17 +3,17 @@ from typing import Optional
 from sqlalchemy import func, or_
 
 from sqlalchemy import delete, func, select, update
-from player.src.application.models.scheduled_tracks import ScheduledTrackModel
-from player.src.building_blocks.clock import Clock
-from player.src.domain.breaks import Break
-from player.src.domain.entities import (
+from application.models.scheduled_tracks import ScheduledTrackModel
+from building_blocks.clock import Clock
+from domain.breaks import Break
+from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
     TrackToSchedule,
 )
-from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.src.domain.types import Identifier
-from player.src.infrastructure.persistence.database import SessionLocal
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from domain.types import Identifier
+from infrastructure.persistence.database import SessionLocal
 
 
 class DBScheduledTracksRepository(ScheduledTracksRepository):

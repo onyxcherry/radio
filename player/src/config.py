@@ -20,7 +20,7 @@ import yaml
 from jsonschema import validate, ValidationError
 
 
-from player.src.domain.types import Seconds
+from domain.types import Seconds
 
 
 logging_config = {

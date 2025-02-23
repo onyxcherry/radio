@@ -2,17 +2,17 @@ from datetime import date, datetime, timedelta, timezone
 from kink import di
 import pytest
 
-from player.src.domain.breaks import Breaks
-from player.src.domain.entities import TrackProvidedIdentity
-from player.src.domain.events.serialize import serialize_event
-from player.src.domain.events.recreate import parse_event
-from player.src.domain.events.track import (
+from domain.breaks import Breaks
+from domain.entities import TrackProvidedIdentity
+from domain.events.serialize import serialize_event
+from domain.events.recreate import parse_event
+from domain.events.track import (
     PlayingTime,
     TrackAddedToPlaylist,
     TrackPlayed,
 )
-from player.src.domain.types import Identifier, Seconds
-from player.src.infrastructure.messaging.types import (
+from domain.types import Identifier, Seconds
+from infrastructure.messaging.types import (
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
 )

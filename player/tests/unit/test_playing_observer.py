@@ -4,22 +4,22 @@ from typing import Final
 from kink import di
 from pytest import fixture
 import pytest
-from player.src.infrastructure.messaging.types import (
+from infrastructure.messaging.types import (
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
 )
-from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.src.application.playing_observer import PlayingObserver
-from player.src.building_blocks.clock import FixedClock
-from player.src.config import BreaksConfig
-from player.src.domain.breaks import Breaks
-from player.src.domain.entities import (
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from application.playing_observer import PlayingObserver
+from building_blocks.clock import FixedClock
+from config import BreaksConfig
+from domain.breaks import Breaks
+from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
     TrackToSchedule,
 )
-from player.src.domain.types import Identifier, Seconds
-from player.src.domain.events.track import TrackPlayed
+from domain.types import Identifier, Seconds
+from domain.events.track import TrackPlayed
 
 
 breaks_config = di[BreaksConfig]

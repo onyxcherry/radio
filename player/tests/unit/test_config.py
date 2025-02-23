@@ -3,12 +3,12 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from pydantic import RootModel
-from player.src.config import (
+from config import (
     BreaksConfig,
     BreakData,
     load_config_from_yaml,
 )
-from player.src.domain.types import Seconds
+from domain.types import Seconds
 
 
 def test_parses_start_time():

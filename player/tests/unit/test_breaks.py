@@ -2,10 +2,10 @@ from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from pytest import fixture
-from player.src.building_blocks.clock import FixedClock
-from player.src.config import BreakData, BreaksConfig
-from player.src.domain.breaks import Break, Breaks
-from player.src.domain.types import Seconds
+from building_blocks.clock import FixedClock
+from config import BreakData, BreaksConfig
+from domain.breaks import Break, Breaks
+from domain.types import Seconds
 
 _timezone = ZoneInfo("Europe/Warsaw")
 _breaks_config = BreaksConfig(

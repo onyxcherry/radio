@@ -3,15 +3,15 @@ from typing import Final
 from kink import di
 from pytest import fixture
 
-from player.src.building_blocks.clock import FixedClock
-from player.src.domain.breaks import Breaks
-from player.src.domain.entities import (
+from building_blocks.clock import FixedClock
+from domain.breaks import Breaks
+from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
     TrackToSchedule,
 )
-from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.src.domain.types import Identifier, Seconds
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from domain.types import Identifier, Seconds
 from player.tests.bootstrap import reregister_deps_with_clock
 
 

@@ -4,21 +4,21 @@ from typing import Any, Final, Generator
 from kink import di
 import pytest
 
-from player.src.application.break_observer import BreakObserver
-from player.src.application.playing_observer import PlayingObserver
-from player.src.building_blocks.clock import FeignedWallClock
-from player.src.config import BreaksConfig
-from player.src.domain.breaks import Breaks
-from player.src.domain.entities import (
+from application.break_observer import BreakObserver
+from application.playing_observer import PlayingObserver
+from building_blocks.clock import FeignedWallClock
+from config import BreaksConfig
+from domain.breaks import Breaks
+from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
     TrackToSchedule,
 )
-from player.src.domain.events.track import TrackPlayed
-from player.src.application.playing_manager import PlayingConditions, PlayingManager
-from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.src.domain.types import Identifier, Seconds
-from player.src.infrastructure.messaging.types import PlaylistEventsConsumer
+from domain.events.track import TrackPlayed
+from application.playing_manager import PlayingConditions, PlayingManager
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from domain.types import Identifier, Seconds
+from infrastructure.messaging.types import PlaylistEventsConsumer
 from player.tests.bootstrap import reregister_deps_with_clock
 
 scheduled_track: Final = ScheduledTrack(
