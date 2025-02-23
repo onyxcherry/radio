@@ -1,6 +1,6 @@
 from pydantic import TypeAdapter
-from domain.events.track import Event
-from domain.events.track import *
+from player.src.domain.events.track import Event
+from player.src.domain.events.track import *
 
 
 def parse_event(data: dict) -> Event:

@@ -2,7 +2,7 @@ from abc import abstractmethod
 import os
 from typing import Callable, Optional
 
-from domain.breaks import Seconds
+from player.src.domain.breaks import Seconds
 
 
 class Player:

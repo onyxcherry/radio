@@ -4,9 +4,9 @@ from pathlib import Path
 import time
 from typing import Callable, Optional
 
-from config import get_logger
-from domain.types import Seconds
-from domain.interfaces.player import Player
+from player.src.config import get_logger
+from player.src.domain.types import Seconds
+from player.src.domain.interfaces.player import Player
 
 
 logger = get_logger(__name__)

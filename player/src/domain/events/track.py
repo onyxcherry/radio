@@ -3,8 +3,8 @@ from pydantic import AwareDatetime, BeforeValidator, ConfigDict, Field, PlainSer
 from pydantic.dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 
-from domain.events.base import Event
-from domain.entities import TrackProvidedIdentity
+from player.src.domain.events.base import Event
+from player.src.domain.entities import TrackProvidedIdentity
 
 
 def datetime_as_millis_timestamp(data, *args) -> int:

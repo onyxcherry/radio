@@ -2,8 +2,8 @@ from pydantic import AwareDatetime
 from pydantic.dataclasses import dataclass
 
 
-from domain.breaks import Break
-from domain.types import Identifier, ProviderName, Seconds
+from player.src.domain.breaks import Break
+from player.src.domain.types import Identifier, ProviderName, Seconds
 
 
 @dataclass(frozen=True, order=True)

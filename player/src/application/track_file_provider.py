@@ -4,10 +4,10 @@ import os
 from pathlib import Path
 from typing import Callable, Coroutine, Optional
 
-from building_blocks.clock import Clock
-from domain.entities import ScheduledTrack, TrackProvidedIdentity
-from config import get_logger
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.building_blocks.clock import Clock
+from player.src.domain.entities import ScheduledTrack, TrackProvidedIdentity
+from player.src.config import get_logger
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
 
 
 @dataclass(frozen=True)

@@ -1,12 +1,12 @@
 from kink import di
-from application.interfaces.events import (
+from player.src.application.interfaces.events import (
     EventsProducer,
     ProducerMessagesOptions,
     ProducerConnectionOptions,
 )
-from domain.events.base import Event
-from infrastructure.messaging.inmemory_events_helper import InMemoryEvents
-from infrastructure.messaging.schema_utils import SchemaRegistryConfig
+from player.src.domain.events.base import Event
+from player.src.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
+from player.src.infrastructure.messaging.schema_utils import SchemaRegistryConfig
 
 
 class InMemoryEventsProducer(EventsProducer):

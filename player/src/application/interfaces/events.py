@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import re
 from typing import Callable, Optional
 
-from infrastructure.messaging.schema_utils import SchemaRegistryConfig
-from domain.events.base import Event
+from player.src.infrastructure.messaging.schema_utils import SchemaRegistryConfig
+from player.src.domain.events.base import Event
 
 
 @dataclass(frozen=True)

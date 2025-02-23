@@ -1,15 +1,15 @@
 from datetime import date
 from typing import Optional
 
-from building_blocks.clock import Clock
-from domain.breaks import Break
-from domain.entities import (
+from player.src.building_blocks.clock import Clock
+from player.src.domain.breaks import Break
+from player.src.domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
     TrackToSchedule,
 )
-from domain.events.compare import events_differ_only_last_changed
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.domain.events.compare import events_differ_only_last_changed
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
 
 
 class InMemoryScheduledTracksRepository(ScheduledTracksRepository):

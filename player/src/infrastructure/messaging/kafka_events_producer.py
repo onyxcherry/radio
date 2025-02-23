@@ -2,17 +2,17 @@ from typing import Literal, Optional
 from uuid import uuid4
 
 from confluent_kafka import Producer
-from config import get_logger
-from domain.events.base import Event
-from domain.events.serialize import serialize_event
-from infrastructure.messaging.schema_utils import (
+from player.src.config import get_logger
+from player.src.domain.events.base import Event
+from player.src.domain.events.serialize import serialize_event
+from player.src.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,
     fetch_schema,
 )
 from confluent_kafka.schema_registry.avro import AvroSerializer
 
-from application.interfaces.events import (
+from player.src.application.interfaces.events import (
     EventsProducer,
     ProducerConnectionOptions,
     ProducerMessagesOptions,

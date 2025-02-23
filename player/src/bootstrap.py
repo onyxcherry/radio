@@ -1,67 +1,66 @@
-from datetime import time, timedelta, datetime
+from datetime import time, timedelta
 from pathlib import Path
-from time import timezone
 from zoneinfo import ZoneInfo
 from kink import di
 
 
-from application.break_observer import BreakObserver
-from application.events.handle import EventHandler
-from application.playing_manager import PlayingConditions, PlayingManager
-from application.playing_observer import PlayingObserver
-from application.track_file_provider import (
+from player.src.application.break_observer import BreakObserver
+from player.src.application.events.handle import EventHandler
+from player.src.application.playing_manager import PlayingConditions, PlayingManager
+from player.src.application.playing_observer import PlayingObserver
+from player.src.application.track_file_provider import (
     PlayableTrackProvider,
     PlayableTrackProviderConfig,
 )
-from building_blocks.awakable import EventBasedAwakable
-from config import config_dict_to_class, load_config_from_yaml
-from building_blocks.clock import Clock, FeignedWallClock, SystemClock
-from config import BreaksConfig
-from domain.breaks import Breaks
-from domain.events.recreate import parse_event
-from domain.events.serialize import serialize_event
-from domain.interfaces.player import Player
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from domain.types import Seconds
-from infrastructure.madeup_player import MadeupPlayer
-from infrastructure.persistence.db_scheduled_tracks_repository import (
+from player.src.building_blocks.awakable import EventBasedAwakable
+from player.src.config import config_dict_to_class, load_config_from_yaml
+from player.src.building_blocks.clock import Clock, SystemClock
+from player.src.config import BreaksConfig
+from player.src.domain.breaks import Breaks
+from player.src.domain.events.recreate import parse_event
+from player.src.domain.events.serialize import serialize_event
+from player.src.domain.interfaces.player import Player
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.domain.types import Seconds
+from player.src.infrastructure.madeup_player import MadeupPlayer
+from player.src.infrastructure.persistence.db_scheduled_tracks_repository import (
     DBScheduledTracksRepository,
 )
-from infrastructure.messaging.types import (
+from player.src.infrastructure.messaging.types import (
     LibraryEventsConsumer,
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
 )
-from application.interfaces.events import (
+from player.src.application.interfaces.events import (
     ProducerMessagesOptions,
     ConsumerMessagesOptions,
 )
-from application.interfaces.events import (
+from player.src.application.interfaces.events import (
     ConsumerConnectionOptions,
     ProducerConnectionOptions,
 )
-from building_blocks.clock import Clock
-from config import BreaksConfig
-from domain.breaks import Breaks
-from domain.interfaces.player import Player
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from domain.types import Seconds
-from infrastructure.madeup_player import MadeupPlayer
-from infrastructure.messaging.inmemory_events_consumer import (
+from player.src.building_blocks.clock import Clock
+from player.src.config import BreaksConfig
+from player.src.domain.breaks import Breaks
+from player.src.domain.interfaces.player import Player
+from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from player.src.domain.types import Seconds
+from player.src.infrastructure.madeup_player import MadeupPlayer
+from player.src.infrastructure.messaging.inmemory_events_consumer import (
     InMemoryEventsConsumer,
 )
-from infrastructure.messaging.inmemory_events_producer import (
+from player.src.infrastructure.messaging.inmemory_events_producer import (
     InMemoryEventsProducer,
 )
-from infrastructure.messaging.kafka_events_consumer import (
+from player.src.infrastructure.messaging.kafka_events_consumer import (
     KafkaAvroEventsConsumer,
 )
-from infrastructure.messaging.kafka_events_producer import (
+from player.src.infrastructure.messaging.kafka_events_producer import (
     KafkaAvroEventsProducer,
 )
-from infrastructure.messaging.schema_utils import SchemaRegistryConfig
-from infrastructure.messaging.types import LibraryEventsProducer
-from infrastructure.persistence.db_scheduled_tracks_repository import (
+from player.src.infrastructure.messaging.schema_utils import SchemaRegistryConfig
+from player.src.infrastructure.messaging.types import LibraryEventsProducer
+from player.src.infrastructure.persistence.db_scheduled_tracks_repository import (
     DBScheduledTracksRepository,
 )
 from confluent_kafka.serialization import StringSerializer
@@ -72,8 +71,7 @@ CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"
 
 
 def bootstrap_di():
-    # clock = SystemClock()
-    clock = FeignedWallClock(datetime(2025, 2, 18, 8, 30, 3, tzinfo=ZoneInfo("Europe/Warsaw")))
+    clock = SystemClock()
     di[Clock] = clock
 
     player = MadeupPlayer()

@@ -2,12 +2,12 @@ import asyncio
 from dataclasses import dataclass
 
 from kink import di, inject
-from application.break_observer import BreakObserver
-from application.playing_observer import PlayingObserver
-from application.track_file_provider import PlayableTrackProvider
-from building_blocks.awakable import EventBasedAwakable
-from config import get_logger
-from domain.interfaces.player import Player
+from player.src.application.break_observer import BreakObserver
+from player.src.application.playing_observer import PlayingObserver
+from player.src.application.track_file_provider import PlayableTrackProvider
+from player.src.building_blocks.awakable import EventBasedAwakable
+from player.src.config import get_logger
+from player.src.domain.interfaces.player import Player
 from just_playback.ma_result import MiniaudioError
 
 

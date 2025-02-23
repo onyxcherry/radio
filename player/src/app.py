@@ -5,13 +5,13 @@ from fastapi import FastAPI
 from kink import di
 import uvicorn
 
-from application.break_observer import BreakObserver
-from application.events.handle import EventHandler
-from application.interfaces.events import EventsConsumer
-from application.playing_manager import PlayingManager
-from bootstrap import bootstrap_di
-from config import get_logger
-from infrastructure.messaging.types import PlaylistEventsConsumer
+from player.src.application.break_observer import BreakObserver
+from player.src.application.events.handle import EventHandler
+from player.src.application.interfaces.events import EventsConsumer
+from player.src.application.playing_manager import PlayingManager
+from player.src.bootstrap import bootstrap_di
+from player.src.config import get_logger
+from player.src.infrastructure.messaging.types import PlaylistEventsConsumer
 
 logger = get_logger(__name__)
 

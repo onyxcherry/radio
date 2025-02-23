@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from datetime import datetime
 
-from domain.types import ProviderName
+from player.src.domain.types import ProviderName
 
 
 from .base import Base

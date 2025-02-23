@@ -1,5 +1,5 @@
 from pydantic import RootModel
-from domain.events.base import Event
+from player.src.domain.events.base import Event
 
 
 def serialize_event(event: Event) -> str:
