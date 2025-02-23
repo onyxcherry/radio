@@ -1,6 +1,6 @@
 breaks:
   offset:
-    seconds: 17
+    seconds: 0
   timezone: "Europe/Warsaw"
   list:
   - start: "08:30"
