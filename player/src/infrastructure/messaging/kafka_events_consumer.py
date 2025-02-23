@@ -2,16 +2,16 @@ import asyncio
 from typing import Literal, Optional
 
 from confluent_kafka import Consumer
-from player.src.config import get_logger
-from player.src.domain.events.base import Event
-from player.src.infrastructure.messaging.schema_utils import (
+from config import get_logger
+from domain.events.base import Event
+from infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,
     fetch_schema,
 )
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 
-from player.src.application.interfaces.events import (
+from application.interfaces.events import (
     ConsumerConnectionOptions,
     ConsumerMessagesOptions,
     EventsConsumer,

@@ -2,9 +2,9 @@ import os
 from typing import Callable, Optional
 from just_playback import Playback
 
-from player.src.config import get_logger
-from player.src.domain.types import Seconds
-from player.src.domain.interfaces.player import Player
+from config import get_logger
+from domain.types import Seconds
+from domain.interfaces.player import Player
 
 logger = get_logger(__name__)
 

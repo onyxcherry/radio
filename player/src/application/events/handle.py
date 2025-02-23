@@ -1,17 +1,17 @@
 from datetime import date, datetime
 from typing import Any
 
-from player.src.building_blocks.clock import Clock
-from player.src.config import get_logger
-from player.src.domain.breaks import Breaks
-from player.src.domain.entities import TrackToSchedule
-from player.src.domain.events.track import (
+from building_blocks.clock import Clock
+from config import get_logger
+from domain.breaks import Breaks
+from domain.entities import TrackToSchedule
+from domain.events.track import (
     Event,
     TrackAddedToPlaylist,
     TrackDeletedFromPlaylist,
 )
-from player.src.domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.src.domain.types import Seconds
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from domain.types import Seconds
 
 logger = get_logger(__name__)
 

@@ -6,9 +6,9 @@ from typing import Optional, Self
 from kink import inject
 
 
-from player.src.building_blocks.clock import Clock
-from player.src.config import BreaksConfig, get_logger
-from player.src.domain.types import Seconds
+from building_blocks.clock import Clock
+from config import BreaksConfig, get_logger
+from domain.types import Seconds
 
 
 @dataclass(frozen=True)

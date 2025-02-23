@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import date
 from typing import Optional
-from player.src.domain.breaks import Break
-from player.src.domain.entities import (
+from domain.breaks import Break
+from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,
     TrackToSchedule,

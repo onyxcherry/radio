@@ -1,4 +1,4 @@
-from player.src.domain.events.base import Event
+from domain.events.base import Event
 
 
 class InMemoryEvents:

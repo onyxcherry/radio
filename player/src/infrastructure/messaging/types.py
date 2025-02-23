@@ -1,4 +1,4 @@
-from player.src.application.interfaces.events import EventsConsumer, EventsProducer
+from application.interfaces.events import EventsConsumer, EventsProducer
 
 
 class LibraryEventsProducer(EventsProducer):
