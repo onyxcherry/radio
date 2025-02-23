@@ -37,4 +37,5 @@ class JustPlaybackPlayer(Player):
             logger.error("Music is playing but should have had been stopped!")
             logger.warning("Stopping")
             # TODO: force stop if possible
+            # TODO: catch *here* any exception when forcing
         self._playback.stop()

@@ -63,6 +63,7 @@ class PlayableTrackProvider:
         scheduled_track = scheduled_tracks[0]
         track_path = self._get_file_path_of(scheduled_track.identity)
         if track_path is None:
+            # TODO: download the track now
             raise RuntimeError("No track downloaded!")
         to_play = TrackToPlay(scheduled_track, track_path)
         return to_play
