@@ -1,7 +1,7 @@
 from typing import Any
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
@@ -52,6 +52,22 @@ async def repository_error_handler(
     return JSONResponse(
         status_code=500,
         content=error_msg.__dict__,
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": True, "message": exc.detail},
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"error": True, "message": "Internal Server Error"},
     )
 
 
