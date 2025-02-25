@@ -13,7 +13,7 @@ from application.track_file_provider import (
     PlayableTrackProviderConfig,
 )
 from building_blocks.awakable import EventBasedAwakable
-from config import config_dict_to_class, load_config_from_yaml
+from config import Settings, config_dict_to_class, load_config_from_yaml
 from building_blocks.clock import Clock, SystemClock
 from config import BreaksConfig
 from domain.breaks import Breaks
@@ -80,6 +80,7 @@ def bootstrap_di():
     config_dict = load_config_from_yaml(
         config_path=CONFIG_FILE_PATH, schema_path=CONFIG_SCHEMA_PATH
     )
+    settings = Settings()  # type: ignore
     config = config_dict_to_class(config_dict)
     breaks_config = config.breaks
     di[BreaksConfig] = breaks_config
@@ -91,8 +92,9 @@ def bootstrap_di():
     scheduled_tracks_repo = DBScheduledTracksRepository(clock=clock)
     di[ScheduledTracksRepository] = scheduled_tracks_repo
 
-    test_data_dir = Path("/home/tomasz/radio/player/data/")
-    playable_track_provider_config = PlayableTrackProviderConfig(test_data_dir)
+    playable_track_provider_config = PlayableTrackProviderConfig(
+        Path(settings.tracks_files_path)
+    )
     di[PlayableTrackProviderConfig] = playable_track_provider_config
 
     playing_conditions = PlayingConditions(
@@ -125,26 +127,26 @@ def bootstrap_di():
     )
 
     producer_conn_options = ProducerConnectionOptions(
-        bootstrap_servers="localhost:19092", client_id="producer-tests-1"
+        bootstrap_servers=settings.broker_bootstrap_server, client_id="producer-1"
     )
     playlist_consumer_conn_options = ConsumerConnectionOptions(
-        bootstrap_servers="localhost:19092",
+        bootstrap_servers=settings.broker_bootstrap_server,
         group_id="consumers-player-queue",
-        client_id="consumer-player-queue-tests-1",
+        client_id="consumer-player-queue-1",
     )
     library_consumer_conn_options = ConsumerConnectionOptions(
-        bootstrap_servers="localhost:19092",
+        bootstrap_servers=settings.broker_bootstrap_server,
         group_id="consumers-player-library",
-        client_id="consumer-player-library-tests-1",
+        client_id="consumer-player-library-1",
     )
     library_schema_config = SchemaRegistryConfig(
-        url="http://localhost:18081",
+        url=settings.schema_registry_url,
         topic_name="library",
         schema_id="latest",
         subject_name="library-value",
     )
     playlist_schema_config = SchemaRegistryConfig(
-        url="http://localhost:18081",
+        url=settings.schema_registry_url,
         topic_name="queue",
         schema_id="latest",
         subject_name="queue-value",

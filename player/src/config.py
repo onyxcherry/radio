@@ -16,6 +16,7 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import yaml
 from jsonschema import validate, ValidationError
 
@@ -104,7 +105,9 @@ class BreakData:
 def seconds_object_to_timedelta(data: Any) -> timedelta:
     if isinstance(data, timedelta):
         return data
-    elif hasattr(data, "seconds") or (isinstance(data, dict) and data.get("seconds") is not None):
+    elif hasattr(data, "seconds") or (
+        isinstance(data, dict) and data.get("seconds") is not None
+    ):
         seconds = int(data["seconds"])
         return timedelta(seconds=seconds)
     raise ValidationError("Bad offset object, no seconds param")
@@ -143,6 +146,18 @@ class BreaksConfig:
     @classmethod
     def from_dict(cls, config: dict) -> Self:
         return TypeAdapter(cls).validate_python(config)
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).parent.parent / ".env", env_file_encoding="utf-8"
+    )
+
+    tracks_files_path: str = Field(
+        str((Path(__file__).parent.parent / "data").absolute())
+    )
+    broker_bootstrap_server: str = Field("localhost:19092")
+    schema_registry_url: str = Field("http://localhost:18081")
 
 
 @dataclass(frozen=True)
