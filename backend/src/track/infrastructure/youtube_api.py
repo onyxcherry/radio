@@ -1,7 +1,8 @@
 from json import JSONDecodeError
+from kink import di
 import requests
 
-from track.infrastructure.config import Config, get_logger
+from config import Settings, get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.provided import Identifier
 from track.application.errors import (
@@ -18,9 +19,10 @@ logger = get_logger(__name__)
 class _PublicAPIProvider:
     @staticmethod
     def get_api_part(track_id: Identifier, part: str) -> dict:
+        settings = di[Settings]
         api_url = (
-            f"{Config.YOUTUBE_API_URL}?part={part}&id={track_id}"
-            f"&key={Config.YOUTUBE_API_KEY}"
+            f"{settings.youtube_api_url}?part={part}&id={track_id}"
+            f"&key={settings.youtube_api_key}"
         )
         try:
             resp = requests.get(api_url, timeout=(1, 3))

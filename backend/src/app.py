@@ -6,7 +6,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from track.infrastructure.boostrap import boostrap_di
+from boostrap import boostrap_di
 from building_blocks.errors import (
     APIErrorMessage,
     DomainError,

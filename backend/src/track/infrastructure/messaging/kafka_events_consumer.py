@@ -1,7 +1,7 @@
 from typing import Literal, Optional
 
 from confluent_kafka import Consumer
-from track.infrastructure.config import get_logger
+from config import get_logger
 from track.domain.events.base import Event
 from track.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,

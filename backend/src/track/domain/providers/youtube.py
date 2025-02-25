@@ -5,7 +5,7 @@ from typing import Self
 from kink import inject
 from track.domain.errors import TrackIdentifierError
 from track.domain.errors import ErrorMessages
-from track.infrastructure.config import get_logger
+from config import get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.duration import parse_isoduration
 from track.domain.provided import (

@@ -12,7 +12,7 @@ from track.application.interfaces.events import (
     ProducerMessagesOptions,
 )
 from track.domain.events.base import Event
-from track.infrastructure.config import get_logger
+from config import get_logger
 from track.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,

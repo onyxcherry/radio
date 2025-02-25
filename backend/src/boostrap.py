@@ -1,3 +1,5 @@
+from pathlib import Path
+from config import Config, Settings, config_dict_to_class, load_config_from_yaml
 from kink import di
 from track.domain.events.recreate import parse_event
 from track.domain.events.serialize import serialize_event
@@ -27,27 +29,38 @@ from track.application.requests_service import RequestsService
 
 from confluent_kafka.serialization import StringSerializer
 
+CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.yaml"
+CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"
+
 
 def boostrap_di() -> None:
     clock = SystemClock()
+    config_dict = load_config_from_yaml(
+        config_path=CONFIG_FILE_PATH, schema_path=CONFIG_SCHEMA_PATH
+    )
+    settings = Settings()  # type: ignore
+    config = config_dict_to_class(config_dict)
+    di[Config] = config
+    di[Settings] = settings
+
     library_repo = DBLibraryRepository()
     playlist_repo = DBPlaylistRepository()
     producer_conn_options = ProducerConnectionOptions(
-        bootstrap_servers="localhost:19092", client_id="producer-1"
+        bootstrap_servers=settings.broker_bootstrap_server, client_id="producer-1"
     )
     playlist_consumer_conn_options = ConsumerConnectionOptions(
-        bootstrap_servers="localhost:19092",
+        bootstrap_servers=settings.broker_bootstrap_server,
         group_id="consumers-queue",
         client_id="consumer-1",
     )
     library_schema_config = SchemaRegistryConfig(
-        url="http://localhost:18081",
+        url=settings.schema_registry_url,
         topic_name="library",
         schema_id="latest",
         subject_name="library-value",
     )
     playlist_schema_config = SchemaRegistryConfig(
-        url="http://localhost:18081",
+        url=settings.schema_registry_url,
         topic_name="queue",
         schema_id="latest",
         subject_name="queue-value",
@@ -84,6 +97,7 @@ def boostrap_di() -> None:
         library_events_producer,
         playlist_events_producer,
         playlist_events_consumer,
+        config,
         clock,
     )
 
