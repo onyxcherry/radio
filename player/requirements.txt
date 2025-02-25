@@ -1,0 +1,14 @@
+confluent-kafka[avro,schemaregistry]==2.8.0
+fastapi==0.115.8
+fastavro==1.10.0
+httpx==0.28.1
+jsonschema==4.23.0
+just_playback==0.1.8
+kink==0.8.1
+pydantic==2.10.6
+pydantic-settings==2.8.0
+pytest-asyncio==0.25.3
+PyYAML==6.0.2
+requests==2.32.3
+sqlalchemy==2.0.38
+uvicorn==0.34.0
