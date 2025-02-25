@@ -1,6 +1,8 @@
 from datetime import date, datetime, timedelta, timezone
+from typing import Final
+from config import Config
 from kink import di
-from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
+from track.domain.breaks import Breaks, PlayingTime
 from track.domain.events.playlist import TrackAddedToPlaylist, TrackPlayed
 from track.domain.events.recreate import parse_event
 from track.domain.events.serialize import serialize_event
@@ -9,6 +11,8 @@ from track.infrastructure.messaging.types import (
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
 )
+
+config: Final = di[Config]
 
 
 def test_parses_event_from_dict_with_unix_epoch_date_field():
@@ -148,13 +152,14 @@ def test_consume_produced_events(reset_events_fixt):
         identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"
     )
     event_pt = PlayingTime(date(2024, 7, 11), Breaks.FIRST)
-    break_end = event_pt.to_datetime() + timedelta(
-        seconds=get_breaks_durations()[event_pt.break_.get_number_from_zero_of()]
-    )
+    break_ = config.breaks.breaks[event_pt.break_.get_number_from_zero_of()]
+    assert break_ is not None
+    assert break_.end is not None
+    break_end = datetime.combine(event_pt.date_, break_.end, tzinfo=timezone.utc)
     event1 = TrackPlayed(
         identity=identity,
         break_=event_pt.break_,
-        start=event_pt.to_datetime(),
+        start=datetime.combine(event_pt.date_, break_.start, tzinfo=timezone.utc),
         end=break_end,
         created=break_end + timedelta(seconds=1),
     )

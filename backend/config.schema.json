@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://radio.wisniewski.app/config.schema.json",
+  "title": "Radio config",
+  "description": "Configuration schema for radio",
+  "type": "object",
+  "properties": {
+    "tracks": {
+      "type": "object",
+      "properties": {
+        "duration": {
+          "type": "object",
+          "properties": {
+            "minimum": {
+              "type": "integer",
+              "minimum": 20
+            },
+            "maximum": {
+              "type": "integer",
+              "maximum": 1200
+            }
+          },
+          "required": [
+            "minimum",
+            "maximum"
+          ]
+        },
+        "queued-one-break-max": {
+          "type": "integer",
+          "minimum": 8
+        },
+        "playing-duration-min": {
+          "type": "integer",
+          "minimum": 60
+        }
+      },
+      "required": [
+        "duration",
+        "queued-one-break-max",
+        "playing-duration-min"
+      ]
+    },
+    "breaks": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "object",
+          "properties": {
+            "seconds": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "seconds"
+          ]
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+              },
+              "end": {
+                "type": "string",
+                "pattern": "^[0-2][0-9]:[0-5][0-9]$"
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "offset",
+        "timezone",
+        "list"
+      ]
+    }
+  },
+  "required": [
+    "tracks",
+    "breaks"
+  ]
+}

@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Any
+from config import Config
 from kink import di
 from pydantic import ValidationError
 from pytest import fixture, raises, mark
@@ -19,15 +20,15 @@ from track.application.playlist import Playlist
 from track.domain.entities import NewTrack, Status, TrackRequested
 from track.application.library import Library
 from track.application.requests_service import (
-    MAX_TRACKS_QUEUED_ONE_BREAK,
     LibraryTrackError,
     PlayingTimeError,
     RequestsService,
 )
-from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
+from track.domain.breaks import Breaks, PlayingTime
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity, TrackUrl
 
 clock = di[Clock]
+config = di[Config]
 library_events_producer: EventsProducer = di[LibraryEventsProducer]
 library_events_consumer: EventsConsumer = di[LibraryEventsConsumer]
 playlist_events_producer: EventsProducer = di[PlaylistEventsProducer]
@@ -43,6 +44,7 @@ rs = RequestsService(
     library_events_producer,
     playlist_events_producer,
     playlist_events_consumer,
+    config,
     clock,
 )
 
@@ -60,9 +62,6 @@ def reset():
 
 @fixture
 def yt_tracks():
-    duration_sum = sum([(track.duration or 0) for track in NEW_YT_TRACKS])
-    assert duration_sum < min(get_breaks_durations()) * 0.8
-
     for track in NEW_YT_TRACKS:
         library.add(track)
 
@@ -71,9 +70,10 @@ def yt_tracks():
 def whole_break_scheduled():
     playing_time = FUTURE_PT
 
-    break_duration = get_breaks_durations()[
+    break_duration = config.breaks.breaks[
         playing_time.break_.get_number_from_zero_of()
-    ]
+    ].duration
+    assert break_duration is not None
     tracks_count = 4
     for idx in range(1, tracks_count + 1):
         identifier = f"{idx}".rjust(11, "a")
@@ -96,8 +96,7 @@ def whole_break_scheduled():
 @fixture
 def max_tracks_count_on_queue():
     playing_time = FUTURE_PT
-
-    for idx in range(1, MAX_TRACKS_QUEUED_ONE_BREAK + 1):
+    for idx in range(1, config.tracks.queued_one_break_max + 1):
         identifier = f"{idx}".rjust(11, "a")
         duration = Seconds(3 * idx)
         track = NewTrack(

@@ -137,8 +137,14 @@ class DurationRange:
 )
 class TracksConfig:
     duration: DurationRange
-    playing_duration_min: int = Field(alias="playing-duration-min")
-    queued_one_break_max: int = Field(alias="queued-one-break-max")
+    playing_duration_min: int = Field(
+        validation_alias="playing-duration-min",
+        serialization_alias="playing-duration-min",
+    )
+    queued_one_break_max: int = Field(
+        validation_alias="queued-one-break-max",
+        serialization_alias="queued-one-break-max",
+    )
 
     @classmethod
     def from_dict(cls, config: dict) -> Self:

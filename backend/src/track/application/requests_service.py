@@ -1,25 +1,19 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import enum
 from typing import Optional, Sequence
+from config import Config
 from kink import inject
 from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.domain.entities import NewTrack, Status, TrackInLibrary, TrackRequested
 from building_blocks.clock import Clock
-from track.domain.breaks import Breaks, PlayingTime, get_breaks_durations
+from track.domain.breaks import Breaks, PlayingTime
 from track.application.library import Library
 from track.builder import TrackBuilder
 from track.application.playlist import Playlist
 from track.domain.library_repository import LibraryRepository
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Seconds, TrackProvidedIdentity
-
-
-MIN_TRACK_DURATION_SECONDS = Seconds(20)
-MAX_TRACK_DURATION_SECONDS = Seconds(1200)
-
-
-MINIMUM_PLAYING_TIME = Seconds(15)
-MAX_TRACKS_QUEUED_ONE_BREAK = 8
 
 
 class LibraryTrackError(enum.StrEnum):
@@ -57,6 +51,7 @@ class RequestsService:
         library_events_producer: EventsProducer,
         playlist_events_producer: EventsProducer,
         playlist_events_consumer: EventsConsumer,
+        config: Config,
         clock: Clock,
     ):
         self._clock = clock
@@ -64,23 +59,30 @@ class RequestsService:
         self._playlist = Playlist(
             playlist_repo, playlist_events_producer, playlist_events_consumer, clock
         )
+        self._config = config
 
-    @staticmethod
-    def _check_valid_duration(duration: Seconds) -> bool:
-        lower_limit = MIN_TRACK_DURATION_SECONDS
-        upper_limit = MAX_TRACK_DURATION_SECONDS
+    def _check_valid_duration(self, duration: Seconds) -> bool:
+        lower_limit = self._config.tracks.duration.minimum
+        upper_limit = self._config.tracks.duration.maximum
         return lower_limit <= duration <= upper_limit
 
     def _requested_playing_time_passed(self, requested_time: PlayingTime) -> bool:
         now = self._clock.now()
-        requested_dt = requested_time.to_datetime()
+        break_number = requested_time.break_.get_number_from_zero_of()
+        break_ = self._config.breaks.breaks[break_number]
+        requested_dt = datetime.combine(
+            requested_time.date_, break_.start, tzinfo=timezone.utc
+        )
         if now < requested_dt:
             return False
         return True
 
     def _calc_left_time_on_break(self, duration: Seconds, break_: Breaks) -> Seconds:
         margin = Seconds(15)
-        break_duration = get_breaks_durations()[break_]
+        break_duration = self._config.breaks.breaks[
+            break_.get_number_from_zero_of()
+        ].duration
+        assert break_duration is not None
         return Seconds(break_duration - duration - margin)
 
     def can_add_to_playlist(
@@ -107,13 +109,13 @@ class RequestsService:
             on_break_duration,
             req.when.break_,
         )
-        if left_time <= MINIMUM_PLAYING_TIME:
+        if left_time <= self._config.tracks.playing_duration_min:
             errors.append(PlayingTimeError.NOT_ENOUGH_TIME)
 
         tracks_on_break_count = self._playlist.get_tracks_count_on_break(
             req.when, waiting=False
         )
-        if tracks_on_break_count >= MAX_TRACKS_QUEUED_ONE_BREAK:
+        if tracks_on_break_count >= self._config.tracks.queued_one_break_max:
             errors.append(PlayingTimeError.MAX_COUNT_EXEEDED)
 
         if len(errors) > 0:

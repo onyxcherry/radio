@@ -1,3 +1,7 @@
+import datetime
+import zoneinfo
+from config import BreakData, BreaksConfig, Config, DurationRange, TracksConfig
+from domain.types import Seconds
 from kink import di
 from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from tests.choices import DIChoices
@@ -40,11 +44,66 @@ from confluent_kafka.serialization import StringSerializer
 
 from tests.helpers.dt import fixed_dt
 
+config = Config(
+    breaks=BreaksConfig(
+        offset=datetime.timedelta(seconds=3),
+        timezone=zoneinfo.ZoneInfo(key="Europe/Warsaw"),
+        breaks=[
+            BreakData(
+                start=datetime.time(8, 30),
+                duration=Seconds(600),
+                end=datetime.time(8, 40),
+            ),
+            BreakData(
+                start=datetime.time(9, 25),
+                duration=Seconds(600),
+                end=datetime.time(9, 35),
+            ),
+            BreakData(
+                start=datetime.time(10, 20),
+                duration=Seconds(600),
+                end=datetime.time(10, 30),
+            ),
+            BreakData(
+                start=datetime.time(11, 15),
+                duration=Seconds(900),
+                end=datetime.time(11, 30),
+            ),
+            BreakData(
+                start=datetime.time(12, 15),
+                duration=Seconds(600),
+                end=datetime.time(12, 25),
+            ),
+            BreakData(
+                start=datetime.time(13, 10),
+                duration=Seconds(600),
+                end=datetime.time(13, 20),
+            ),
+            BreakData(
+                start=datetime.time(14, 5),
+                duration=Seconds(600),
+                end=datetime.time(14, 15),
+            ),
+            BreakData(
+                start=datetime.time(15, 0),
+                duration=Seconds(600),
+                end=datetime.time(15, 10),
+            ),
+        ],
+    ),
+    tracks=TracksConfig(
+        duration=DurationRange(minimum=Seconds(20), maximum=Seconds(1200)),
+        playing_duration_min=60,
+        queued_one_break_max=8,
+    ),
+)
+
 
 def bootstrap_di(di_choices: DIChoices) -> None:
     di[DIChoices] = di_choices
     fixed_clock = FixedClock(fixed_dt)
     di[Clock] = fixed_clock
+    di[Config] = config
 
     if di_choices.real_db:
         library_repo = DBLibraryRepository()
@@ -151,6 +210,7 @@ def bootstrap_di(di_choices: DIChoices) -> None:
         library_events_producer,
         playlist_events_producer,
         playlist_events_consumer,
+        config,
         fixed_clock,
     )
 
