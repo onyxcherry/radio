@@ -1,7 +1,7 @@
 import datetime
 import zoneinfo
+from track.domain.provided import Seconds
 from config import BreakData, BreaksConfig, Config, DurationRange, TracksConfig
-from domain.types import Seconds
 from kink import di
 from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from tests.choices import DIChoices

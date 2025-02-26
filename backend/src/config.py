@@ -1,6 +1,7 @@
 import json
 from os import PathLike
 from pathlib import Path
+from track.domain.provided import Seconds
 from pydantic.dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, tzinfo
 import logging
@@ -19,9 +20,6 @@ from pydantic import (
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import yaml
 from jsonschema import validate, ValidationError
-
-
-from domain.types import Seconds
 
 
 logging_config = {
