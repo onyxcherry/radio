@@ -1,20 +1,10 @@
 import dataclasses
-from datetime import date, datetime
+import pydantic
 from json import JSONEncoder
-from uuid import UUID
 
 
 class MyJSONEncoder(JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, UUID):
-            return str(obj)
-        elif isinstance(obj, date):
-            return obj.isoformat()
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        elif dataclasses.is_dataclass(type(obj)):
+        if dataclasses.is_dataclass(type(obj)):
             return dataclasses.asdict(obj)
-        elif isinstance(obj, list):
-            return list(self.default(elem) for elem in obj)
-        else:
-            return super().default(obj)
+        return pydantic.RootModel[type(obj)](obj).model_dump(by_alias=True, mode="json")
