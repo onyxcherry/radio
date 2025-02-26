@@ -1,5 +1,5 @@
 from copy import deepcopy
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Optional
 from kink import inject
 from building_blocks.clock import Clock

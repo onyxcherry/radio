@@ -1,5 +1,6 @@
 import asyncio
-from dataclasses import dataclass
+from pydantic import ConfigDict
+from pydantic.dataclasses import dataclass
 
 from kink import di, inject
 from application.break_observer import BreakObserver
@@ -14,7 +15,7 @@ from just_playback.ma_result import MiniaudioError
 logger = get_logger(__name__)
 
 
-@dataclass
+@dataclass(config=ConfigDict(arbitrary_types_allowed=True))
 class PlayingConditions:
     manually_stopped: EventBasedAwakable
     stopped_due_to_tech_error: EventBasedAwakable

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Literal, Optional
 from confluent_kafka.schema_registry import SchemaRegistryClient
 
