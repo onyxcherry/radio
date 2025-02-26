@@ -65,10 +65,15 @@ async def consume_events(
 
 
 async def main_tasks() -> None:
-    playing_manager = di[PlayingManager]
-    break_observer = di[BreakObserver]
-    playlist_events_consumer = di[PlaylistEventsConsumer]
-    event_handler = di[EventHandler]
+    try:
+        playing_manager = di[PlayingManager]
+        break_observer = di[BreakObserver]
+        playlist_events_consumer = di[PlaylistEventsConsumer]
+        event_handler = di[EventHandler]
+    except Exception as ex:
+        logger.error("Error happened during setup")
+        logger.exception(ex)
+        return
     try:
         async with asyncio.TaskGroup() as tg:
             mp_task = tg.create_task(manage_playing_with_exc(playing_manager))
@@ -95,6 +100,7 @@ async def main_tasks() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    bootstrap_di()
     main_task = asyncio.create_task(main_tasks())
     try:
         yield
@@ -116,5 +122,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 if __name__ == "__main__":
-    bootstrap_di()
     uvicorn.run("app:app", host="localhost", port=5000)
