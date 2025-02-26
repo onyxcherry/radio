@@ -4,14 +4,66 @@ networks:
     driver: bridge
 volumes:
   redpanda-0: null
+  player-database: null
+secrets:
+  youtube_api_key:
+    file: ./.youtube-api-key.secret
 services:
-  backend:
+  init-backend:
+    container_name: init-backend
     build:
       context: backend/
-    ports:
-      - 8000:8000
+    env_file:
+      - ./.env.compose
+    command: python initialize.py
+    volumes:
+      - ./backend/sql_app.db:/app/sql_app.db
     networks:
       - redpanda_network
+    depends_on:
+      redpanda-0:
+        condition: service_started
+  backend:
+    container_name: backend
+    build:
+      context: backend/
+    env_file:
+      - ./.env.compose
+    secrets:
+      - youtube_api_key
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend/sql_app.db:/app/sql_app.db
+    networks:
+      - redpanda_network
+    depends_on:
+      init-backend:
+        condition: service_completed_successfully
+  init-player:
+    container_name: init-player
+    build:
+      context: player/
+    command: python initialize.py
+    volumes:
+      - ./player/player.db:/app/player.db
+  player:
+    container_name: player
+    build:
+      context: player/
+    env_file:
+      - ./.env.compose
+    ports:
+      - 5000:5000
+    volumes:
+      - ./player/player.db:/app/player.db
+    networks:
+      - redpanda_network
+    depends_on:
+      init-backend:
+        condition: service_completed_successfully
+      init-player:
+        condition: service_completed_successfully
   redpanda-0:
     container_name: redpanda-broker-0
     command:
@@ -46,6 +98,8 @@ services:
       - 18082:18082
       - 19092:19092
       - 19644:9644
+    # healthcheck:
+    # curl /public_metrics
   console:
     container_name: redpanda-broker-console
     image: docker.redpanda.com/redpandadata/console:v2.6.0
