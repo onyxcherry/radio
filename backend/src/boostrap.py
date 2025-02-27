@@ -33,8 +33,7 @@ CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.yaml"
 CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"
 
 
-def boostrap_di() -> None:
-    clock = SystemClock()
+def bootstrap_config() -> None:
     config_dict = load_config_from_yaml(
         config_path=CONFIG_FILE_PATH, schema_path=CONFIG_SCHEMA_PATH
     )
@@ -42,6 +41,13 @@ def boostrap_di() -> None:
     config = config_dict_to_class(config_dict)
     di[Config] = config
     di[Settings] = settings
+
+
+def boostrap_di() -> None:
+    bootstrap_config()
+    clock = SystemClock()
+    config = di[Config]
+    settings = di[Settings]
 
     library_repo = DBLibraryRepository()
     playlist_repo = DBPlaylistRepository()

@@ -5,7 +5,7 @@ from track.application.models.library import LibraryTrackModel
 from track.domain.entities import Status, TrackInLibrary
 from track.domain.library_repository import LibraryRepository
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity, TrackUrl
-from track.infrastructure.persistence.database import SessionLocal
+from track.infrastructure.persistence.database import sessionLocal
 
 
 class DBLibraryRepository(LibraryRepository):
@@ -14,7 +14,7 @@ class DBLibraryRepository(LibraryRepository):
             provider=identity.provider,
             identifier=identity.identifier,
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).one_or_none()
         if result is None:
             return None
@@ -28,7 +28,7 @@ class DBLibraryRepository(LibraryRepository):
             stmt = stmt.where(
                 LibraryTrackModel.status.in_(statuses),
             )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).all()
 
         tracks_in_library: list[TrackInLibrary] = []
@@ -46,7 +46,7 @@ class DBLibraryRepository(LibraryRepository):
             duration=track.duration,
             status=track.status,
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             session.add(new_track)
             session.commit()
 
@@ -69,14 +69,14 @@ class DBLibraryRepository(LibraryRepository):
             )
             .execution_options(synchronize_session="fetch")
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             session.execute(stmt)
             session.commit()
 
         return track
 
     def delete_all(self) -> int:
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             stmt = delete(LibraryTrackModel)
             result = session.execute(stmt)
             session.commit()

@@ -24,7 +24,8 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-*.db
-*.db.old
+**/*.db
+**/*.db.old
+**/config.yaml
 LICENSE
 README.md

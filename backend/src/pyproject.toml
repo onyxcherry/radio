@@ -24,3 +24,6 @@ use_parentheses = true
 ensure_newline_before_comments = true
 skip = ["git", "__pycache__", "venv", "virtualenv", ".tox", ".pytest_cache"]
 src_paths = ["isort", "test"]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope="function"

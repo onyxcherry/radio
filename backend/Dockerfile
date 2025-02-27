@@ -42,7 +42,5 @@ USER appuser
 # Expose the port that the application listens on.
 EXPOSE 8000
 
-RUN python src/track/infrastructure/persistence/dbinit.py
-
 # Run the application.
 CMD ["uvicorn", "src.app:app", "--host=0.0.0.0", "--port=8000"]

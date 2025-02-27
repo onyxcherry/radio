@@ -4,7 +4,7 @@ from typing import Any, Optional
 from sqlalchemy import Select, delete, func, select, update
 from track.application.models.library import LibraryTrackModel
 from track.application.models.queue import QueueTrackModel
-from track.infrastructure.persistence.database import SessionLocal
+from track.infrastructure.persistence.database import sessionLocal
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.entities import Status, TrackQueued, TrackToQueue, TrackUnqueued
 from track.domain.playlist_repository import PlaylistRepository
@@ -34,7 +34,7 @@ class DBPlaylistRepository(PlaylistRepository):
         if break_ is not None:
             stmt = stmt.filter(QueueTrackModel.break_ == break_)
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).one_or_none()
         if result is None:
             return None
@@ -63,7 +63,7 @@ class DBPlaylistRepository(PlaylistRepository):
         )
         stmt = self._apply_filters(stmt, break_, played, waiting)
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).all()
 
         tracks_queued = []
@@ -86,7 +86,7 @@ class DBPlaylistRepository(PlaylistRepository):
             .filter(QueueTrackModel.track_id == track_id)
         )
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).all()
 
         tracks_queued = []
@@ -109,7 +109,7 @@ class DBPlaylistRepository(PlaylistRepository):
         )
         stmt = self._apply_filters(stmt, break_, played, waiting)
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).scalar_one()
             return result
 
@@ -127,7 +127,7 @@ class DBPlaylistRepository(PlaylistRepository):
         )
         stmt = self._apply_filters(stmt, break_, played, waiting)
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).scalar_one()
             if result is None:
                 return Seconds(0)
@@ -147,7 +147,7 @@ class DBPlaylistRepository(PlaylistRepository):
             .filter(LibraryTrackModel.identifier == track.identity.identifier)
             .filter(LibraryTrackModel.provider == track.identity.provider)
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             session.add(new_queued_track)
             session.commit()
             status = session.execute(status_stmt).one()
@@ -171,7 +171,7 @@ class DBPlaylistRepository(PlaylistRepository):
             .values(played=track.played)
             .execution_options(synchronize_session="fetch")
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             session.execute(stmt)
             session.commit()
 
@@ -186,7 +186,7 @@ class DBPlaylistRepository(PlaylistRepository):
             .where(QueueTrackModel.track_id == track_id)
             .where(QueueTrackModel.played == False)
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).rowcount
             session.commit()
             if result == 0:
@@ -199,7 +199,7 @@ class DBPlaylistRepository(PlaylistRepository):
 
     def delete_all(self) -> int:
         stmt = delete(QueueTrackModel)
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).rowcount
             session.commit()
             return result
@@ -221,7 +221,7 @@ class DBPlaylistRepository(PlaylistRepository):
         tracks_unqueued = []
         ids_to_delete = []
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt)
 
         for data in result:
@@ -235,7 +235,7 @@ class DBPlaylistRepository(PlaylistRepository):
             ids_to_delete.append(id_)
 
         stmt = delete(QueueTrackModel).where(QueueTrackModel.id.in_(ids_to_delete))
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).rowcount
             session.commit()
 
@@ -248,7 +248,7 @@ class DBPlaylistRepository(PlaylistRepository):
             "identifier": identity.identifier,
         }
         stmt = select(LibraryTrackModel.id).filter_by(**params)
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).scalar()
             if result is None:
                 raise RuntimeError("No track in library!")

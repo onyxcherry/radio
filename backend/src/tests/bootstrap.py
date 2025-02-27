@@ -1,7 +1,14 @@
 import datetime
 import zoneinfo
 from track.domain.provided import Seconds
-from config import BreakData, BreaksConfig, Config, DurationRange, TracksConfig
+from config import (
+    BreakData,
+    BreaksConfig,
+    Config,
+    DurationRange,
+    Settings,
+    TracksConfig,
+)
 from kink import di
 from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from tests.choices import DIChoices
@@ -105,6 +112,9 @@ def bootstrap_di(di_choices: DIChoices) -> None:
     di[Clock] = fixed_clock
     di[Config] = config
 
+    settings = Settings()  # type: ignore
+    di[Settings] = settings
+
     if di_choices.real_db:
         library_repo = DBLibraryRepository()
         playlist_repo = DBPlaylistRepository()
@@ -114,26 +124,26 @@ def bootstrap_di(di_choices: DIChoices) -> None:
 
     if di_choices.real_msg_broker:
         producer_conn_options = ProducerConnectionOptions(
-            bootstrap_servers="localhost:19092", client_id="producer-tests-1"
+            bootstrap_servers=settings.broker_bootstrap_server, client_id="producer-tests-1"
         )
         playlist_consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="localhost:19092",
+            bootstrap_servers=settings.broker_bootstrap_server,
             group_id="consumers-queue",
             client_id="consumer-tests-1",
         )
         library_consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="localhost:19092",
+            bootstrap_servers=settings.broker_bootstrap_server,
             group_id="consumers-library",
             client_id="consumer-tests-2",
         )
         library_schema_config = SchemaRegistryConfig(
-            url="http://localhost:18081",
+            url=settings.schema_registry_url,
             topic_name="library",
             schema_id="latest",
             subject_name="library-value",
         )
         playlist_schema_config = SchemaRegistryConfig(
-            url="http://localhost:18081",
+            url=settings.schema_registry_url,
             topic_name="queue",
             schema_id="latest",
             subject_name="queue-value",

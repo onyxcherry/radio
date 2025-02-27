@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import Any
 
 import uvicorn
@@ -16,12 +17,18 @@ from building_blocks.errors import (
 from track.controllers.library import router as library_router
 from track.controllers.playlist import router as playlist_router
 
-boostrap_di()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    boostrap_di()
+
+    yield
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.include_router(library_router)
 app.include_router(playlist_router)
+app.openapi = custom_openapi  # type: ignore
 
 
 @app.exception_handler(DomainError)
@@ -85,8 +92,6 @@ def custom_openapi() -> dict[str, Any]:
 
     return app.openapi_schema  # type: ignore
 
-
-app.openapi = custom_openapi  # type: ignore
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="localhost", port=8000, reload=True)

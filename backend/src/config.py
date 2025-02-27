@@ -192,8 +192,8 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         secrets_dir="/run/secrets",
     )
-    youtube_api_url: str
-    youtube_api_key: str
+    youtube_api_url: str = Field("https://youtube.googleapis.com/youtube/v3/videos")
+    youtube_api_key: str = Field("notprovidedyoutubeapikey")
     sqlalchemy_database_url: str = Field("sqlite:///./sql_app.db")
     broker_bootstrap_server: str = Field("localhost:19092")
     schema_registry_url: str = Field("http://localhost:18081")
