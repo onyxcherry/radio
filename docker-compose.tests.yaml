@@ -1,0 +1,75 @@
+name: radio-tests
+networks:
+  redpanda_network:
+    driver: bridge
+volumes:
+  redpanda-0-tests: null
+  sql_app_db: null
+services:
+  init-backend:
+    container_name: init-backend-tests
+    build:
+      context: backend/
+    env_file:
+      - ./.env.tests.backend
+    user: root
+    command: bash -c "chown -R root:root /app/db/ && python initialize.py && chown -R 10001:10001 /app/db/"
+    volumes:
+      - sql_app_db:/app/db/
+      - ./backend/config.yaml:/app/config.yaml:ro
+    networks:
+      - redpanda_network
+    depends_on:
+      redpanda-0:
+        condition: service_started
+  backend-units:
+    container_name: backend-tests-units
+    build:
+      context: backend/
+    command: ["pytest"]
+    volumes:
+      - ./backend/config.yaml:/app/config.yaml:ro
+  backend-integration:
+    container_name: backend-tests-integration
+    build:
+      context: backend/
+    command: ["pytest", "--realdb", "src/tests/"] #"--realmsgbroker"
+    env_file:
+      - ./.env.tests.backend
+    volumes:
+      - sql_app_db:/app/db/
+      - ./backend/config.yaml:/app/config.yaml:ro
+    networks:
+      - redpanda_network
+    depends_on:
+      init-backend:
+        condition: service_completed_successfully
+  redpanda-0:
+    container_name: redpanda-broker-0-tests
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      # Address the broker advertises to clients that connect to the Kafka API.
+      # Use the internal addresses to connect to the Redpanda brokers'
+      # from inside the same Docker network.
+      # Use the external addresses to connect to the Redpanda brokers'
+      # from outside the Docker network.
+      - --advertise-kafka-addr internal://redpanda-0:9092,external://localhost:19092
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      # Address the broker advertises to clients that connect to the HTTP Proxy.
+      - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://localhost:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      # Redpanda brokers use the RPC API to communicate with each other internally.
+      - --rpc-addr redpanda-0:33145
+      - --advertise-rpc-addr redpanda-0:33145
+      # Mode dev-container uses well-known configuration properties for development in containers.
+      - --mode dev-container
+      # Tells Seastar (the framework Redpanda uses under the hood) to use 1 core on the system.
+      - --smp 1
+      - --default-log-level=info
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.9
+    volumes:
+      - redpanda-0-tests:/var/lib/redpanda/data
+    networks:
+      - redpanda_network
