@@ -22,7 +22,7 @@ services:
       - redpanda_network
     depends_on:
       redpanda-0:
-        condition: service_started
+        condition: service_healthy
   backend-units:
     container_name: backend-tests-units
     build:
@@ -60,7 +60,7 @@ services:
       - redpanda_network
     depends_on:
       redpanda-0:
-        condition: service_started
+        condition: service_healthy
   player-units:
     container_name: player-tests-units
     build:
@@ -112,3 +112,14 @@ services:
       - redpanda-0-tests:/var/lib/redpanda/data
     networks:
       - redpanda_network
+    ports:
+      - 18081:18081
+      - 18082:18082
+      - 19092:19092
+      - 19644:9644
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:9644/v1/status/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 7s
