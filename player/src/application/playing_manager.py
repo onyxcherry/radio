@@ -91,7 +91,8 @@ class PlayingManager:
                 raise RuntimeError("Playing error :(") from mex
             # else:
             # TODO: fix this - execute in `else` block properly
-            #     playing_observer.update_track_playing(track, duration=playing_duration)
+            #     playing_observer.update_track_playing(track,
+            # duration=playing_duration)
 
 
 async def main() -> None:
