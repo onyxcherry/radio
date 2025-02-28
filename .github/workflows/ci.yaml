@@ -33,7 +33,7 @@ jobs:
         run: isort --check-only --diff ${{ matrix.service }}
 
       - name: Run flake8
-        run: flake8 ${{ matrix.service }}
+        run: flake8 --config ${{ matrix.service }}/.flake8 ${{ matrix.service }}
 
   tests:
     name: Integration Tests
