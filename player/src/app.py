@@ -1,9 +1,9 @@
 import asyncio
 from contextlib import asynccontextmanager
 
+import uvicorn
 from fastapi import FastAPI
 from kink import di
-import uvicorn
 
 from application.break_observer import BreakObserver
 from application.events.handle import EventHandler

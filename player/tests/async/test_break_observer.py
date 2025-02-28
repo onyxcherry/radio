@@ -1,13 +1,13 @@
 import asyncio
 from datetime import datetime
-from kink import di
+
 import pytest
+from kink import di
+
 from application.break_observer import BreakObserver
 from building_blocks.clock import FeignedWallClock
 from config import BreaksConfig
 from domain.breaks import Break, Breaks
-from domain.types import Seconds
-
 
 breaks_config = di[BreaksConfig]
 

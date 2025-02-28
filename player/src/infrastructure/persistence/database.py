@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from kink import di
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

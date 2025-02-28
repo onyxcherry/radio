@@ -1,12 +1,13 @@
-from datetime import date, datetime, timedelta, timezone
 import io
+from datetime import date, datetime, timezone
 from typing import Final
-from config import Settings
+
 import fastavro
 from fastavro.validation import validate
 from kink import di
 from pytest import fixture, mark
 
+from config import Settings
 from domain.events.track import (
     date_as_unix_epoch_date_int,
     datetime_as_millis_timestamp,

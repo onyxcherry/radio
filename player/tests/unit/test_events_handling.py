@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from typing import Final
+
 from kink import di
 from pytest import fixture
+
 from application.events.handle import EventHandler
 from building_blocks.clock import FixedClock
 from domain.breaks import Breaks
@@ -16,8 +18,8 @@ from domain.events.track import (
 )
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from domain.types import Identifier, Seconds
-from ..bootstrap import reregister_deps_with_clock
 
+from ..bootstrap import reregister_deps_with_clock
 
 dt: Final = datetime(2024, 8, 14, 14, 53, 16, tzinfo=timezone.utc)
 

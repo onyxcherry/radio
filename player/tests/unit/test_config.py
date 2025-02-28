@@ -3,9 +3,10 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from pydantic import RootModel
+
 from config import (
-    BreaksConfig,
     BreakData,
+    BreaksConfig,
     load_config_from_yaml,
 )
 from domain.types import Seconds

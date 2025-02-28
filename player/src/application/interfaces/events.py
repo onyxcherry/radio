@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from pydantic.dataclasses import dataclass
-import re
 from typing import Callable, Optional
 
-from infrastructure.messaging.schema_utils import SchemaRegistryConfig
+from pydantic.dataclasses import dataclass
+
 from domain.events.base import Event
+from infrastructure.messaging.schema_utils import SchemaRegistryConfig
 
 
 @dataclass(frozen=True)

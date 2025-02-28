@@ -1,4 +1,5 @@
 from kink import di
+
 from application.interfaces.events import (
     ConsumerConnectionOptions,
     ConsumerMessagesOptions,

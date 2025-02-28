@@ -1,5 +1,7 @@
 from typing import Optional
+
 from kink import inject
+
 from application.break_observer import BreakObserver
 from application.playing_observer import PlayingObserver
 from domain.entities import ScheduledTrack

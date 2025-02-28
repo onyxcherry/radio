@@ -2,6 +2,7 @@ from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from pytest import fixture
+
 from building_blocks.clock import FixedClock
 from config import BreakData, BreaksConfig
 from domain.breaks import Break, Breaks

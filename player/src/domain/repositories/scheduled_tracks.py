@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import date
 from typing import Optional
-from domain.breaks import Break
+
 from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,

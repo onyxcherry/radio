@@ -1,11 +1,12 @@
 from datetime import date, datetime, timedelta, timezone
-from kink import di
+
 import pytest
+from kink import di
 
 from domain.breaks import Breaks
 from domain.entities import TrackProvidedIdentity
-from domain.events.serialize import serialize_event
 from domain.events.recreate import parse_event
+from domain.events.serialize import serialize_event
 from domain.events.track import (
     PlayingTime,
     TrackAddedToPlaylist,

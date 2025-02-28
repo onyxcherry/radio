@@ -1,4 +1,5 @@
 from pydantic import RootModel
+
 from domain.events.base import Event
 
 

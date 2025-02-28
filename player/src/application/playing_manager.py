@@ -1,16 +1,16 @@
 import asyncio
+
+from just_playback.ma_result import MiniaudioError
+from kink import di, inject
 from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 
-from kink import di, inject
 from application.break_observer import BreakObserver
 from application.playing_observer import PlayingObserver
 from application.track_file_provider import PlayableTrackProvider
 from building_blocks.awakable import EventBasedAwakable
 from config import get_logger
 from domain.interfaces.player import Player
-from just_playback.ma_result import MiniaudioError
-
 
 logger = get_logger(__name__)
 

@@ -1,8 +1,7 @@
 import pytest
 
-from .choices import DIChoices
-
 from .bootstrap import bootstrap_di
+from .choices import DIChoices
 from .fixtures.reset import reset_db_fixt, reset_events_fixt  # noqa
 
 

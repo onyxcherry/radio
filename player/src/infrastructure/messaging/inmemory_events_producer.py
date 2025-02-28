@@ -1,8 +1,9 @@
 from kink import di
+
 from application.interfaces.events import (
     EventsProducer,
-    ProducerMessagesOptions,
     ProducerConnectionOptions,
+    ProducerMessagesOptions,
 )
 from domain.events.base import Event
 from infrastructure.messaging.inmemory_events_helper import InMemoryEvents

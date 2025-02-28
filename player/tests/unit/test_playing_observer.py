@@ -1,14 +1,10 @@
 from datetime import date, datetime, time, timedelta
 from typing import Final
 
+import pytest
 from kink import di
 from pytest import fixture
-import pytest
-from infrastructure.messaging.types import (
-    PlaylistEventsConsumer,
-    PlaylistEventsProducer,
-)
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+
 from application.playing_observer import PlayingObserver
 from building_blocks.clock import FixedClock
 from config import BreaksConfig
@@ -18,9 +14,13 @@ from domain.entities import (
     TrackProvidedIdentity,
     TrackToSchedule,
 )
-from domain.types import Identifier, Seconds
 from domain.events.track import TrackPlayed
-
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+from domain.types import Identifier, Seconds
+from infrastructure.messaging.types import (
+    PlaylistEventsConsumer,
+    PlaylistEventsProducer,
+)
 
 breaks_config = di[BreaksConfig]
 

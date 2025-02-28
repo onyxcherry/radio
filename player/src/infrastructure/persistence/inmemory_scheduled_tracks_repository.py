@@ -2,7 +2,6 @@ from datetime import date
 from typing import Optional
 
 from building_blocks.clock import Clock
-from domain.breaks import Break
 from domain.entities import (
     ScheduledTrack,
     TrackProvidedIdentity,

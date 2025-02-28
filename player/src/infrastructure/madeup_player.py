@@ -1,13 +1,11 @@
 import asyncio
 import os
 from pathlib import Path
-import time
 from typing import Callable, Optional
 
 from config import get_logger
-from domain.types import Seconds
 from domain.interfaces.player import Player
-
+from domain.types import Seconds
 
 logger = get_logger(__name__)
 
