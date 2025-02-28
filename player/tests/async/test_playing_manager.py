@@ -19,7 +19,7 @@ from application.playing_manager import PlayingConditions, PlayingManager
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from domain.types import Identifier, Seconds
 from infrastructure.messaging.types import PlaylistEventsConsumer
-from player.tests.bootstrap import reregister_deps_with_clock
+from ..bootstrap import reregister_deps_with_clock
 
 scheduled_track: Final = ScheduledTrack(
     identity=TrackProvidedIdentity(

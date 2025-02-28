@@ -1,10 +1,21 @@
+from functools import lru_cache
+from kink import di
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./player.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+from config import Settings
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def setup_engine():
+    settings = di[Settings]
+    engine = create_engine(
+        settings.sqlalchemy_database_url, connect_args={"check_same_thread": False}
+    )
+    return engine
+
+
+@lru_cache
+def sessionLocal():
+    engine = setup_engine()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return SessionLocal

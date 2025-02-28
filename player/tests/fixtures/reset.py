@@ -2,7 +2,7 @@ from kink import di
 import pytest
 
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from player.tests.helpers.messaging import reset_events
+from ..helpers.messaging import reset_events
 
 
 @pytest.fixture(scope="function")

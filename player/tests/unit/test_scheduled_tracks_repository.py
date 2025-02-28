@@ -12,7 +12,7 @@ from domain.entities import (
 )
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from domain.types import Identifier, Seconds
-from player.tests.bootstrap import reregister_deps_with_clock
+from ..bootstrap import reregister_deps_with_clock
 
 
 dt: Final = datetime(2024, 8, 14, 14, 53, 16, tzinfo=timezone.utc)

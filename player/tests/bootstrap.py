@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from bootstrap import bootstrap_config
 from kink import di
 
 
@@ -31,7 +32,7 @@ from application.interfaces.events import (
     ProducerConnectionOptions,
 )
 from building_blocks.clock import Clock, FeignedWallClock
-from config import BreakData, BreaksConfig
+from config import BreakData, BreaksConfig, Settings
 from domain.breaks import Breaks
 from domain.interfaces.player import Player
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
@@ -58,7 +59,7 @@ from infrastructure.persistence.inmemory_scheduled_tracks_repository import (
 )
 from confluent_kafka.serialization import StringSerializer
 
-from player.tests.choices import DIChoices
+from .choices import DIChoices
 
 
 def create_breaks_config() -> BreaksConfig:
@@ -119,6 +120,9 @@ def reregister_deps_with_clock(clock: Clock):
 
 
 def bootstrap_di(di_choices: DIChoices) -> None:
+    bootstrap_config()
+    settings = di[Settings]
+
     di[DIChoices] = di_choices
     breaks_config = create_breaks_config()
     dt = datetime(2024, 8, 1, 8, 34, 11, tzinfo=breaks_config.timezone)
@@ -129,8 +133,9 @@ def bootstrap_di(di_choices: DIChoices) -> None:
     di[Player] = player
     di[BreaksConfig] = breaks_config
 
-    test_data_dir = Path("/home/tomasz/radio/player/tests/data/")
-    playable_track_provider_config = PlayableTrackProviderConfig(test_data_dir)
+    playable_track_provider_config = PlayableTrackProviderConfig(
+        Path((Path(__file__).parent / "data").absolute())
+    )
     di[PlayableTrackProviderConfig] = playable_track_provider_config
 
     playing_conditions = PlayingConditions(
@@ -143,26 +148,27 @@ def bootstrap_di(di_choices: DIChoices) -> None:
 
     if di_choices.real_msg_broker:
         producer_conn_options = ProducerConnectionOptions(
-            bootstrap_servers="localhost:19092", client_id="producer-tests-1"
+            bootstrap_servers=settings.broker_bootstrap_server,
+            client_id="producer-tests-1",
         )
         playlist_consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="localhost:19092",
+            bootstrap_servers=settings.broker_bootstrap_server,
             group_id="consumers-player-queue",
             client_id="consumer-player-queue-tests-1",
         )
         library_consumer_conn_options = ConsumerConnectionOptions(
-            bootstrap_servers="localhost:19092",
+            bootstrap_servers=settings.broker_bootstrap_server,
             group_id="consumers-player-library",
             client_id="consumer-player-library-tests-1",
         )
         library_schema_config = SchemaRegistryConfig(
-            url="http://localhost:18081",
+            url=settings.schema_registry_url,
             topic_name="library",
             schema_id="latest",
             subject_name="library-value",
         )
         playlist_schema_config = SchemaRegistryConfig(
-            url="http://localhost:18081",
+            url=settings.schema_registry_url,
             topic_name="queue",
             # schema_id=17,
             schema_id="latest",

@@ -156,6 +156,7 @@ class Settings(BaseSettings):
     tracks_files_path: str = Field(
         str((Path(__file__).parent.parent / "data").absolute())
     )
+    sqlalchemy_database_url: str = Field("sqlite:///./sql_app.db")
     broker_bootstrap_server: str = Field("localhost:19092")
     schema_registry_url: str = Field("http://localhost:18081")
 

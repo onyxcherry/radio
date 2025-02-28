@@ -1,8 +1,10 @@
 from datetime import date, datetime, timedelta, timezone
 import io
 from typing import Final
+from config import Settings
 import fastavro
 from fastavro.validation import validate
+from kink import di
 from pytest import fixture, mark
 
 from domain.events.track import (
@@ -20,8 +22,9 @@ from infrastructure.messaging.schema_utils import (
 
 @fixture
 def sch_reg_client():
+    settings = di[Settings]
     schema_registry_config = SchemaRegistryConfig(
-        url="http://localhost:18081",
+        url=settings.schema_registry_url,
         topic_name="queue",
         schema_id="latest",
         subject_name="queue-value",

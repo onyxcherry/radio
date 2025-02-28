@@ -1,6 +1,6 @@
 import pytest
 
-from player.tests.choices import DIChoices
+from .choices import DIChoices
 
 from .bootstrap import bootstrap_di
 from .fixtures.reset import reset_db_fixt, reset_events_fixt  # noqa

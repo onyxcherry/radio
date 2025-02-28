@@ -1,7 +1,9 @@
+from bootstrap import bootstrap_config
 from src.infrastructure.persistence import dbinit
 
 
 def main():
+    bootstrap_config()
     dbinit.main()
 
 

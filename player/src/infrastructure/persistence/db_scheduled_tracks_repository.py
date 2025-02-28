@@ -13,7 +13,7 @@ from domain.entities import (
 )
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from domain.types import Identifier
-from infrastructure.persistence.database import SessionLocal
+from infrastructure.persistence.database import sessionLocal
 
 
 class DBScheduledTracksRepository(ScheduledTracksRepository):
@@ -36,7 +36,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
         if break_ is not None:
             stmt = stmt.filter(ScheduledTrackModel.ordinal == break_)
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).one_or_none()
         if result is None:
             return None
@@ -63,7 +63,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
         if played is not None:
             stmt = stmt.filter(ScheduledTrackModel.played == played)
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).all()
 
         tracks_queued = []
@@ -94,7 +94,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             last_changed=now.astimezone(timezone.utc),
         )
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             session.add(scheduled)
             session.commit()
 
@@ -130,7 +130,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             .execution_options(synchronize_session="fetch")
         )
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             rowcount = session.execute(stmt).rowcount
             if rowcount > 1:
                 raise RuntimeError("More than one track has been updated")
@@ -179,7 +179,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             .where(ScheduledTrackModel.played == False)
             .execution_options(synchronize_session="fetch")
         )
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).rowcount
             session.commit()
 
@@ -192,7 +192,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
 
     def delete_all(self) -> int:
         stmt = delete(ScheduledTrackModel)
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).rowcount
             session.commit()
             return result
@@ -205,7 +205,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             .where(ScheduledTrackModel.played == False)
         )
 
-        with SessionLocal() as session:
+        with sessionLocal()() as session:
             result = session.execute(stmt).rowcount
             session.commit()
 

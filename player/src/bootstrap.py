@@ -13,7 +13,7 @@ from application.track_file_provider import (
     PlayableTrackProviderConfig,
 )
 from building_blocks.awakable import EventBasedAwakable
-from config import Settings, config_dict_to_class, load_config_from_yaml
+from config import Config, Settings, config_dict_to_class, load_config_from_yaml
 from building_blocks.clock import Clock, SystemClock
 from config import BreaksConfig
 from domain.breaks import Breaks
@@ -70,7 +70,21 @@ CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.yaml"
 CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"
 
 
+def bootstrap_config() -> None:
+    config_dict = load_config_from_yaml(
+        config_path=CONFIG_FILE_PATH, schema_path=CONFIG_SCHEMA_PATH
+    )
+    settings = Settings()  # type: ignore
+    config = config_dict_to_class(config_dict)
+    di[Config] = config
+    di[Settings] = settings
+
+
 def bootstrap_di():
+    bootstrap_config()
+    config = di[Config]
+    settings = di[Settings]
+
     clock = SystemClock()
     di[Clock] = clock
 
