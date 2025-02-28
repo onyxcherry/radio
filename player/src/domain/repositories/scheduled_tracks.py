@@ -37,7 +37,9 @@ class ScheduledTracksRepository(ABC):
         pass
 
     @abstractmethod
-    def insert_or_update(self, track: TrackToSchedule | ScheduledTrack) -> ScheduledTrack:
+    def insert_or_update(
+        self, track: TrackToSchedule | ScheduledTrack
+    ) -> ScheduledTrack:
         pass
 
     @abstractmethod

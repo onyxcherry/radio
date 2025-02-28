@@ -44,9 +44,9 @@ class EventHandler:
             logger.warning(f"Not known event: {event}")
 
         match event:
-            case (
-                TrackAddedToPlaylist() as added_to_playlist
-            ) if added_to_playlist.waits_on_approval is False:
+            case TrackAddedToPlaylist() as added_to_playlist if (
+                added_to_playlist.waits_on_approval is False
+            ):
                 break_ = self._breaks.on_day_of_ordinal(
                     added_to_playlist.when.date_, added_to_playlist.when.break_
                 )
