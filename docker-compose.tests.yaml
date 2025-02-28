@@ -5,6 +5,7 @@ networks:
 volumes:
   redpanda-0-tests: null
   sql_app_db: null
+  player_db: null
 services:
   init-backend:
     container_name: init-backend-tests
@@ -33,7 +34,7 @@ services:
     container_name: backend-tests-integration
     build:
       context: backend/
-    command: ["pytest", "--realdb", "src/tests/"] #"--realmsgbroker"
+    command: ["pytest", "--realdb", "--realmsgbroker", "src/tests/"]
     env_file:
       - ./.env.tests.backend
     volumes:
@@ -43,6 +44,44 @@ services:
       - redpanda_network
     depends_on:
       init-backend:
+        condition: service_completed_successfully
+  init-player:
+    container_name: init-player-tests
+    build:
+      context: player/
+    env_file:
+      - ./.env.tests.player
+    user: root
+    command: bash -c "chown -R root:root /app/db/ && python initialize.py && chown -R 10001:10001 /app/db/"
+    volumes:
+      - player_db:/app/db/
+      - ./player/config.yaml:/app/config.yaml:ro
+    networks:
+      - redpanda_network
+    depends_on:
+      redpanda-0:
+        condition: service_started
+  player-units:
+    container_name: player-tests-units
+    build:
+      context: player/
+    command: ["pytest"]
+    volumes:
+      - ./player/config.yaml:/app/config.yaml:ro
+  player-integration:
+    container_name: player-tests-integration
+    build:
+      context: player/
+    command: ["pytest", "--realdb", "--realmsgbroker", "tests/"]
+    env_file:
+      - ./.env.tests.player
+    volumes:
+      - player_db:/app/db/
+      - ./player/config.yaml:/app/config.yaml:ro
+    networks:
+      - redpanda_network
+    depends_on:
+      init-player:
         condition: service_completed_successfully
   redpanda-0:
     container_name: redpanda-broker-0-tests
