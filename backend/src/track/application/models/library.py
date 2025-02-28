@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import Optional
+
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
@@ -7,12 +9,11 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column, relationship
-from datetime import datetime
-from track.domain.provided import ProviderName
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from track.application.models.queue import QueueTrackModel
 from track.domain.entities import Status
+from track.domain.provided import ProviderName
 
 from .base import Base
 

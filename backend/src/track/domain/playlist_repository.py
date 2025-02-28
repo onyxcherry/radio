@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import date
 from typing import Optional
-from track.domain.breaks import Breaks
 
+from track.domain.breaks import Breaks
 from track.domain.entities import TrackQueued, TrackToQueue, TrackUnqueued
 from track.domain.provided import Seconds, TrackProvidedIdentity
 

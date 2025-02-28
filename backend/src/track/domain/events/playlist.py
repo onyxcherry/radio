@@ -1,11 +1,9 @@
+from pydantic import ConfigDict, Field, PositiveInt
 from pydantic.dataclasses import dataclass
 
-from pydantic import ConfigDict, Field, PositiveInt
-
+from track.domain.breaks import PlayingTime
 from track.domain.events.base import Event, MillisDatetime
 from track.domain.provided import TrackProvidedIdentity
-from track.domain.breaks import PlayingTime
-
 
 dataclass_config = ConfigDict(populate_by_name=True)
 

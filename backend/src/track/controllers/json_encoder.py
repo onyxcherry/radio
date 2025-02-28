@@ -1,6 +1,7 @@
 import dataclasses
-import pydantic
 from json import JSONEncoder
+
+import pydantic
 
 
 class MyJSONEncoder(JSONEncoder):

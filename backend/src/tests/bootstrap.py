@@ -1,6 +1,10 @@
 import datetime
 import zoneinfo
-from track.domain.provided import Seconds
+
+from confluent_kafka.serialization import StringSerializer
+from kink import di
+
+from building_blocks.clock import Clock, FixedClock
 from config import (
     BreakData,
     BreaksConfig,
@@ -9,47 +13,43 @@ from config import (
     Settings,
     TracksConfig,
 )
-from kink import di
-from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 from tests.choices import DIChoices
+from tests.helpers.dt import fixed_dt
+from tests.inmemory_youtube_api import InMemoryYoutubeAPI
+from track.application.interfaces.events import (
+    ConsumerConnectionOptions,
+    ConsumerMessagesOptions,
+    ProducerConnectionOptions,
+    ProducerMessagesOptions,
+)
+from track.application.interfaces.youtube_api import YoutubeAPIInterface
+from track.application.library import Library
+from track.application.playlist import Playlist
+from track.application.requests_service import RequestsService
 from track.domain.events.recreate import parse_event
 from track.domain.events.serialize import serialize_event
+from track.domain.provided import Seconds
+from track.domain.providers.youtube import YoutubeTrackProvided
+from track.infrastructure.db_library_repository import DBLibraryRepository
+from track.infrastructure.db_playlist_repository import DBPlaylistRepository
+from track.infrastructure.inmemory_library_repository import InMemoryLibraryRepository
+from track.infrastructure.inmemory_playlist_repository import InMemoryPlaylistRepository
+from track.infrastructure.messaging.inmemory_events_consumer import (
+    InMemoryEventsConsumer,
+)
+from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
+from track.infrastructure.messaging.inmemory_events_producer import (
+    InMemoryEventsProducer,
+)
+from track.infrastructure.messaging.kafka_events_consumer import KafkaAvroEventsConsumer
+from track.infrastructure.messaging.kafka_events_producer import KafkaAvroEventsProducer
+from track.infrastructure.messaging.schema_utils import SchemaRegistryConfig
 from track.infrastructure.messaging.types import (
     LibraryEventsConsumer,
     LibraryEventsProducer,
     PlaylistEventsConsumer,
     PlaylistEventsProducer,
 )
-from track.infrastructure.messaging.schema_utils import SchemaRegistryConfig
-from track.application.interfaces.events import (
-    ConsumerConnectionOptions,
-    ConsumerMessagesOptions,
-    ProducerMessagesOptions,
-    ProducerConnectionOptions,
-)
-from track.infrastructure.messaging.inmemory_events_consumer import (
-    InMemoryEventsConsumer,
-)
-from track.infrastructure.messaging.inmemory_events_producer import (
-    InMemoryEventsProducer,
-)
-from track.infrastructure.messaging.kafka_events_consumer import KafkaAvroEventsConsumer
-from track.infrastructure.messaging.kafka_events_producer import KafkaAvroEventsProducer
-from track.infrastructure.db_library_repository import DBLibraryRepository
-from track.infrastructure.db_playlist_repository import DBPlaylistRepository
-from track.application.playlist import Playlist
-from track.application.library import Library
-from track.domain.providers.youtube import YoutubeTrackProvided
-from building_blocks.clock import Clock, FixedClock
-from track.application.requests_service import RequestsService
-from track.infrastructure.inmemory_library_repository import InMemoryLibraryRepository
-from track.infrastructure.inmemory_playlist_repository import InMemoryPlaylistRepository
-from tests.inmemory_youtube_api import InMemoryYoutubeAPI
-from track.application.interfaces.youtube_api import YoutubeAPIInterface
-
-from confluent_kafka.serialization import StringSerializer
-
-from tests.helpers.dt import fixed_dt
 
 config = Config(
     breaks=BreaksConfig(
@@ -124,7 +124,8 @@ def bootstrap_di(di_choices: DIChoices) -> None:
 
     if di_choices.real_msg_broker:
         producer_conn_options = ProducerConnectionOptions(
-            bootstrap_servers=settings.broker_bootstrap_server, client_id="producer-tests-1"
+            bootstrap_servers=settings.broker_bootstrap_server,
+            client_id="producer-tests-1",
         )
         playlist_consumer_conn_options = ConsumerConnectionOptions(
             bootstrap_servers=settings.broker_bootstrap_server,

@@ -1,17 +1,19 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, status, Query
+
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from kink import di
 
-from .json_encoder import MyJSONEncoder
+from building_blocks.errors import APIErrorMessage
+from track.application.library import Library
 from track.application.requests_service import (
     AddToLibraryStatus,
     RequestsService,
 )
-from track.domain.provided import TrackProvidedIdentity
-from track.application.library import Library
 from track.domain.entities import Status, TrackInLibrary
-from building_blocks.errors import APIErrorMessage
+from track.domain.provided import TrackProvidedIdentity
+
+from .json_encoder import MyJSONEncoder
 
 router = APIRouter()
 

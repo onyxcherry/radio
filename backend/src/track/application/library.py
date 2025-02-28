@@ -1,15 +1,17 @@
 from copy import deepcopy
-from pydantic.dataclasses import dataclass
 from typing import Optional
+
 from kink import inject
+from pydantic.dataclasses import dataclass
+
 from building_blocks.clock import Clock
 from track.application.interfaces.events import EventsProducer
+from track.domain.entities import NewTrack, Status, TrackInLibrary
 from track.domain.events.library import (
     TrackAccepted,
     TrackAddedToLibrary,
     TrackRejected,
 )
-from track.domain.entities import NewTrack, Status, TrackInLibrary
 from track.domain.library_repository import LibraryRepository
 from track.domain.provided import TrackProvidedIdentity
 

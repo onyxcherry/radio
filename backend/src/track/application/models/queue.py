@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -7,12 +9,9 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
 )
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from datetime import date, datetime
+from sqlalchemy.orm import Mapped, mapped_column
 
 from track.domain.breaks import Breaks
-
 
 from .base import Base
 

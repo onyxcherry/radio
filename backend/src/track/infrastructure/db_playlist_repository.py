@@ -2,13 +2,14 @@ from datetime import date
 from typing import Any, Optional
 
 from sqlalchemy import Select, delete, func, select, update
+
 from track.application.models.library import LibraryTrackModel
 from track.application.models.queue import QueueTrackModel
-from track.infrastructure.persistence.database import sessionLocal
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.entities import Status, TrackQueued, TrackToQueue, TrackUnqueued
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity
+from track.infrastructure.persistence.database import sessionLocal
 
 
 class DBPlaylistRepository(PlaylistRepository):

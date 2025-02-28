@@ -1,22 +1,20 @@
 from typing import Any, Optional, Type
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 from kink import di
 
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
-from track.domain.errors import TrackIdentifierError
-from track.domain.errors import ErrorMessages
-from track.domain.providers.youtube import (
-    ORIGINS as YoutubeOrigins,
-    YoutubeTrackProvided,
-)
+from track.domain.errors import ErrorMessages, TrackIdentifierError
 from track.domain.provided import (
-    TrackProvided,
     ProviderName,
+    TrackProvided,
     TrackProvidedIdentity,
     TrackUrl,
 )
-
+from track.domain.providers.youtube import ORIGINS as YoutubeOrigins
+from track.domain.providers.youtube import (
+    YoutubeTrackProvided,
+)
 
 _TEMP_INTERFACES_FOR_IMPLS: dict[Type[TrackProvided], Any] = {
     YoutubeTrackProvided: YoutubeAPIInterface,

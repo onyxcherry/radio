@@ -1,16 +1,18 @@
 from datetime import date
 from typing import Optional
-from fastapi import APIRouter, Depends, status, Query
+
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from kink import di
 
-from track.application.playlist import Playlist
-from .json_encoder import MyJSONEncoder
-from track.domain.breaks import Breaks, PlayingTime
-from track.application.requests_service import RequestResult, RequestsService
-from track.domain.provided import Identifier, ProviderName, TrackProvidedIdentity
-from track.domain.entities import TrackQueued
 from building_blocks.errors import APIErrorMessage
+from track.application.playlist import Playlist
+from track.application.requests_service import RequestResult, RequestsService
+from track.domain.breaks import Breaks, PlayingTime
+from track.domain.entities import TrackQueued
+from track.domain.provided import Identifier, ProviderName, TrackProvidedIdentity
+
+from .json_encoder import MyJSONEncoder
 
 router = APIRouter()
 

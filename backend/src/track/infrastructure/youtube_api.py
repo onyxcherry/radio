@@ -1,10 +1,9 @@
 from json import JSONDecodeError
-from kink import di
+
 import requests
+from kink import di
 
 from config import Settings, get_logger
-from track.application.interfaces.youtube_api import YoutubeAPIInterface
-from track.domain.provided import Identifier
 from track.application.errors import (
     TrackAPIConfigurationError,
     TrackAPIConnectionError,
@@ -12,6 +11,8 @@ from track.application.errors import (
     TrackAPINoResults,
     TrackAPITimeout,
 )
+from track.application.interfaces.youtube_api import YoutubeAPIInterface
+from track.domain.provided import Identifier
 
 logger = get_logger(__name__)
 

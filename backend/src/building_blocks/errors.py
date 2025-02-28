@@ -1,5 +1,6 @@
-from pydantic.dataclasses import dataclass
 from typing import Self
+
+from pydantic.dataclasses import dataclass
 
 
 class DomainError(Exception):

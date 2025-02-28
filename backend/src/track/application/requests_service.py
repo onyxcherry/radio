@@ -1,16 +1,18 @@
-from pydantic.dataclasses import dataclass
-from datetime import datetime, timezone
 import enum
+from datetime import datetime, timezone
 from typing import Optional, Sequence
-from config import Config
+
 from kink import inject
-from track.application.interfaces.events import EventsConsumer, EventsProducer
-from track.domain.entities import NewTrack, Status, TrackInLibrary, TrackRequested
+from pydantic.dataclasses import dataclass
+
 from building_blocks.clock import Clock
-from track.domain.breaks import Breaks, PlayingTime
+from config import Config
+from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.application.library import Library
-from track.builder import TrackBuilder
 from track.application.playlist import Playlist
+from track.builder import TrackBuilder
+from track.domain.breaks import Breaks, PlayingTime
+from track.domain.entities import NewTrack, Status, TrackInLibrary, TrackRequested
 from track.domain.library_repository import LibraryRepository
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Seconds, TrackProvidedIdentity

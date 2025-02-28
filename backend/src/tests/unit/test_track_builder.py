@@ -1,6 +1,6 @@
+from track.builder import TrackBuilder
 from track.domain.provided import Identifier, TrackProvidedIdentity
 from track.domain.providers.youtube import YoutubeTrackProvided
-from track.builder import TrackBuilder
 
 
 def test_normalize_url_should_add_protocol():

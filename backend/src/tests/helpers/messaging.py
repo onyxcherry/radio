@@ -1,9 +1,10 @@
-from config import Settings, get_logger
-from kink import di
-from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
-from tests.choices import DIChoices
-from confluent_kafka import Consumer, TopicPartition, KafkaException
+from confluent_kafka import Consumer, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
+from kink import di
+
+from config import Settings, get_logger
+from tests.choices import DIChoices
+from track.infrastructure.messaging.inmemory_events_helper import InMemoryEvents
 
 logger = get_logger(__name__)
 

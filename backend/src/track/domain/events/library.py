@@ -1,9 +1,9 @@
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
+from track.domain.entities import Status
 from track.domain.events.base import Event, MillisDatetime
 from track.domain.provided import TrackProvidedIdentity
-from track.domain.entities import Status
 
 dataclass_config = ConfigDict(populate_by_name=True)
 

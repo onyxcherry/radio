@@ -1,14 +1,14 @@
 import json
-from os import PathLike
-from pathlib import Path
-from track.domain.provided import Seconds
-from pydantic.dataclasses import dataclass
-from datetime import date, datetime, time, timedelta, tzinfo
 import logging
 import logging.config
+from datetime import date, datetime, time, timedelta, tzinfo
+from os import PathLike
+from pathlib import Path
 from typing import Annotated, Any, Optional, Self
 from zoneinfo import ZoneInfo
 
+import yaml
+from jsonschema import ValidationError, validate
 from pydantic import (
     BeforeValidator,
     ConfigDict,
@@ -17,10 +17,10 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+from pydantic.dataclasses import dataclass
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import yaml
-from jsonschema import validate, ValidationError
 
+from track.domain.provided import Seconds
 
 logging_config = {
     "version": 1,

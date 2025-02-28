@@ -5,7 +5,6 @@ from tests.unit.data import IDENTITIES, TRACKS
 from track.application.library import Library
 from track.domain.entities import Status
 
-
 library = di[Library]
 library_repo = library._library_repository
 

@@ -3,16 +3,15 @@ from uuid import uuid4
 
 from confluent_kafka import Producer
 from confluent_kafka.schema_registry.avro import AvroSerializer
+from confluent_kafka.serialization import MessageField, SerializationContext
 
-from confluent_kafka.serialization import SerializationContext, MessageField
-
+from config import get_logger
 from track.application.interfaces.events import (
     EventsProducer,
     ProducerConnectionOptions,
     ProducerMessagesOptions,
 )
 from track.domain.events.base import Event
-from config import get_logger
 from track.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,

@@ -1,7 +1,7 @@
+from enum import IntEnum, auto, unique
+
 from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
-from enum import IntEnum, auto, unique
-from datetime import date, datetime, time, timezone
 
 from track.domain.events.base import DateFromUnixEpoch
 from track.domain.provided import Seconds

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from track.domain.entities import Status, TrackInLibrary
 
+from track.domain.entities import Status, TrackInLibrary
 from track.domain.provided import TrackProvidedIdentity
 
 

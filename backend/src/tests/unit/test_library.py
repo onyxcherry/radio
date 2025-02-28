@@ -1,14 +1,15 @@
 from typing import Sequence
+
 from kink import di
 from pytest import fixture
-from track.infrastructure.messaging.types import LibraryEventsConsumer
+
 from building_blocks.clock import Clock
-from track.domain.events.library import TrackAddedToLibrary
+from tests.helpers.dt import fixed_dt
 from tests.unit.data import ACCEPTED_TRACKS, NEW_TRACKS, PENDING_APPROVAL_TRACKS
 from track.application.library import Library
 from track.domain.entities import Status
-from tests.helpers.dt import fixed_dt
-
+from track.domain.events.library import TrackAddedToLibrary
+from track.infrastructure.messaging.types import LibraryEventsConsumer
 
 library = di[Library]
 library_repo = library._library_repository

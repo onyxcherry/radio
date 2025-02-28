@@ -1,14 +1,14 @@
-from pydantic.dataclasses import dataclass
+from enum import StrEnum, unique
 from typing import Optional
-from track.domain.breaks import PlayingTime
 
+from pydantic.dataclasses import dataclass
+
+from track.domain.breaks import PlayingTime
 from track.domain.provided import (
     Seconds,
     TrackProvidedIdentity,
     TrackUrl,
 )
-
-from enum import StrEnum, unique
 
 
 @unique

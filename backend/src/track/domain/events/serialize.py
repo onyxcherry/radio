@@ -1,4 +1,5 @@
 from pydantic import RootModel
+
 from track.domain.events.base import Event
 from track.domain.events.library import *
 from track.domain.events.playlist import *

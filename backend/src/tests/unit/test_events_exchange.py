@@ -1,7 +1,9 @@
 from datetime import date, datetime, timedelta, timezone
 from typing import Final
-from config import Config
+
 from kink import di
+
+from config import Config
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.events.playlist import TrackAddedToPlaylist, TrackPlayed
 from track.domain.events.recreate import parse_event

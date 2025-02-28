@@ -2,20 +2,21 @@ from datetime import date
 from typing import Optional
 
 from kink import inject
+
 from building_blocks.clock import Clock
 from track.application.interfaces.events import EventsConsumer, EventsProducer
-from track.domain.events.playlist import (
-    TrackAddedToPlaylist,
-    TrackDeletedFromPlaylist,
-    TrackMarkedAsPlayed,
-)
+from track.domain.breaks import Breaks, PlayingTime
 from track.domain.entities import (
     TrackQueued,
     TrackRequested,
     TrackToQueue,
     TrackUnqueued,
 )
-from track.domain.breaks import Breaks, PlayingTime
+from track.domain.events.playlist import (
+    TrackAddedToPlaylist,
+    TrackDeletedFromPlaylist,
+    TrackMarkedAsPlayed,
+)
 from track.domain.playlist_repository import PlaylistRepository
 from track.domain.provided import Seconds, TrackProvidedIdentity
 

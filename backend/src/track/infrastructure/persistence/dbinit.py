@@ -1,7 +1,7 @@
-from track.infrastructure.persistence.database import setup_engine
 from track.application.models.base import Base
 from track.application.models.library import LibraryTrackModel  # noqa
 from track.application.models.queue import QueueTrackModel  # noqa
+from track.infrastructure.persistence.database import setup_engine
 
 
 # https://stackoverflow.com/a/73639613/14011471

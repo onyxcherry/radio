@@ -1,25 +1,23 @@
-from datetime import timedelta
 import string
+import urllib.parse as urlparse
+from datetime import timedelta
 from typing import Self
+from urllib.parse import parse_qs, unquote
 
 from kink import inject
-from track.domain.errors import TrackIdentifierError
-from track.domain.errors import ErrorMessages
+
 from config import get_logger
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.duration import parse_isoduration
+from track.domain.errors import ErrorMessages, TrackIdentifierError
 from track.domain.provided import (
+    Identifier,
     ProviderName,
     Seconds,
-    Identifier,
     TrackProvided,
     TrackProvidedIdentity,
     TrackUrl,
 )
-
-from urllib.parse import parse_qs, unquote
-import urllib.parse as urlparse
-
 
 logger = get_logger(__name__)
 

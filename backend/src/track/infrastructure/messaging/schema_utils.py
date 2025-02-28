@@ -1,9 +1,10 @@
-from pydantic.dataclasses import dataclass
 import os
 from typing import Literal, Optional
+
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from fastavro.schema import load_schema
 from fastavro.types import Schema
+from pydantic.dataclasses import dataclass
 
 
 @dataclass

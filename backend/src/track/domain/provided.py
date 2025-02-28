@@ -1,7 +1,7 @@
-from pydantic.dataclasses import dataclass
-from typing import Any, Literal, NewType, Self
 from abc import ABC, abstractmethod
+from typing import Any, Literal, NewType, Self
 
+from pydantic.dataclasses import dataclass
 
 Identifier = NewType("Identifier", str)
 ProviderName = Literal["file", "Youtube"]

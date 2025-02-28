@@ -1,31 +1,33 @@
 from datetime import date
 from typing import Any
-from config import Config
+
 from kink import di
 from pydantic import ValidationError
-from pytest import fixture, raises, mark
-from track.domain.events.library import TrackAccepted, TrackRejected
-from track.domain.events.playlist import TrackDeletedFromPlaylist
-from tests.helpers.dt import fixed_dt
-from track.infrastructure.messaging.types import (
-    LibraryEventsConsumer,
-    LibraryEventsProducer,
-    PlaylistEventsConsumer,
-    PlaylistEventsProducer,
-)
-from track.application.interfaces.events import EventsConsumer, EventsProducer
+from pytest import fixture, mark, raises
+
 from building_blocks.clock import Clock
-from tests.unit.data import FUTURE_PT, FUTURE_PT_WEEKEND, PASSED_PT, NEW_YT_TRACKS
-from track.application.playlist import Playlist
-from track.domain.entities import NewTrack, Status, TrackRequested
+from config import Config
+from tests.helpers.dt import fixed_dt
+from tests.unit.data import FUTURE_PT, FUTURE_PT_WEEKEND, NEW_YT_TRACKS, PASSED_PT
+from track.application.interfaces.events import EventsConsumer, EventsProducer
 from track.application.library import Library
+from track.application.playlist import Playlist
 from track.application.requests_service import (
     LibraryTrackError,
     PlayingTimeError,
     RequestsService,
 )
 from track.domain.breaks import Breaks, PlayingTime
+from track.domain.entities import NewTrack, Status, TrackRequested
+from track.domain.events.library import TrackAccepted, TrackRejected
+from track.domain.events.playlist import TrackDeletedFromPlaylist
 from track.domain.provided import Identifier, Seconds, TrackProvidedIdentity, TrackUrl
+from track.infrastructure.messaging.types import (
+    LibraryEventsConsumer,
+    LibraryEventsProducer,
+    PlaylistEventsConsumer,
+    PlaylistEventsProducer,
+)
 
 clock = di[Clock]
 config = di[Config]

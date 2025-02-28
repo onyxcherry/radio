@@ -1,21 +1,21 @@
 from typing import Literal, Optional
 
 from confluent_kafka import Consumer
+from confluent_kafka.schema_registry.avro import AvroDeserializer
+from confluent_kafka.serialization import MessageField, SerializationContext
+
 from config import get_logger
+from track.application.interfaces.events import (
+    ConsumerConnectionOptions,
+    ConsumerMessagesOptions,
+    EventsConsumer,
+)
 from track.domain.events.base import Event
 from track.infrastructure.messaging.schema_utils import (
     SchemaRegistryConfig,
     create_client,
     fetch_schema,
 )
-from confluent_kafka.schema_registry.avro import AvroDeserializer
-
-from track.application.interfaces.events import (
-    ConsumerConnectionOptions,
-    ConsumerMessagesOptions,
-    EventsConsumer,
-)
-from confluent_kafka.serialization import SerializationContext, MessageField
 
 logger = get_logger(__name__)
 

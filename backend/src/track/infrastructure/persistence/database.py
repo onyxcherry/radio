@@ -1,8 +1,10 @@
-from config import Settings
+from functools import lru_cache
+
 from kink import di
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from functools import lru_cache
+
+from config import Settings
 
 
 def setup_engine():

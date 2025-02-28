@@ -1,13 +1,14 @@
 from datetime import date
+
 from kink import di
 from pytest import fixture, mark
-from track.domain.provided import Seconds
+
+from tests.unit.data import IDENTITIES, TRACKS
 from track.application.library import Library
 from track.application.playlist import Playlist
-from track.domain.entities import TrackQueued, TrackToQueue
-from tests.unit.data import IDENTITIES, TRACKS
 from track.domain.breaks import Breaks, PlayingTime
-
+from track.domain.entities import TrackQueued, TrackToQueue
+from track.domain.provided import Seconds
 
 playlist = di[Playlist]
 library = di[Library]

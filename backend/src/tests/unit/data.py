@@ -1,4 +1,5 @@
 from datetime import date
+
 from track.domain.breaks import Breaks, PlayingTime
 from track.domain.entities import NewTrack, Status, TrackInLibrary
 from track.domain.provided import (
@@ -7,7 +8,6 @@ from track.domain.provided import (
     TrackProvidedIdentity,
     TrackUrl,
 )
-
 
 track1 = NewTrack(
     TrackProvidedIdentity(identifier=Identifier("a123"), provider="file"),

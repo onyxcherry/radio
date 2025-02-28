@@ -2,12 +2,11 @@ from typing import Final
 
 import pytest
 
-
-from track.domain.errors import TrackIdentifierError
+from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 from track.builder import TrackBuilder
+from track.domain.errors import TrackIdentifierError
 from track.domain.provided import TrackUrl
 from track.domain.providers.youtube import YoutubeTrackProvided
-from tests.inmemory_youtube_api import InMemoryYoutubeAPI
 
 expected: Final = "i-uYn_lp6Qg"
 

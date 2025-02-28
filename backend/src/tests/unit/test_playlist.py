@@ -1,19 +1,20 @@
 from kink import di
 from pytest import fixture, mark
-from track.domain.provided import Seconds
-from track.infrastructure.messaging.types import PlaylistEventsConsumer
+
+from building_blocks.clock import Clock
+from tests.helpers.dt import fixed_dt
+from track.application.library import Library
+from track.application.playlist import Playlist
+from track.domain.entities import TrackRequested
 from track.domain.events.playlist import (
     TrackAddedToPlaylist,
     TrackDeletedFromPlaylist,
     TrackMarkedAsPlayed,
 )
-from building_blocks.clock import Clock
-from track.application.library import Library
-from track.domain.entities import TrackRequested
-from track.application.playlist import Playlist
-from .data import ACCEPTED_TRACKS, FUTURE_PT, PENDING_APPROVAL_TRACKS
-from tests.helpers.dt import fixed_dt
+from track.domain.provided import Seconds
+from track.infrastructure.messaging.types import PlaylistEventsConsumer
 
+from .data import ACCEPTED_TRACKS, FUTURE_PT, PENDING_APPROVAL_TRACKS
 
 playlist = di[Playlist]
 library = di[Library]
