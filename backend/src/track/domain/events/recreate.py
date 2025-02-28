@@ -1,8 +1,8 @@
 from pydantic import TypeAdapter
 
 from track.domain.events.base import Event
-from track.domain.events.library import *
-from track.domain.events.playlist import *
+from track.domain.events.library import *  # noqa: F401, F403
+from track.domain.events.playlist import *  # noqa: F401, F403
 
 
 def parse_event(data: dict) -> Event:

@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(library_router)
 app.include_router(playlist_router)
-app.openapi = custom_openapi  # type: ignore
+app.openapi = custom_openapi  # type: ignore # noqa
 
 
 @app.exception_handler(DomainError)

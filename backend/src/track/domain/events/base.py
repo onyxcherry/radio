@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta, timezone
 from typing import Annotated, Any
 
-from pydantic import AwareDatetime, BeforeValidator, ConfigDict, Field, PlainSerializer
+from pydantic import AwareDatetime, BeforeValidator, PlainSerializer
 
 
 def millis_to_timestamp(v: Any) -> datetime:

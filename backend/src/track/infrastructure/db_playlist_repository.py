@@ -185,7 +185,7 @@ class DBPlaylistRepository(PlaylistRepository):
             .where(QueueTrackModel.break_ == track.when.break_)
             .where(QueueTrackModel.date_ == track.when.date_)
             .where(QueueTrackModel.track_id == track_id)
-            .where(QueueTrackModel.played == False)
+            .where(QueueTrackModel.played == False)  # noqa: E712
         )
         with sessionLocal()() as session:
             result = session.execute(stmt).rowcount

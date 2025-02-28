@@ -4,7 +4,6 @@ from pydantic import ConfigDict, Field
 from pydantic.dataclasses import dataclass
 
 from track.domain.events.base import DateFromUnixEpoch
-from track.domain.provided import Seconds
 
 dataclass_config = ConfigDict(populate_by_name=True)
 

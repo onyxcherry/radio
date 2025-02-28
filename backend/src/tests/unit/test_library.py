@@ -1,5 +1,3 @@
-from typing import Sequence
-
 from kink import di
 from pytest import fixture
 

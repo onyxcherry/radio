@@ -1,7 +1,6 @@
 from track.application.interfaces.youtube_api import YoutubeAPIInterface
 from track.domain.provided import Identifier
 
-# header_rendered = channel_info[1]["response"]["header"]["c4TabbedHeaderRenderer"]
 _channel_info_data = {
     "UC2XdaAVUannpujzv32jcouQ": [
         {},
@@ -12,7 +11,7 @@ _channel_info_data = {
                         "channelId": "UC2XdaAVUannpujzv32jcouQ",
                         "title": "The Beatles - Topic",
                         "navigationEndpoint": {
-                            "clickTrackingParams": "CA0Q8DsiEwjB-pf8namEAxVuQ3oFHcE8CqM=",
+                            "clickTrackingParams": "CA0Q8DsiEwjB-pf8namEAxVuQ3oFHcE8CqM=",  # noqa: E501
                             "commandMetadata": {
                                 "webCommandMetadata": {
                                     "url": "/channel/UC2XdaAVUannpujzv32jcouQ",
