@@ -1,6 +1,5 @@
-from dataclasses import asdict, dataclass, is_dataclass
-from typing import TypeGuard, TypeVar
-
+from dataclasses import asdict, is_dataclass
+from typing import TypeVar
 
 Ev = TypeVar("Ev")
 

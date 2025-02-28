@@ -2,22 +2,21 @@ from typing import Literal, Optional
 from uuid import uuid4
 
 from confluent_kafka import Producer
-from config import get_logger
-from domain.events.base import Event
-from domain.events.serialize import serialize_event
-from infrastructure.messaging.schema_utils import (
-    SchemaRegistryConfig,
-    create_client,
-    fetch_schema,
-)
 from confluent_kafka.schema_registry.avro import AvroSerializer
+from confluent_kafka.serialization import MessageField, SerializationContext
 
 from application.interfaces.events import (
     EventsProducer,
     ProducerConnectionOptions,
     ProducerMessagesOptions,
 )
-from confluent_kafka.serialization import SerializationContext, MessageField
+from config import get_logger
+from domain.events.base import Event
+from infrastructure.messaging.schema_utils import (
+    SchemaRegistryConfig,
+    create_client,
+    fetch_schema,
+)
 
 logger = get_logger(__name__)
 

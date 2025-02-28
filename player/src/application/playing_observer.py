@@ -3,15 +3,15 @@ from datetime import datetime
 from typing import Callable, Coroutine, Optional
 
 from kink import di
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from infrastructure.messaging.types import PlaylistEventsProducer
-from config import get_logger
 
 from building_blocks.clock import Clock
+from config import get_logger
 from domain.breaks import Break, Breaks
 from domain.entities import ScheduledTrack
 from domain.events.track import TrackPlayed
+from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 from domain.types import Seconds
+from infrastructure.messaging.types import PlaylistEventsProducer
 
 logger = get_logger(__name__)
 

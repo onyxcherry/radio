@@ -1,8 +1,8 @@
 from datetime import date, datetime, timezone
 from typing import Optional
-from sqlalchemy import func, or_
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, or_, select, update
+
 from application.models.scheduled_tracks import ScheduledTrackModel
 from building_blocks.clock import Clock
 from domain.breaks import Break

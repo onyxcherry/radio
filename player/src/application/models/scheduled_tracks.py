@@ -1,10 +1,9 @@
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, String
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
 from datetime import datetime
 
-from domain.types import ProviderName
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
+from domain.types import ProviderName
 
 from .base import Base
 

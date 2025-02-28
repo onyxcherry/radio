@@ -2,6 +2,14 @@ import asyncio
 from typing import Literal, Optional
 
 from confluent_kafka import Consumer
+from confluent_kafka.schema_registry.avro import AvroDeserializer
+from confluent_kafka.serialization import MessageField, SerializationContext
+
+from application.interfaces.events import (
+    ConsumerConnectionOptions,
+    ConsumerMessagesOptions,
+    EventsConsumer,
+)
 from config import get_logger
 from domain.events.base import Event
 from infrastructure.messaging.schema_utils import (
@@ -9,14 +17,6 @@ from infrastructure.messaging.schema_utils import (
     create_client,
     fetch_schema,
 )
-from confluent_kafka.schema_registry.avro import AvroDeserializer
-
-from application.interfaces.events import (
-    ConsumerConnectionOptions,
-    ConsumerMessagesOptions,
-    EventsConsumer,
-)
-from confluent_kafka.serialization import SerializationContext, MessageField
 
 logger = get_logger(__name__)
 

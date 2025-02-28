@@ -1,7 +1,8 @@
-from kink import di
 import pytest
+from kink import di
 
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
+
 from ..helpers.messaging import reset_events
 
 

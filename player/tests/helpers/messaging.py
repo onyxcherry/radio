@@ -1,9 +1,11 @@
+from confluent_kafka import Consumer, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient
+from kink import di
+
 from config import Settings, get_logger
 from infrastructure.messaging.inmemory_events_helper import InMemoryEvents
-from kink import di
+
 from ..choices import DIChoices
-from confluent_kafka import Consumer, TopicPartition, KafkaException
-from confluent_kafka.admin import AdminClient
 
 logger = get_logger(__name__)
 

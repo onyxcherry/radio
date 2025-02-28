@@ -1,5 +1,5 @@
-from abc import abstractmethod
 import os
+from abc import abstractmethod
 from typing import Callable, Optional
 
 from domain.breaks import Seconds

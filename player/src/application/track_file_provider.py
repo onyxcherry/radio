@@ -1,12 +1,13 @@
 import asyncio
-from pydantic.dataclasses import dataclass
 import os
 from pathlib import Path
 from typing import Callable, Coroutine, Optional
 
+from pydantic.dataclasses import dataclass
+
 from building_blocks.clock import Clock
-from domain.entities import ScheduledTrack, TrackProvidedIdentity
 from config import get_logger
+from domain.entities import ScheduledTrack, TrackProvidedIdentity
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
 
 

@@ -1,10 +1,9 @@
-from pydantic import AwareDatetime, PositiveInt, model_validator
-from pydantic.dataclasses import dataclass
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional, Self
 
 from kink import inject
-
+from pydantic import AwareDatetime, PositiveInt, model_validator
+from pydantic.dataclasses import dataclass
 
 from building_blocks.clock import Clock
 from config import BreaksConfig, get_logger

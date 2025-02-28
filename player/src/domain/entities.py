@@ -1,7 +1,6 @@
 from pydantic import AwareDatetime
 from pydantic.dataclasses import dataclass
 
-
 from domain.breaks import Break
 from domain.types import Identifier, ProviderName, Seconds
 

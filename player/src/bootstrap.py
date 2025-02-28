@@ -1,11 +1,16 @@
-from datetime import time, timedelta
 from pathlib import Path
-from zoneinfo import ZoneInfo
-from kink import di
 
+from confluent_kafka.serialization import StringSerializer
+from kink import di
 
 from application.break_observer import BreakObserver
 from application.events.handle import EventHandler
+from application.interfaces.events import (
+    ConsumerConnectionOptions,
+    ConsumerMessagesOptions,
+    ProducerConnectionOptions,
+    ProducerMessagesOptions,
+)
 from application.playing_manager import PlayingConditions, PlayingManager
 from application.playing_observer import PlayingObserver
 from application.track_file_provider import (
@@ -13,45 +18,20 @@ from application.track_file_provider import (
     PlayableTrackProviderConfig,
 )
 from building_blocks.awakable import EventBasedAwakable
-from config import Config, Settings, config_dict_to_class, load_config_from_yaml
 from building_blocks.clock import Clock, SystemClock
-from config import BreaksConfig
+from config import (
+    BreaksConfig,
+    Config,
+    Settings,
+    config_dict_to_class,
+    load_config_from_yaml,
+)
 from domain.breaks import Breaks
 from domain.events.recreate import parse_event
 from domain.events.serialize import serialize_event
 from domain.interfaces.player import Player
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from domain.types import Seconds
 from infrastructure.madeup_player import MadeupPlayer
-from infrastructure.persistence.db_scheduled_tracks_repository import (
-    DBScheduledTracksRepository,
-)
-from infrastructure.messaging.types import (
-    LibraryEventsConsumer,
-    PlaylistEventsConsumer,
-    PlaylistEventsProducer,
-)
-from application.interfaces.events import (
-    ProducerMessagesOptions,
-    ConsumerMessagesOptions,
-)
-from application.interfaces.events import (
-    ConsumerConnectionOptions,
-    ProducerConnectionOptions,
-)
-from building_blocks.clock import Clock
-from config import BreaksConfig
-from domain.breaks import Breaks
-from domain.interfaces.player import Player
-from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from domain.types import Seconds
-from infrastructure.madeup_player import MadeupPlayer
-from infrastructure.messaging.inmemory_events_consumer import (
-    InMemoryEventsConsumer,
-)
-from infrastructure.messaging.inmemory_events_producer import (
-    InMemoryEventsProducer,
-)
 from infrastructure.messaging.kafka_events_consumer import (
     KafkaAvroEventsConsumer,
 )
@@ -59,12 +39,15 @@ from infrastructure.messaging.kafka_events_producer import (
     KafkaAvroEventsProducer,
 )
 from infrastructure.messaging.schema_utils import SchemaRegistryConfig
-from infrastructure.messaging.types import LibraryEventsProducer
+from infrastructure.messaging.types import (
+    LibraryEventsConsumer,
+    LibraryEventsProducer,
+    PlaylistEventsConsumer,
+    PlaylistEventsProducer,
+)
 from infrastructure.persistence.db_scheduled_tracks_repository import (
     DBScheduledTracksRepository,
 )
-from confluent_kafka.serialization import StringSerializer
-
 
 CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.yaml"
 CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"

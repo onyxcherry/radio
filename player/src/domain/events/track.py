@@ -1,10 +1,18 @@
-from typing import Annotated, Any
-from pydantic import AwareDatetime, BeforeValidator, ConfigDict, Field, PlainSerializer, PositiveInt
-from pydantic.dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
+from typing import Annotated, Any
 
-from domain.events.base import Event
+from pydantic import (
+    AwareDatetime,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    PositiveInt,
+)
+from pydantic.dataclasses import dataclass
+
 from domain.entities import TrackProvidedIdentity
+from domain.events.base import Event
 
 
 def datetime_as_millis_timestamp(data, *args) -> int:
