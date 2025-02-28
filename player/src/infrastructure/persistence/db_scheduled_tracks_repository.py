@@ -117,7 +117,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             )
             .where(ScheduledTrackModel.end == track.break_.end.astimezone(timezone.utc))
             .where(ScheduledTrackModel.ordinal == track.break_.ordinal)
-            .where(ScheduledTrackModel.played == False)
+            .where(ScheduledTrackModel.played == False)  # noqa: E712
             .where(
                 or_(
                     ScheduledTrackModel.duration != track.duration,
@@ -176,7 +176,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             )
             .where(ScheduledTrackModel.end == track.break_.end.astimezone(timezone.utc))
             .where(ScheduledTrackModel.ordinal == track.break_.ordinal)
-            .where(ScheduledTrackModel.played == False)
+            .where(ScheduledTrackModel.played == False)  # noqa: E712
             .execution_options(synchronize_session="fetch")
         )
         with sessionLocal()() as session:
@@ -202,7 +202,7 @@ class DBScheduledTracksRepository(ScheduledTracksRepository):
             delete(ScheduledTrackModel)
             .where(ScheduledTrackModel.identifier == identity.identifier)
             .where(ScheduledTrackModel.provider == identity.provider)
-            .where(ScheduledTrackModel.played == False)
+            .where(ScheduledTrackModel.played == False)  # noqa: E712
         )
 
         with sessionLocal()() as session:

@@ -88,13 +88,13 @@ async def main_tasks() -> None:
         logger.error("Sub task has failed")
         logger.exception(ex)
     except* RuntimeError as ex:
-        logger.error(f"Caught unexpected RuntimeError group")
+        logger.error("Caught unexpected RuntimeError group")
         logger.exception(ex)
     except* Exception as ex:
-        logger.error(f"Caught unexpected Exception group")
+        logger.error("Caught unexpected Exception group")
         logger.exception(ex)
     except* BaseException as ex:
-        logger.error(f"Caught unexpected BaseException group")
+        logger.error("Caught unexpected BaseException group")
         logger.exception(ex)
 
 

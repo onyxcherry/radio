@@ -36,15 +36,17 @@ class ScheduledTrackModel(Base):
     def __str__(self) -> str:
         return (
             f"ScheduledTrackModel(id={self.id!s}, identifier={self.identifier!s}, "
-            f"provider={self.provider!s}, duration={self.duration!s}, start={self.start!s}, "
-            f"end={self.end!s}, ordinal={self.ordinal!s}, played={self.played!s}, "
-            f"created={self.created!s}, last_changed={self.last_changed!s})"
+            f"provider={self.provider!s}, duration={self.duration!s}, "
+            f"start={self.start!s}, end={self.end!s}, ordinal={self.ordinal!s}, "
+            f"played={self.played!s}, created={self.created!s}, "
+            f"last_changed={self.last_changed!s})"
         )
 
     def __repr__(self) -> str:
         return (
             f"ScheduledTrackModel(id={self.id!r}, identifier={self.identifier!r}, "
-            f"provider={self.provider!r}, duration={self.duration!r}, start={self.start!r}, "
-            f"end={self.end!r}, ordinal={self.ordinal!r}, played={self.played!r}, "
-            f"created={self.created!r}, last_changed={self.last_changed!r})"
+            f"provider={self.provider!r}, duration={self.duration!r}, "
+            f"start={self.start!r}, end={self.end!r}, ordinal={self.ordinal!r}, "
+            f"played={self.played!r}, created={self.created!r}, "
+            f"last_changed={self.last_changed!r})"
         )

@@ -16,7 +16,8 @@ from domain.types import Seconds
 logger = get_logger(__name__)
 
 # assumptions:
-# 1. events are ordered at least per topic (hence per track) TODO: configure partitioner
+# 1. events are ordered at least per topic (hence per track)
+# TODO: configure partitioner
 # 2.
 
 
@@ -54,12 +55,18 @@ class EventHandler:
                 to_schedule = TrackToSchedule(
                     identity=added_to_playlist.identity,
                     break_=break_,
-                    duration=Seconds(min(added_to_playlist.duration, break_.duration)),
+                    duration=Seconds(
+                        min(
+                            added_to_playlist.duration,
+                            break_.duration,
+                        )
+                    ),
                 )
                 result = self._schtr_repo.insert_or_update(to_schedule)
                 if result.last_changed < added_to_playlist.created:
                     logger.info(
-                        "Event doesn't change track's state. May have had been applied before"
+                        "Event doesn't change track's state. "
+                        "May have had been applied before"
                     )
                 else:
                     logger.info(f"Scheduled track {to_schedule}")
