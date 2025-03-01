@@ -149,6 +149,7 @@ def test_serializes_event_with_unix_epoch_date():
 def test_consume_produced_events(reset_events_fixt):
     events_producer = di[PlaylistEventsProducer]
     events_consumer = di[PlaylistEventsConsumer]
+    events_consumer.seek_beginning()
 
     identity = TrackProvidedIdentity(
         identifier=Identifier("cTAYaZkOvV8"), provider="Youtube"

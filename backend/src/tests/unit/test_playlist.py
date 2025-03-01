@@ -21,7 +21,6 @@ library = di[Library]
 playlist_repo = playlist._playlist_repository
 library_repo = library._library_repository
 events_consumer = di[PlaylistEventsConsumer]
-events_consumer.subscribe(playlist._events_topic)
 events_producer = playlist._events_producer
 clock = di[Clock]
 
@@ -51,6 +50,7 @@ def pending_approval_tracks(reset):
 
 @mark.realdb()
 def test_adds_track_to_playlist(accepted_tracks, reset_events_fixt):
+    events_consumer.seek_beginning()
     playing_time = FUTURE_PT
     requested = TrackRequested(ACCEPTED_TRACKS[0].identity, playing_time, Seconds(189))
 
@@ -72,6 +72,7 @@ def test_adds_track_to_playlist(accepted_tracks, reset_events_fixt):
 
 
 def test_deletes_track(accepted_tracks, reset_events_fixt):
+    events_consumer.seek_beginning()
     playing_time = FUTURE_PT
     identity = ACCEPTED_TRACKS[0].identity
     requested = TrackRequested(identity, playing_time, Seconds(42))
@@ -88,6 +89,7 @@ def test_deletes_track(accepted_tracks, reset_events_fixt):
 
 
 def test_marks_as_played(accepted_tracks, reset_events_fixt):
+    events_consumer.seek_beginning()
     requested = TrackRequested(ACCEPTED_TRACKS[0].identity, FUTURE_PT, Seconds(42))
     playlist.add(requested)
 

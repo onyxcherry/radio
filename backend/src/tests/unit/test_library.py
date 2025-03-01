@@ -12,7 +12,6 @@ from track.infrastructure.messaging.types import LibraryEventsConsumer
 library = di[Library]
 library_repo = library._library_repository
 events_consumer = di[LibraryEventsConsumer]
-events_consumer.subscribe(library._events_topic)
 events_producer = library._events_producer
 clock = di[Clock]
 
@@ -33,6 +32,7 @@ def tracks_one_accepted(reset):
 
 
 def test_new_track_has_pending_approval_state(reset, reset_events_fixt):
+    events_consumer.seek_beginning()
     track = NEW_TRACKS[0]
     library.add(track)
     got_track = library.get(track.identity)
