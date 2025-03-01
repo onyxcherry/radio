@@ -148,6 +148,7 @@ async def test_plays_track(pm_during_break, scheduled_track_ready):
     break_observer = di[BreakObserver]
     playing_manager = pm_during_break
     events_consumer = di[PlaylistEventsConsumer]
+    events_consumer.seek_beginning()
 
     create_asyncio_task(playing_manager.manage_playing())
     create_asyncio_task(break_observer.update_current_break())

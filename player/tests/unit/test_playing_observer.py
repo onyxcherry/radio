@@ -81,6 +81,7 @@ def test_updates_track_is_playing_then_stops(pl_obs):
 
 @pytest.mark.asyncio
 async def test_playing_ends_callback(pl_obs):
+    events_consumer.seek_beginning()
     pl_obs.update_track_playing(scheduled_track, duration=Seconds(40))
 
     pl_obs.playing_ends_callback()

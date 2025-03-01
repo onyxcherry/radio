@@ -226,6 +226,9 @@ def bootstrap_di(di_choices: DIChoices) -> None:
             consumer_conn_options, consumer_msg_options, playlist_schema_config
         )
 
+    library_events_consumer.subscribe("library")
+    playlist_events_consumer.subscribe("queue")
+
     di[LibraryEventsProducer] = library_events_producer
     di[LibraryEventsConsumer] = library_events_consumer
     di[PlaylistEventsProducer] = playlist_events_producer
