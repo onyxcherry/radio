@@ -23,9 +23,12 @@ class InMemoryEventsConsumer(EventsConsumer):
     def subscribe(self, topic: str) -> None:
         self._topic = topic
 
+    def seek_beginning(self) -> None:
+        pass
+
     def consume(self, limit: int) -> list[Event]:
         events_store = di[InMemoryEvents]
-        messages = events_store.get_and_ack_for(self._topic, limit)
+        messages = events_store.get_for(self._topic)
         if len(messages) != limit:
             raise RuntimeError(f"Found {len(messages)} events, but limit is {limit}")
         return messages

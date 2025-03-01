@@ -1,7 +1,7 @@
 import asyncio
 from typing import Literal, Optional
 
-from confluent_kafka import Consumer
+from confluent_kafka import Consumer, TopicPartition
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 from confluent_kafka.serialization import MessageField, SerializationContext
 
@@ -59,7 +59,8 @@ class KafkaAvroEventsConsumer(EventsConsumer):
         return avro_deserializer
 
     def subscribe(self, topic: str) -> None:
-        self._consumer.subscribe([topic])
+        tp = TopicPartition(topic, 0)
+        self._consumer.assign([tp])
 
     async def consume(self, limit: int) -> list[Event]:
         results = []

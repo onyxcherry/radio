@@ -342,6 +342,7 @@ def test_multiple_playlist_errors(yt_tracks, whole_break_scheduled):
 
 @mark.realdb()
 def test_accept_track(yt_tracks, reset_events_fixt):
+    library_events_consumer.seek_beginning()
     track = NEW_YT_TRACKS[0]
 
     rs.accept(track.identity)
@@ -358,6 +359,7 @@ def test_accept_track(yt_tracks, reset_events_fixt):
 
 
 def test_reject_track(yt_tracks, reset_events_fixt):
+    library_events_consumer.seek_beginning()
     track = NEW_YT_TRACKS[0]
 
     rs.reject(track.identity)
@@ -375,6 +377,7 @@ def test_reject_track(yt_tracks, reset_events_fixt):
 
 @mark.realdb()
 def test_rejecting_track_removes_all_playlist_occurrences(yt_tracks, reset_events_fixt):
+    playlist_events_consumer.seek_beginning()
     track = NEW_YT_TRACKS[0]
     rs.accept(track.identity)
     first_pt = PlayingTime(break_=Breaks.FIRST, date_=date(2099, 4, 1))
