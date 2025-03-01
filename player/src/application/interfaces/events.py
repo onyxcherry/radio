@@ -49,6 +49,10 @@ class EventsConsumer(ABC):
         pass
 
     @abstractmethod
+    def seek_beginning(self) -> None:
+        pass
+
+    @abstractmethod
     async def consume(self, limit: int) -> list[Event]:
         pass
 

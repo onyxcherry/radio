@@ -1,7 +1,7 @@
 import asyncio
 from typing import Literal, Optional
 
-from confluent_kafka import Consumer, TopicPartition
+from confluent_kafka import OFFSET_BEGINNING, Consumer, TopicPartition
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 from confluent_kafka.serialization import MessageField, SerializationContext
 
@@ -44,6 +44,7 @@ class KafkaAvroEventsConsumer(EventsConsumer):
         self._avro_deserializer = self._create_avro_deserializer(
             schema_id=schema_config.schema_id, subject_name=schema_config.subject_name
         )
+        self._topic: Optional[str] = None
 
     def _create_avro_deserializer(
         self, schema_id: int | Literal["latest"], subject_name: Optional[str]
@@ -59,8 +60,14 @@ class KafkaAvroEventsConsumer(EventsConsumer):
         return avro_deserializer
 
     def subscribe(self, topic: str) -> None:
+        self._topic = topic
         tp = TopicPartition(topic, 0)
         self._consumer.assign([tp])
+
+    def seek_beginning(self) -> None:
+        assert self._topic is not None
+        tp = TopicPartition(self._topic, 0, OFFSET_BEGINNING)
+        self._consumer.seek(tp)
 
     async def consume(self, limit: int) -> list[Event]:
         results = []
