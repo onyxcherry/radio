@@ -65,6 +65,7 @@ class PlayableTrackProvider:
         track_path = self._get_file_path_of(scheduled_track.identity)
         if track_path is None:
             # TODO: download the track now
-            raise RuntimeError("No track downloaded!")
+            msg = f"No track downloaded! Expected {track_path} to exists on disk"
+            raise RuntimeError(msg)
         to_play = TrackToPlay(scheduled_track, track_path)
         return to_play

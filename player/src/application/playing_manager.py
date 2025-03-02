@@ -1,6 +1,5 @@
 import asyncio
 
-from just_playback.ma_result import MiniaudioError
 from kink import di, inject
 from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
@@ -86,13 +85,9 @@ class PlayingManager:
             )
             try:
                 await self._player.play(playing_duration, callback)
-            except MiniaudioError as mex:
+            except Exception as ex:
                 self.handle_playing_immediate_stop()
-                raise RuntimeError("Playing error :(") from mex
-            # else:
-            # TODO: fix this - execute in `else` block properly
-            #     playing_observer.update_track_playing(track,
-            # duration=playing_duration)
+                raise RuntimeError("Playing error :(") from ex
 
 
 async def main() -> None:
@@ -114,9 +109,5 @@ async def main() -> None:
     await asyncio.gather(
         playing_manager.manage_playing(),
         break_observer.create_task(),
-        # break_observer.update_current_break(),
         return_exceptions=True,
     )
-
-
-# asyncio.run(main())

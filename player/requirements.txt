@@ -3,8 +3,8 @@ fastapi==0.115.8
 fastavro==1.10.0
 httpx==0.28.1
 jsonschema==4.23.0
-just_playback==0.1.8
 kink==0.8.1
+miniaudio==1.61
 pydantic==2.10.6
 pydantic-settings==2.8.0
 pytest-asyncio==0.25.3

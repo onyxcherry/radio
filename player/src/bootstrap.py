@@ -31,7 +31,6 @@ from domain.events.recreate import parse_event
 from domain.events.serialize import serialize_event
 from domain.interfaces.player import Player
 from domain.repositories.scheduled_tracks import ScheduledTracksRepository
-from infrastructure.madeup_player import MadeupPlayer
 from infrastructure.messaging.kafka_events_consumer import (
     KafkaAvroEventsConsumer,
 )
@@ -48,6 +47,7 @@ from infrastructure.messaging.types import (
 from infrastructure.persistence.db_scheduled_tracks_repository import (
     DBScheduledTracksRepository,
 )
+from infrastructure.real_player import MiniaudioPlayer
 
 CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.yaml"
 CONFIG_SCHEMA_PATH = Path(__file__).parent.parent / "config.schema.json"
@@ -71,7 +71,7 @@ def bootstrap_di():
     clock = SystemClock()
     di[Clock] = clock
 
-    player = MadeupPlayer()
+    player = MiniaudioPlayer()
     di[Player] = player
 
     config_dict = load_config_from_yaml(
