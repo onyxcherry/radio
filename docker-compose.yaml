@@ -55,11 +55,17 @@ services:
       context: player/
     env_file:
       - ./.env.compose
+    # WSL2 - uncomment below 2 lines to play music within container
+    # environment:
+    #   PULSE_SERVER: /mnt/wslg/PulseServer
     ports:
       - 5000:5000
     volumes:
       - ./player/player.db:/app/db/player.db
       - ./player/config.yaml:/app/config.yaml:ro
+      - ./player/data/:/app/data/
+      # WSL2 - uncomment below line to play music within container
+      # - /mnt/wslg/:/mnt/wslg/
     networks:
       - redpanda_network
     depends_on:
