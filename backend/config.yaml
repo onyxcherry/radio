@@ -5,8 +5,6 @@ tracks:
   queued-one-break-max: 8
   playing-duration-min: 60
 breaks:
-  offset:
-    seconds: 3
   timezone: "Europe/Warsaw"
   list:
     - start: "08:30"

@@ -100,24 +100,11 @@ class BreakData:
         return TypeAdapter(cls).validate_python(data)
 
 
-def seconds_object_to_timedelta(data: Any) -> timedelta:
-    if isinstance(data, timedelta):
-        return data
-    elif hasattr(data, "seconds") or (
-        isinstance(data, dict) and data.get("seconds") is not None
-    ):
-        seconds = int(data["seconds"])
-        return timedelta(seconds=seconds)
-    raise ValidationError("Bad offset object, no seconds param")
-
-
 def tzinfo_from_timezone_name(data: Any) -> tzinfo:
     if isinstance(data, tzinfo):
         return data
     return ZoneInfo(str(data))
 
-
-SecondsTimedelta = Annotated[timedelta, BeforeValidator(seconds_object_to_timedelta)]
 
 TzinfoFromName = Annotated[tzinfo, BeforeValidator(tzinfo_from_timezone_name)]
 
@@ -156,7 +143,6 @@ class TracksConfig:
     frozen=True, config=ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
 )
 class BreaksConfig:
-    offset: SecondsTimedelta
     timezone: TzinfoFromName
     breaks: list[BreakData] = Field(validation_alias="list", serialization_alias="list")
 

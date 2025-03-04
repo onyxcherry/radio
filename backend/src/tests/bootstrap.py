@@ -53,7 +53,6 @@ from track.infrastructure.messaging.types import (
 
 config = Config(
     breaks=BreaksConfig(
-        offset=datetime.timedelta(seconds=3),
         timezone=zoneinfo.ZoneInfo(key="Europe/Warsaw"),
         breaks=[
             BreakData(

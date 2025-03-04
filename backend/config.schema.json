@@ -43,17 +43,6 @@
     "breaks": {
       "type": "object",
       "properties": {
-        "offset": {
-          "type": "object",
-          "properties": {
-            "seconds": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "seconds"
-          ]
-        },
         "timezone": {
           "type": "string"
         },
@@ -80,7 +69,6 @@
         }
       },
       "required": [
-        "offset",
         "timezone",
         "list"
       ]
