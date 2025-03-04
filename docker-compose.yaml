@@ -18,11 +18,12 @@ services:
     command: python initialize.py
     volumes:
       - ./backend/sql_app.db:/app/sql_app.db
+      - ./backend/config.yaml:/app/config.yaml:ro
     networks:
       - redpanda_network
     depends_on:
       redpanda-0:
-        condition: service_started
+        condition: service_healthy
   backend:
     container_name: backend
     build:
@@ -34,7 +35,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./backend/sql_app.db:/app/sql_app.db
+      - ./backend/sql_app.db:/app/db/sql_app.db
       - ./backend/config.yaml:/app/config.yaml:ro
     networks:
       - redpanda_network
@@ -57,7 +58,7 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - ./player/player.db:/app/player.db
+      - ./player/player.db:/app/db/player.db
       - ./player/config.yaml:/app/config.yaml:ro
     networks:
       - redpanda_network
@@ -100,8 +101,12 @@ services:
       - 18082:18082
       - 19092:19092
       - 19644:9644
-    # healthcheck:
-    # curl /public_metrics
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:9644/v1/status/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 7s
   console:
     container_name: redpanda-broker-console
     image: docker.redpanda.com/redpandadata/console:v2.6.0
@@ -124,4 +129,5 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - redpanda-0
+      redpanda-0:
+        condition: service_healthy
